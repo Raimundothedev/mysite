@@ -533,8 +533,8 @@ html,body{
 }
 .tech-tree-canvas{
   position:relative;
-  width:920px;
-  height:520px;
+  width:1680px;
+  height:560px;
 }
 .tech-tree-canvas svg.tech-lines{
   position:absolute; left:0; top:0; width:100%; height:100%;
@@ -678,7 +678,7 @@ html,body{
         <button class="xp-btn" id="btn-settings">Settings</button>
       </div>
       <div class="hint-text" id="load-hint">No saved empire found on this computer.</div>
-      <div class="menu-footer">Version 2.3 &middot; Civ Tech Tree</div>
+      <div class="menu-footer">Version 2.6 &middot; Expanded Tech Tree + Research Warning</div>
     </div>
   </div>
 </div>
@@ -817,18 +817,104 @@ const AI_DIFFICULTY = {
   VERY_HARD:{ id:"VERY_HARD", name:"Very Hard", expandBias:1.0, builderBias:1.0, districtBias:0.95, prodBonus:2 }
 };
 
+/* Real historical civilizations only — player picks one; AI takes from the rest.
+   Includes ancient, classical, medieval and early-modern empires (no fictional names). */
+const PLAYABLE_CIVS = [
+  /* —— Ancient / Classical —— */
+  { id:"ROME", name:"Roman Empire", leader:"Julius Caesar", color:"#1c62d6", adjective:"Roman",
+    cityNames:["Rome","Ostia","Antium","Cumae","Neapolis","Ravenna","Mediolanum","Aquileia","Tarentum","Capua","Pisae","Brundisium"] },
+  { id:"EGYPT", name:"Egyptian Kingdom", leader:"Ramesses II", color:"#d4a017", adjective:"Egyptian",
+    cityNames:["Thebes","Memphis","Alexandria","Heliopolis","Abydos","Edfu","Aswan","Tanis","Pi-Ramesses","Hermopolis","Bubastis"] },
+  { id:"PERSIA", name:"Achaemenid Empire", leader:"Darius I", color:"#c43c3c", adjective:"Persian",
+    cityNames:["Persepolis","Susa","Pasargadae","Ecbatana","Babylon","Sardis","Bactra","Arbela","Ctesiphon"] },
+  { id:"GREECE", name:"Macedonian Empire", leader:"Alexander the Great", color:"#3a8fd0", adjective:"Macedonian",
+    cityNames:["Pella","Athens","Sparta","Corinth","Thebes","Alexandria","Babylon","Susa","Persepolis","Ephesus","Miletus"] },
+  { id:"CARTHAGE", name:"Carthaginian Republic", leader:"Hannibal Barca", color:"#2e8b57", adjective:"Carthaginian",
+    cityNames:["Carthage","Utica","Hadrumetum","Hippo Regius","Gades","Malaca","Lilybaeum","Panormus","Tingis"] },
+  { id:"BABYLON", name:"Babylonian Empire", leader:"Hammurabi", color:"#6b3fa0", adjective:"Babylonian",
+    cityNames:["Babylon","Ur","Uruk","Nippur","Sippar","Larsa","Isin","Kish","Nineveh","Assur"] },
+  { id:"ASSYRIA", name:"Assyrian Empire", leader:"Ashurbanipal", color:"#8b0000", adjective:"Assyrian",
+    cityNames:["Nineveh","Assur","Nimrud","Arbela","Harran","Carchemish","Dur-Sharrukin"] },
+  { id:"CHINA", name:"Qin Empire", leader:"Qin Shi Huang", color:"#c06020", adjective:"Chinese",
+    cityNames:["Xianyang","Luoyang","Chang'an","Chengdu","Kaifeng","Nanjing","Hangzhou","Guangzhou","Suzhou"] },
+  { id:"INDIA", name:"Maurya Empire", leader:"Ashoka", color:"#8b4513", adjective:"Indian",
+    cityNames:["Pataliputra","Taxila","Ujjain","Varanasi","Mathura","Sravasti","Kausambi","Tamralipti","Sopara"] },
+  { id:"HITTITE", name:"Hittite Empire", leader:"Suppiluliuma", color:"#556b2f", adjective:"Hittite",
+    cityNames:["Hattusa","Kanesh","Aleppo","Carchemish","Ugarit","Tarhuntassa"] },
+  { id:"PHOENICIA", name:"Phoenician City-States", leader:"Hiram of Tyre", color:"#4682b4", adjective:"Phoenician",
+    cityNames:["Tyre","Sidon","Byblos","Arwad","Carthage","Gades","Utica","Leptis"] },
+
+  /* —— Americas —— */
+  { id:"AZTEC", name:"Aztec Empire", leader:"Montezuma II", color:"#b22222", adjective:"Aztec",
+    cityNames:["Tenochtitlan","Texcoco","Tlacopan","Cholula","Tlaxcala","Xochicalco","Tula","Cempoala"] },
+  { id:"INCA", name:"Inca Empire", leader:"Pachacuti", color:"#cd853f", adjective:"Inca",
+    cityNames:["Cusco","Quito","Cajamarca","Machu Picchu","Vilcabamba","Pachacamac","Chan Chan","Arequipa"] },
+  { id:"MAYA", name:"Maya Civilization", leader:"Pakal the Great", color:"#228b22", adjective:"Maya",
+    cityNames:["Tikal","Palenque","Chichen Itza","Copán","Calakmul","Uxmal","Mayapan","Cobá"] },
+
+  /* —— Medieval / Early Modern —— */
+  { id:"BYZANTINE", name:"Byzantine Empire", leader:"Justinian I", color:"#800080", adjective:"Byzantine",
+    cityNames:["Constantinople","Thessalonica","Nicaea","Antioch","Trebizond","Adrianople","Syracuse","Ravenna"] },
+  { id:"OTTOMAN", name:"Ottoman Empire", leader:"Suleiman the Magnificent", color:"#a52a2a", adjective:"Ottoman",
+    cityNames:["Istanbul","Edirne","Bursa","Ankara","Izmir","Salonika","Damascus","Baghdad","Cairo","Belgrade"] },
+  { id:"MONGOL", name:"Mongol Empire", leader:"Genghis Khan", color:"#4a4a4a", adjective:"Mongol",
+    cityNames:["Karakorum","Khanbaliq","Samarkand","Bukhara","Sarai","Kazan","Tabriz","Herat"] },
+  { id:"MALI", name:"Mali Empire", leader:"Mansa Musa", color:"#daa520", adjective:"Malian",
+    cityNames:["Niani","Timbuktu","Gao","Djenné","Walata","Kumbi Saleh","Awdaghust"] },
+  { id:"SONGHAI", name:"Songhai Empire", leader:"Askia Muhammad", color:"#b8860b", adjective:"Songhai",
+    cityNames:["Gao","Timbuktu","Djenné","Kukiya","Tadmekka"] },
+  { id:"ETHIOPIA", name:"Ethiopian Empire", leader:"Menelik II", color:"#006400", adjective:"Ethiopian",
+    cityNames:["Axum","Lalibela","Gondar","Addis Ababa","Harar","Adwa","Massawa"] },
+  { id:"JAPAN", name:"Tokugawa Shogunate", leader:"Tokugawa Ieyasu", color:"#dc143c", adjective:"Japanese",
+    cityNames:["Edo","Kyoto","Osaka","Nagoya","Nagasaki","Hiroshima","Sendai","Kanazawa","Kagoshima"] },
+  { id:"KOREA", name:"Joseon Korea", leader:"Sejong the Great", color:"#4169e1", adjective:"Korean",
+    cityNames:["Hanseong","Pyongyang","Kaesong","Gyeongju","Busan","Jeonju","Suwon"] },
+  { id:"HOLY_ROMAN", name:"Holy Roman Empire", leader:"Charlemagne", color:"#ffd700", adjective:"Imperial",
+    cityNames:["Aachen","Frankfurt","Nuremberg","Vienna","Prague","Cologne","Regensburg","Augsburg"] },
+  { id:"FRANCE", name:"Kingdom of France", leader:"Louis XIV", color:"#0055a4", adjective:"French",
+    cityNames:["Paris","Orléans","Lyon","Rouen","Bordeaux","Toulouse","Reims","Marseille","Nantes"] },
+  { id:"ENGLAND", name:"Kingdom of England", leader:"Elizabeth I", color:"#cf142b", adjective:"English",
+    cityNames:["London","York","Winchester","Norwich","Bristol","Oxford","Canterbury","Exeter","Chester"] },
+  { id:"SPAIN", name:"Spanish Empire", leader:"Charles V", color:"#c60b1e", adjective:"Spanish",
+    cityNames:["Madrid","Seville","Toledo","Barcelona","Valencia","Córdoba","Granada","Salamanca","Cádiz"] },
+  { id:"PORTUGAL", name:"Portuguese Empire", leader:"Manuel I", color:"#006600", adjective:"Portuguese",
+    cityNames:["Lisbon","Porto","Coimbra","Évora","Braga","Goa","Salvador","Rio de Janeiro","Luanda","Macau"] },
+  { id:"RUSSIA", name:"Russian Empire", leader:"Peter the Great", color:"#0039a6", adjective:"Russian",
+    cityNames:["Moscow","Saint Petersburg","Novgorod","Kiev","Smolensk","Kazan","Astrakhan","Vladimir"] },
+  { id:"SWEDEN", name:"Swedish Empire", leader:"Gustavus Adolphus", color:"#006aa7", adjective:"Swedish",
+    cityNames:["Stockholm","Uppsala","Gothenburg","Åbo","Riga","Narva","Reval","Stralsund"] },
+  { id:"NETHERLANDS", name:"Dutch Republic", leader:"William of Orange", color:"#ff6600", adjective:"Dutch",
+    cityNames:["Amsterdam","The Hague","Rotterdam","Utrecht","Leiden","Haarlem","Delft","Batavia"] },
+  { id:"POLAND", name:"Polish-Lithuanian Commonwealth", leader:"Jan III Sobieski", color:"#dc143c", adjective:"Polish",
+    cityNames:["Kraków","Warsaw","Vilnius","Gdańsk","Poznań","Lwów","Lublin","Torún"] },
+  { id:"PERSIA_SAFAVID", name:"Safavid Empire", leader:"Shah Abbas", color:"#009000", adjective:"Persian",
+    cityNames:["Isfahan","Tabriz","Qazvin","Shiraz","Mashhad","Herat","Kerman"] },
+  { id:"MUGHAL", name:"Mughal Empire", leader:"Akbar", color:"#ff8c00", adjective:"Mughal",
+    cityNames:["Agra","Delhi","Lahore","Fatehpur Sikri","Allahabad","Ajmer","Patna","Dhaka"] },
+
+  /* —— South America / Brazil —— */
+  { id:"BRAZIL", name:"Empire of Brazil", leader:"Dom Pedro II", color:"#009c3b", adjective:"Brazilian",
+    cityNames:["Rio de Janeiro","Salvador","São Paulo","Recife","Belém","Ouro Preto","Olinda","São Luís","Porto Alegre","Curitiba","Niterói","Petrópolis"] }
+];
+
+/* Fallback AI pool (also real) if more opponents than remaining playable slots */
 const AI_CIV_NAMES = [
-  { name:"Kingdom of Valoria", color:"#c43c3c" },
-  { name:"Nordmark Confederation", color:"#2e8b57" },
-  { name:"Emirate of Zahara", color:"#d4a017" },
-  { name:"Empire of Koryo", color:"#6b3fa0" },
-  { name:"Republic of Helvetia", color:"#c06020" },
-  { name:"Tsardom of Volga", color:"#3a6ea5" },
-  { name:"Sultanate of Marib", color:"#8b4513" },
-  { name:"Highlands of Brenna", color:"#556b2f" },
-  { name:"Principality of Aurel", color:"#b22222" },
-  { name:"League of Caspira", color:"#4682b4" },
-  { name:"Dominion of Solara", color:"#cd853f" }
+  { id:"VIETNAM", name:"Đại Việt", leader:"Lê Lợi", color:"#da251d",
+    cityNames:["Thăng Long","Huế","Hội An","Đà Nẵng","Thanh Hóa","Nghệ An"] },
+  { id:"SIAM", name:"Kingdom of Siam", leader:"Ramkhamhaeng", color:"#a51931",
+    cityNames:["Ayutthaya","Sukhothai","Bangkok","Chiang Mai","Lopburi","Phitsanulok"] },
+  { id:"BURMA", name:"Burmese Empire", leader:"Bayinnaung", color:"#fecb00",
+    cityNames:["Pagan","Ava","Pegu","Mandalay","Toungoo","Martaban"] },
+  { id:"AKSUM", name:"Kingdom of Aksum", leader:"Ezana", color:"#006400",
+    cityNames:["Aksum","Adulis","Yeha","Matara","Qohaito"] },
+  { id:"KONGO", name:"Kingdom of Kongo", leader:"Afonso I", color:"#ce1126",
+    cityNames:["M'banza-Kongo","São Salvador","Loango","Ngoyo","Kakongo"] },
+  { id:"BENIN", name:"Kingdom of Benin", leader:"Ewuare", color:"#008751",
+    cityNames:["Benin City","Ughoton","Udo","Edo"] },
+  { id:"MAPUCHE", name:"Mapuche Confederation", leader:"Lautaro", color:"#0033a0",
+    cityNames:["Wallmapu","Temuco","Valdivia","Osorno","Imperial"] },
+  { id:"IROQUOIS", name:"Iroquois Confederacy", leader:"Hiawatha", color:"#6b3fa0",
+    cityNames:["Onondaga","Oneida","Mohawk","Cayuga","Seneca","Tuscarora"] }
 ];
 
 /* Terrain yields: food, production, gold. workable = can be assigned to a citizen */
@@ -876,6 +962,11 @@ const UNIT_DEFS = {
     description: "Heavy infantry. Requires Iron Working.",
     moves: 2, civilian: false, combatStrength: 35, maxHealth: 100, buildable: true, requiresTech: "IRON_WORKING"
   },
+  HORSEMAN: {
+    id: "HORSEMAN", name: "Horseman", cost: 65,
+    description: "Fast mounted melee. Requires Horseback Riding.",
+    moves: 4, civilian: false, combatStrength: 30, maxHealth: 100, buildable: true, requiresTech: "HORSEBACK_RIDING"
+  },
   BUILDER: {
     id: "BUILDER", name: "Builder", cost: 50,
     description: "Constructs tile improvements. Has limited build charges.",
@@ -894,6 +985,7 @@ const UNIT_DEFS = {
 --------------------------------------------------------------------------- */
 const TECHS = {
   /* column = horizontal tier (Civ left→right), row = vertical lane */
+  /* —— Ancient Era —— */
   AGRICULTURE: {
     id: "AGRICULTURE", name: "Agriculture", cost: 25, era: "Ancient",
     prereqs: [], column: 0, row: 1,
@@ -942,6 +1034,12 @@ const TECHS = {
     description: "Transportation and simple machines.",
     unlocks: { improvements: [], buildings: [], units: [], districts: [] }
   },
+  ASTROLOGY: {
+    id: "ASTROLOGY", name: "Astrology", cost: 50, era: "Ancient",
+    prereqs: ["SAILING"], column: 1, row: 5,
+    description: "Read the stars for navigation and ritual.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
   WRITING: {
     id: "WRITING", name: "Writing", cost: 50, era: "Ancient",
     prereqs: ["POTTERY"], column: 2, row: 0,
@@ -957,8 +1055,8 @@ const TECHS = {
   HORSEBACK_RIDING: {
     id: "HORSEBACK_RIDING", name: "Horseback Riding", cost: 60, era: "Classical",
     prereqs: ["ANIMAL_HUSBANDRY"], column: 2, row: 2,
-    description: "Mounted warfare and travel.",
-    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+    description: "Mounted warfare and travel. Unlocks the Horseman.",
+    unlocks: { improvements: [], buildings: [], units: ["HORSEMAN"], districts: [] }
   },
   IRON_WORKING: {
     id: "IRON_WORKING", name: "Iron Working", cost: 80, era: "Classical",
@@ -966,12 +1064,19 @@ const TECHS = {
     description: "Superior metal arms. Unlocks the Swordsman.",
     unlocks: { improvements: [], buildings: [], units: ["SWORDSMAN"], districts: [] }
   },
+  MASONRY: {
+    id: "MASONRY", name: "Masonry", cost: 55, era: "Ancient",
+    prereqs: ["MINING"], column: 2, row: 4,
+    description: "Cut and set stone. Stronger city defenses.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
   CALENDAR: {
     id: "CALENDAR", name: "Calendar", cost: 45, era: "Ancient",
     prereqs: ["POTTERY"], column: 2, row: 5,
     description: "Track seasons. Unlocks Camps.",
     unlocks: { improvements: ["CAMP"], buildings: [], units: [], districts: [] }
   },
+  /* —— Classical Era —— */
   CURRENCY: {
     id: "CURRENCY", name: "Currency", cost: 65, era: "Classical",
     prereqs: ["WRITING"], column: 3, row: 0,
@@ -984,11 +1089,133 @@ const TECHS = {
     description: "Numbers and geometry. Unlocks Commercial Hub and Market.",
     unlocks: { improvements: [], buildings: ["MARKET"], units: [], districts: ["COMMERCIAL_HUB"] }
   },
+  DRAMA_POETRY: {
+    id: "DRAMA_POETRY", name: "Drama and Poetry", cost: 70, era: "Classical",
+    prereqs: ["WRITING"], column: 3, row: 2,
+    description: "Arts and performance. Culture flourishes.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
   CONSTRUCTION: {
     id: "CONSTRUCTION", name: "Construction", cost: 75, era: "Classical",
-    prereqs: ["THE_WHEEL", "BRONZE_WORKING"], column: 3, row: 3,
+    prereqs: ["THE_WHEEL", "MASONRY"], column: 3, row: 3,
     description: "Advanced building. Unlocks Industrial Zone, Encampment, Workshop.",
     unlocks: { improvements: [], buildings: ["WORKSHOP"], units: [], districts: ["INDUSTRIAL_ZONE", "ENCAMPMENT"] }
+  },
+  ENGINEERING: {
+    id: "ENGINEERING", name: "Engineering", cost: 85, era: "Classical",
+    prereqs: ["THE_WHEEL", "MASONRY"], column: 3, row: 4,
+    description: "Roads, bridges and siege craft.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  CELESTIAL_NAVIGATION: {
+    id: "CELESTIAL_NAVIGATION", name: "Celestial Navigation", cost: 70, era: "Classical",
+    prereqs: ["SAILING", "ASTROLOGY"], column: 3, row: 5,
+    description: "Navigate by the stars across open seas.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  /* —— Medieval Era —— */
+  EDUCATION: {
+    id: "EDUCATION", name: "Education", cost: 120, era: "Medieval",
+    prereqs: ["MATHEMATICS", "CURRENCY"], column: 4, row: 0,
+    description: "Formal learning. Stronger science output from campuses.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  APPRENTICESHIP: {
+    id: "APPRENTICESHIP", name: "Apprenticeship", cost: 110, era: "Medieval",
+    prereqs: ["CURRENCY", "CONSTRUCTION"], column: 4, row: 1,
+    description: "Craft guilds and skilled labor. Boosts production.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  MILITARY_TACTICS: {
+    id: "MILITARY_TACTICS", name: "Military Tactics", cost: 105, era: "Medieval",
+    prereqs: ["HORSEBACK_RIDING", "IRON_WORKING"], column: 4, row: 2,
+    description: "Coordinated battlefield doctrine.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  CASTLES: {
+    id: "CASTLES", name: "Castles", cost: 115, era: "Medieval",
+    prereqs: ["CONSTRUCTION", "ENGINEERING"], column: 4, row: 3,
+    description: "Fortified strongholds. Cities gain extra defense.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  MACHINERY: {
+    id: "MACHINERY", name: "Machinery", cost: 125, era: "Medieval",
+    prereqs: ["ENGINEERING", "IRON_WORKING"], column: 4, row: 4,
+    description: "Complex mechanisms and crossbows.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  THEOLOGY: {
+    id: "THEOLOGY", name: "Theology", cost: 100, era: "Medieval",
+    prereqs: ["DRAMA_POETRY", "ASTROLOGY"], column: 4, row: 5,
+    description: "Organized faith and doctrine.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  STIRRUPS: {
+    id: "STIRRUPS", name: "Stirrups", cost: 130, era: "Medieval",
+    prereqs: ["HORSEBACK_RIDING", "MILITARY_TACTICS"], column: 5, row: 2,
+    description: "Cavalry dominance. Mounted units fight harder.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  MILITARY_ENGINEERING: {
+    id: "MILITARY_ENGINEERING", name: "Military Engineering", cost: 140, era: "Medieval",
+    prereqs: ["CASTLES", "MACHINERY"], column: 5, row: 3,
+    description: "Siege engines and fortified works.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  BANKING: {
+    id: "BANKING", name: "Banking", cost: 135, era: "Medieval",
+    prereqs: ["EDUCATION", "APPRENTICESHIP"], column: 5, row: 0,
+    description: "Credit and capital. Gold from commercial districts.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  GUILDS: {
+    id: "GUILDS", name: "Guilds", cost: 130, era: "Medieval",
+    prereqs: ["APPRENTICESHIP"], column: 5, row: 1,
+    description: "Organized craftsmen. Production bonuses.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  /* —— Renaissance Era —— */
+  PRINTING: {
+    id: "PRINTING", name: "Printing", cost: 180, era: "Renaissance",
+    prereqs: ["EDUCATION", "MACHINERY"], column: 6, row: 0,
+    description: "Mass distribution of knowledge. Science surge.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  GUNPOWDER: {
+    id: "GUNPOWDER", name: "Gunpowder", cost: 200, era: "Renaissance",
+    prereqs: ["MILITARY_ENGINEERING", "APPRENTICESHIP"], column: 6, row: 3,
+    description: "Explosive weapons change warfare forever.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  ASTRONOMY: {
+    id: "ASTRONOMY", name: "Astronomy", cost: 175, era: "Renaissance",
+    prereqs: ["CELESTIAL_NAVIGATION", "EDUCATION"], column: 6, row: 5,
+    description: "Map the heavens. Better navigation and science.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  CARTOGRAPHY: {
+    id: "CARTOGRAPHY", name: "Cartography", cost: 170, era: "Renaissance",
+    prereqs: ["CELESTIAL_NAVIGATION", "BANKING"], column: 6, row: 4,
+    description: "Accurate maps of the world.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  MASS_PRODUCTION: {
+    id: "MASS_PRODUCTION", name: "Mass Production", cost: 190, era: "Renaissance",
+    prereqs: ["GUILDS", "MACHINERY"], column: 6, row: 1,
+    description: "Workshops scale up. Industrial efficiency.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  SIEGE_TACTICS: {
+    id: "SIEGE_TACTICS", name: "Siege Tactics", cost: 185, era: "Renaissance",
+    prereqs: ["MILITARY_ENGINEERING", "GUNPOWDER"], column: 7, row: 3,
+    description: "Systematic reduction of fortifications.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
+  },
+  SCIENTIFIC_THEORY: {
+    id: "SCIENTIFIC_THEORY", name: "Scientific Theory", cost: 220, era: "Renaissance",
+    prereqs: ["PRINTING", "ASTRONOMY"], column: 7, row: 0,
+    description: "Methodical inquiry. Major science boost.",
+    unlocks: { improvements: [], buildings: [], units: [], districts: [] }
   }
 };
 
@@ -1605,6 +1832,10 @@ const Game = {
       name: opts.name || "Civilization",
       leader: opts.leader || "Leader",
       color: opts.color || "#1c62d6",
+      adjective: opts.adjective || null,
+      civTemplateId: opts.civTemplateId || null,
+      cityNames: Array.isArray(opts.cityNames) ? opts.cityNames.slice() : null,
+      cityNameIndex: 0,
       isPlayer: !!opts.isPlayer,
       difficulty: opts.difficulty || "NORMAL",
       gold: 0,
@@ -4495,12 +4726,46 @@ function moveUnitAlongPath(unit, path, totalCost){
 /* ---------------------------------------------------------------------------
    10. CITY FOUNDING / CITY WINDOW
 --------------------------------------------------------------------------- */
+function peekNextCityName(civ){
+  if (!civ) return "New City";
+  if (Array.isArray(civ.cityNames) && civ.cityNames.length){
+    const idx = civ.cityNameIndex || 0;
+    let name = civ.cityNames[idx % civ.cityNames.length];
+    if (idx >= civ.cityNames.length){
+      name = name + " " + (Math.floor(idx / civ.cityNames.length) + 1);
+    }
+    return name;
+  }
+  const n = Game.citiesOf(civ.id).length + 1;
+  if (n === 1) return (civ.name.split(" ").pop() || civ.name);
+  return (civ.name.split(" ").pop() || "City") + " " + n;
+}
+
+function nextCityNameFor(civ){
+  if (!civ) return "New City";
+  if (Array.isArray(civ.cityNames) && civ.cityNames.length){
+    const idx = civ.cityNameIndex || 0;
+    let name = civ.cityNames[idx % civ.cityNames.length];
+    if (idx >= civ.cityNames.length){
+      name = name + " " + (Math.floor(idx / civ.cityNames.length) + 1);
+    }
+    civ.cityNameIndex = idx + 1;
+    return name;
+  }
+  const n = Game.citiesOf(civ.id).length + 1;
+  if (n === 1) return (civ.name.split(" ").pop() || civ.name);
+  return (civ.name.split(" ").pop() || "City") + " " + n;
+}
+
 function promptFoundCity(unit){
+  const civ = Game.getCiv(unit.civId) || Game.civ;
+  const proposed = peekNextCityName(civ);
   showModal("Found City", `
-    <div class="xp-field">
-      <label>Name this settlement:</label>
-      <input type="text" id="city-name-input" class="xp-input" value="${suggestCityName()}" maxlength="24">
-    </div>
+    <p style="margin:0 0 8px">Your settlers are ready to found a new city.</p>
+    <div class="xp-row"><span class="label">Civilization</span><span class="value">${civ ? civ.name : ""}</span></div>
+    <div class="xp-row"><span class="label">Leader</span><span class="value">${civ ? civ.leader : ""}</span></div>
+    <div class="xp-row"><span class="label">City name</span><span class="value">${proposed}</span></div>
+    <div class="hint-text" style="text-align:left;margin-top:6px">City names come from your civilization's historical list.</div>
     <div class="modal-actions">
       <button class="xp-btn" id="modal-cancel">Cancel</button>
       <button class="xp-btn primary" id="modal-confirm">Found City</button>
@@ -4508,7 +4773,7 @@ function promptFoundCity(unit){
   `);
   document.getElementById("modal-cancel").addEventListener("click", hideModal);
   document.getElementById("modal-confirm").addEventListener("click", () => {
-    const name = document.getElementById("city-name-input").value.trim() || suggestCityName();
+    const name = nextCityNameFor(civ);
     const city = Game.founderFoundCity(unit, name);
     hideModal();
     deselectUnit();
@@ -4516,12 +4781,6 @@ function promptFoundCity(unit){
     render();
     if (city.civId === Game.playerCivId) openCityWindow(city);
   });
-}
-
-const CITY_NAME_POOL = ["Rome","Alexandria","Carthage","Byzantium","Memphis","Athens","Thebes","Antioch","Cyrene","Syracuse"];
-function suggestCityName(){
-  if (Game.cities.length === 0) return Game.civ.name || CITY_NAME_POOL[0];
-  return CITY_NAME_POOL[Game.cities.length % CITY_NAME_POOL.length];
 }
 
 let windowZCounter = 50;
@@ -4914,7 +5173,7 @@ const AI = {
       return;
     }
     if (military < nCities + 1 && Math.random() < 0.45){
-      const candidates = ["WARRIOR", "ARCHER", "SPEARMAN", "SWORDSMAN"].filter(u => TechSystem.unitUnlocked(civ, u));
+      const candidates = ["WARRIOR", "ARCHER", "SPEARMAN", "HORSEMAN", "SWORDSMAN"].filter(u => TechSystem.unitUnlocked(civ, u));
       const pick = candidates.length ? candidates[Math.floor(Math.random() * candidates.length)] : "WARRIOR";
       Production.startProject(city, "UNIT", pick);
       return;
@@ -4994,7 +5253,7 @@ const AI = {
       if (HexGrid.distance(unit.col, unit.row, c.col, c.row) < 4) farEnough = false;
     }
     if (score > 5 && farEnough && TERRAIN[Game.world.grid[unit.row][unit.col].terrain].passable){
-      Game.founderFoundCity(unit, civ.name.split(" ").pop() + " " + (cities.length + 1));
+      Game.founderFoundCity(unit, nextCityNameFor(civ));
       return;
     }
     // Move toward high-score unexplored land
@@ -5239,11 +5498,21 @@ const UnitOrders = {
   }
 };
 
+function needsResearchSelection(){
+  const pc = Game.playerCiv() || Game.civ;
+  if (!pc) return false;
+  // Only warn if there is something available to research and nothing is selected
+  if (pc.researching) return false;
+  const avail = TechSystem.availableTechs(pc);
+  return avail.length > 0;
+}
+
 function tryEndTurn(){
   if (Game.aiThinking || Game.animating) return;
   const units = UnitOrders.playerUnitsNeedingOrders();
   const cities = UnitOrders.citiesNeedingProduction();
-  if (units.length === 0 && cities.length === 0){
+  const needResearch = needsResearchSelection();
+  if (units.length === 0 && cities.length === 0 && !needResearch){
     nextTurn();
     return;
   }
@@ -5253,6 +5522,9 @@ function tryEndTurn(){
     lines += `<div class="xp-row"><span class="label">${c.name} needs production</span></div>`;
   }
   if (cities.length > 5) lines += `<div class="hint-text">...and ${cities.length - 5} more cities</div>`;
+  if (needResearch){
+    lines += `<div class="xp-row"><span class="label">No technology selected for research</span></div>`;
+  }
   showModal("End Turn — Attention Required", `
     <p style="margin:0 0 6px">The following still need attention:</p>
     ${lines}
@@ -5277,6 +5549,10 @@ function tryEndTurn(){
       Selection.selectCity(c.id);
       openCityWindow(c);
       centerCameraOnStart(c.col, c.row);
+      return;
+    }
+    if (needsResearchSelection()){
+      openTechWindow();
     }
   });
 }
@@ -5389,7 +5665,7 @@ function openTechWindow(){
   win = document.createElement("div");
   win.className = "xp-window";
   win.id = "tech-win";
-  win.style.width = "720px";
+  win.style.width = "780px";
   win.style.left = "40px";
   win.style.top = "48px";
   win.style.zIndex = ++windowZCounter;
@@ -5455,6 +5731,11 @@ function refreshTechWindow(){
   const COL_W = 200, ROW_H = 84, PAD_X = 24, PAD_Y = 36, NODE_W = 132, NODE_H = 72;
   const tree = win.querySelector("[data-tech-tree]");
   const techs = Object.values(TECHS);
+  const maxCol = Math.max(...techs.map(t => t.column || 0), 0);
+  const canvasW = Math.max(920, PAD_X * 2 + (maxCol + 1) * COL_W + 20);
+  const canvasH = 560;
+  tree.style.width = canvasW + "px";
+  tree.style.height = canvasH + "px";
 
   function nodeCenter(t){
     return {
@@ -5482,7 +5763,9 @@ function refreshTechWindow(){
   // Era banners
   const eras = [
     { label: "ANCIENT ERA", x: PAD_X + 0 * COL_W },
-    { label: "CLASSICAL ERA", x: PAD_X + 2.2 * COL_W }
+    { label: "CLASSICAL ERA", x: PAD_X + 2.5 * COL_W },
+    { label: "MEDIEVAL ERA", x: PAD_X + 4.2 * COL_W },
+    { label: "RENAISSANCE", x: PAD_X + 6.0 * COL_W }
   ];
   let eraHtml = eras.map(e => `<div class="tech-era-label" style="left:${e.x}px">${e.label}</div>`).join("");
 
@@ -5511,7 +5794,7 @@ function refreshTechWindow(){
   }
 
   tree.innerHTML = `
-    <svg class="tech-lines" viewBox="0 0 920 520" preserveAspectRatio="none">${lines}</svg>
+    <svg class="tech-lines" viewBox="0 0 ${canvasW} ${canvasH}" preserveAspectRatio="none">${lines}</svg>
     ${eraHtml}
     ${nodes}
   `;
@@ -5685,15 +5968,19 @@ function startNewGame(setup){
   const mapSize = MAP_SIZES[setup.mapSize] || MAP_SIZES.MEDIUM;
   const aiCount = Math.max(0, Math.min(setup.aiCount != null ? setup.aiCount : 3, mapSize.maxAI));
   const difficulty = AI_DIFFICULTY[setup.difficulty] ? setup.difficulty : "NORMAL";
-  Game.setup = { mapSize: mapSize.id, aiCount, difficulty };
+  Game.setup = { mapSize: mapSize.id, aiCount, difficulty, civId: setup.civId || "ROME" };
 
   CONFIG.MAP_W = mapSize.w;
   CONFIG.MAP_H = mapSize.h;
 
+  const template = PLAYABLE_CIVS.find(c => c.id === setup.civId) || PLAYABLE_CIVS[0];
   const player = Game.createCivilization({
-    name: setup.civName || "Rome",
-    leader: setup.leaderName || "Player",
-    color: "#1c62d6",
+    name: template.name,
+    leader: template.leader,
+    color: template.color,
+    adjective: template.adjective,
+    civTemplateId: template.id,
+    cityNames: template.cityNames,
     isPlayer: true
   });
 
@@ -5714,12 +6001,28 @@ function startNewGame(setup){
 
   placeStart(player, spots[0] || { col: Math.floor(Game.world.w/2), row: Math.floor(Game.world.h/2) });
 
+  // AI: remaining real playable civs first (shuffled), then extra historical fallbacks
+  const usedIds = new Set([template.id]);
+  const available = PLAYABLE_CIVS.filter(c => !usedIds.has(c.id));
+  for (let i = available.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = available[i]; available[i] = available[j]; available[j] = tmp;
+  }
+  let aiIdx = 0;
   for (let i = 0; i < aiCount; i++){
-    const template = AI_CIV_NAMES[i % AI_CIV_NAMES.length];
+    let t = null;
+    if (aiIdx < available.length){
+      t = available[aiIdx++];
+    } else {
+      t = AI_CIV_NAMES[(i - available.length) % AI_CIV_NAMES.length];
+    }
     const ai = Game.createCivilization({
-      name: template.name,
-      leader: "AI",
-      color: template.color,
+      name: t.name,
+      leader: t.leader || "Leader",
+      color: t.color,
+      adjective: t.adjective || null,
+      civTemplateId: t.id || null,
+      cityNames: t.cityNames || null,
       isPlayer: false,
       difficulty
     });
@@ -5737,13 +6040,28 @@ function startNewGame(setup){
 function openNewGameSetup(){
   const sizes = Object.values(MAP_SIZES);
   const diffs = Object.values(AI_DIFFICULTY);
+  // Put Brazil near the top for the Brazilian player :)
+  const ordered = [...PLAYABLE_CIVS];
+  const brIdx = ordered.findIndex(c => c.id === "BRAZIL");
+  if (brIdx > 0){
+    const br = ordered.splice(brIdx, 1)[0];
+    ordered.unshift(br);
+  }
+  const civOptions = ordered.map((c) => {
+    return `<label class="xp-check" style="display:flex;align-items:center;gap:6px;margin:3px 0">
+      <input type="radio" name="setup-civ" value="${c.id}" ${c.id === "BRAZIL" ? "checked" : ""}>
+      <span style="display:inline-block;width:12px;height:12px;background:${c.color};border:1px solid #003c74;flex:0 0 auto"></span>
+      <span><strong>${c.name}</strong> — ${c.leader}</span>
+    </label>`;
+  }).join("");
+
   showModal("New Game Setup", `
-    <div class="xp-field">
-      <label>Civilization name:</label>
-      <input type="text" id="setup-civ-name" class="xp-input" value="Rome" maxlength="24">
+    <div class="xp-section-label">Choose Your Civilization</div>
+    <div style="max-height:200px;overflow:auto;border:1px solid #7f9db9;padding:4px 6px;background:#fff;margin-bottom:8px">
+      ${civOptions}
     </div>
     <div class="xp-section-label">Map Size</div>
-    ${sizes.map((s,i) => `<label class="xp-check"><input type="radio" name="setup-map" value="${s.id}" ${s.id==="MEDIUM"?"checked":""}> ${s.name} (${s.w}x${s.h}) — ${s.rec}</label>`).join("")}
+    ${sizes.map((s) => `<label class="xp-check"><input type="radio" name="setup-map" value="${s.id}" ${s.id==="MEDIUM"?"checked":""}> ${s.name} (${s.w}x${s.h}) — ${s.rec}</label>`).join("")}
     <div class="xp-section-label">AI Civilizations</div>
     <div class="xp-field">
       <select id="setup-ai-count" class="xp-input">
@@ -5757,6 +6075,8 @@ function openNewGameSetup(){
       </select>
     </div>
     <div class="xp-section-label">World Summary</div>
+    <div class="xp-row"><span class="label">Your civilization</span><span class="value" id="setup-civ-preview">Empire of Brazil</span></div>
+    <div class="xp-row"><span class="label">Leader</span><span class="value" id="setup-leader-preview">Dom Pedro II</span></div>
     <div class="xp-row"><span class="label">Total civilizations</span><span class="value" id="setup-total">4</span></div>
     <div class="hint-text" id="setup-warn"></div>
     <div class="modal-actions">
@@ -5767,6 +6087,15 @@ function openNewGameSetup(){
   const aiSel = document.getElementById("setup-ai-count");
   const totalEl = document.getElementById("setup-total");
   const warn = document.getElementById("setup-warn");
+  const civPreview = document.getElementById("setup-civ-preview");
+  const leaderPreview = document.getElementById("setup-leader-preview");
+
+  function refreshCivPreview(){
+    const civId = (document.querySelector('input[name="setup-civ"]:checked') || {}).value || "BRAZIL";
+    const t = PLAYABLE_CIVS.find(c => c.id === civId) || PLAYABLE_CIVS[0];
+    if (civPreview) civPreview.textContent = t.name;
+    if (leaderPreview) leaderPreview.textContent = t.leader;
+  }
   function refreshSummary(){
     const mapId = (document.querySelector('input[name="setup-map"]:checked') || {}).value || "MEDIUM";
     const map = MAP_SIZES[mapId];
@@ -5777,8 +6106,10 @@ function openNewGameSetup(){
       warn.textContent = "AI count capped for this map size (max " + map.maxAI + ").";
     } else warn.textContent = "";
     totalEl.textContent = String(1 + ai);
+    refreshCivPreview();
   }
   document.querySelectorAll('input[name="setup-map"]').forEach(r => r.addEventListener("change", refreshSummary));
+  document.querySelectorAll('input[name="setup-civ"]').forEach(r => r.addEventListener("change", refreshCivPreview));
   aiSel.addEventListener("change", refreshSummary);
   refreshSummary();
   document.getElementById("modal-cancel").addEventListener("click", hideModal);
@@ -5787,10 +6118,10 @@ function openNewGameSetup(){
     const map = MAP_SIZES[mapId];
     let ai = parseInt(document.getElementById("setup-ai-count").value, 10) || 0;
     ai = Math.min(ai, map.maxAI);
-    const civName = document.getElementById("setup-civ-name").value.trim() || "Rome";
+    const civId = (document.querySelector('input[name="setup-civ"]:checked') || {}).value || "BRAZIL";
     const difficulty = document.getElementById("setup-diff").value || "NORMAL";
     hideModal();
-    startNewGame({ civName, leaderName: "Player", mapSize: mapId, aiCount: ai, difficulty });
+    startNewGame({ civId, mapSize: mapId, aiCount: ai, difficulty });
   });
 }
 
