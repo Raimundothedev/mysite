@@ -1,228 +1,575 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-```
-<title>IA Labz</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PNGG LABZ ★ home</title>
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; min-height: 100%; }
 
-    body {
-        min-height: 100vh;
-        font-family: Arial, Helvetica, sans-serif;
-        background: #f4f4f4;
-        color: #222;
-    }
+  body.mode-games {
+    background: #000080 url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='3' cy='3' r='1.2' fill='%23ffffff' opacity='0.35'/%3E%3Ccircle cx='22' cy='18' r='0.9' fill='%23ffffff' opacity='0.25'/%3E%3Ccircle cx='35' cy='8' r='1' fill='%23ffff99' opacity='0.4'/%3E%3Ccircle cx='12' cy='30' r='0.8' fill='%23ffffff' opacity='0.3'/%3E%3C/svg%3E");
+    color: #fff;
+    font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", "Marker Felt", cursive;
+    font-size: 16px;
+  }
 
-    header {
-        text-align: center;
-        padding: 70px 20px 50px;
-        background: white;
-        border-bottom: 1px solid #ddd;
-    }
+  body.mode-sims {
+    background: linear-gradient(180deg, #a8d8f5 0%, #7ec8f5 30%, #5bb8e8 70%, #3aa0d0 100%);
+    color: #0a3a55;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  }
 
-    header h1 {
-        font-size: clamp(2.5rem, 6vw, 5rem);
-        letter-spacing: -3px;
-        margin-bottom: 15px;
-    }
+  .topbar { text-align: center; padding: 8px 10px; }
+  .mode-games .topbar {
+    background: #000;
+    border-bottom: 3px ridge #c0c0c0;
+  }
+  .mode-sims .topbar {
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(180,230,255,0.5));
+    border-bottom: 1px solid rgba(255,255,255,0.7);
+    backdrop-filter: blur(12px);
+  }
 
-    header p {
-        font-size: 1.1rem;
-        color: #777;
-    }
+  .logo-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .logo-icon { width: 42px; height: 42px; }
+  .logo-text {
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  .mode-games .logo-text {
+    color: #ffff00;
+    text-shadow: 2px 2px 0 #ff00ff, -1px -1px 0 #00ffff;
+  }
+  .mode-sims .logo-text {
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: #08608a;
+    text-shadow: 0 1px 0 #fff;
+  }
 
-    main {
-        max-width: 1100px;
-        margin: auto;
-        padding: 60px 25px;
-    }
+  .tabs { display: inline-block; margin-top: 4px; }
+  .tab-btn {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 0 3px;
+    padding: 4px 14px;
+  }
+  .mode-games .tab-btn {
+    background: #c0c0c0;
+    border: 2px outset #fff;
+    color: #000;
+  }
+  .mode-games .tab-btn:active,
+  .mode-games .tab-btn.on {
+    border-style: inset;
+    background: #808080;
+    color: #fff;
+  }
+  .mode-sims .tab-btn {
+    background: linear-gradient(180deg, #fff, #c8e8ff);
+    border: 1px solid #fff;
+    border-radius: 20px;
+    color: #08608a;
+    padding: 6px 16px;
+    box-shadow: 0 2px 8px rgba(0,80,120,0.15);
+  }
+  .mode-sims .tab-btn.on {
+    background: linear-gradient(180deg, #5ec4f0, #2a9fd4);
+    color: #fff;
+  }
 
-    .games-title {
-        font-size: 1.8rem;
-        margin-bottom: 30px;
-    }
+  .view { display: none; }
+  .view.on { display: block; }
 
-    .games-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 25px;
-    }
+  .games-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 16px 12px 40px;
+    text-align: center;
+  }
 
-    .game-card {
-        background: white;
-        border: 2px solid #e5e5e5;
-        border-radius: 20px;
-        padding: 35px;
-        min-height: 300px;
+  .welcome {
+    background: #000;
+    border: 3px solid #ffff00;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  .welcome h1 {
+    margin: 0 0 8px;
+    font-size: 32px;
+    color: #00ff00;
+    text-shadow: 0 0 6px #00ff00;
+  }
+  .welcome .slogan {
+    color: #ff66cc;
+    font-size: 18px;
+    margin: 0;
+  }
 
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
+  .blink { animation: blink 1s step-start infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
 
-        text-decoration: none;
-        color: inherit;
+  marquee {
+    background: #ffff00;
+    color: #000;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 4px 0;
+    border-top: 2px solid #ff0000;
+    border-bottom: 2px solid #ff0000;
+    margin: 12px 0;
+    display: block;
+  }
 
-        transition:
-            transform 0.2s ease,
-            box-shadow 0.2s ease,
-            border-color 0.2s ease;
-    }
+  .hit-counter {
+    display: inline-block;
+    background: #000;
+    border: 2px inset #808080;
+    padding: 3px 8px;
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+    color: #0f0;
+    letter-spacing: 3px;
+    margin: 10px 0;
+  }
 
-    .game-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-        border-color: #aaa;
-    }
+  .section-title {
+    color: #ffff00;
+    font-size: 22px;
+    margin: 20px 0 12px;
+    text-decoration: underline;
+  }
 
-    .game-icon {
-        font-size: 4rem;
-        margin-bottom: 20px;
-    }
+  .game-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto 20px;
+    background: #fff;
+    color: #000;
+    border: 4px ridge #c0c0c0;
+  }
+  .game-table td {
+    border: 2px solid #808080;
+    padding: 10px;
+    vertical-align: middle;
+    text-align: left;
+  }
+  .game-table .thumb {
+    width: 120px;
+    height: 80px;
+    background: #000080;
+    border: 2px inset #c0c0c0;
+    display: block;
+  }
+  .game-table .thumb svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .game-table .name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #0000ee;
+  }
+  .game-table a { color: #0000ee; text-decoration: underline; }
+  .game-table a:visited { color: #551a8b; }
+  .game-table .go {
+    display: inline-block;
+    margin-top: 6px;
+    background: #00ff00;
+    border: 2px outset #fff;
+    color: #000;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 3px 12px;
+    text-decoration: none;
+    font-family: inherit;
+  }
+  .game-table .go:active { border-style: inset; }
 
-    .game-card h2 {
-        font-size: 2rem;
-        margin-bottom: 10px;
-    }
+  .construction {
+    margin: 24px auto;
+    padding: 10px;
+    border: 3px dashed #ff0000;
+    background: #330000;
+    color: #ff6666;
+    max-width: 400px;
+  }
 
-    .game-card p {
-        color: #777;
-        line-height: 1.5;
-        font-size: 1rem;
-    }
+  .footer-games {
+    margin-top: 30px;
+    padding-top: 12px;
+    border-top: 2px dotted #ffff00;
+    font-size: 15px;
+    color: #ccc;
+  }
+  .footer-games .by {
+    color: #fff;
+    font-size: 17px;
+    font-weight: bold;
+  }
+  .footer-games .claude {
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
+  }
 
-    .play-button {
-        margin-top: 30px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: bold;
-        font-size: 1rem;
-    }
+  hr.stars {
+    border: none;
+    text-align: center;
+    height: auto;
+    margin: 16px 0;
+    font-size: 14px;
+    color: #ffff00;
+  }
+  hr.stars::before { content: "★ ☆ ★ ☆ ★ ☆ ★ ☆ ★"; }
 
-    .coming-soon {
-        margin-top: 25px;
-        border: 2px dashed #ccc;
-        border-radius: 20px;
-        padding: 35px;
-        text-align: center;
-        color: #888;
-    }
+  .sims-wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 30px 16px 50px;
+    position: relative;
+  }
+  .sims-hero { text-align: center; margin-bottom: 28px; }
+  .sims-hero .kicker {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #08608a;
+    background: rgba(255,255,255,0.65);
+    border: 1px solid rgba(255,255,255,0.9);
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .sims-hero h1 {
+    margin: 0 0 10px;
+    font-size: 28px;
+    color: #08608a;
+    text-shadow: 0 1px 0 #fff;
+  }
+  .sims-hero p {
+    margin: 0 auto;
+    max-width: 480px;
+    color: #2a6a88;
+    font-size: 15px;
+    line-height: 1.5;
+  }
 
-    .coming-soon h3 {
-        font-size: 1.5rem;
-        margin-bottom: 10px;
-        color: #555;
-    }
+  .sims-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    justify-content: center;
+  }
+  .sim-card {
+    width: 320px;
+    background: linear-gradient(165deg, rgba(255,255,255,0.7), rgba(180,220,245,0.45));
+    border: 1px solid rgba(255,255,255,0.85);
+    border-radius: 18px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 10px 30px rgba(20,90,140,0.2), inset 0 1px 0 #fff;
+    transition: transform 0.2s;
+  }
+  .sim-card:hover { transform: translateY(-5px); }
+  .sim-card .art { height: 140px; overflow: hidden; }
+  .sim-card .art svg { width: 100%; height: 100%; display: block; }
+  .sim-card .body { padding: 14px 16px 18px; }
+  .sim-card h2 { margin: 0 0 6px; font-size: 17px; color: #08608a; }
+  .sim-card p { margin: 0 0 12px; font-size: 13px; color: #2a6a88; line-height: 1.45; }
+  .sim-card .cta {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(180deg, #6ecff5, #2a9fd4);
+    padding: 7px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 0 3px 10px rgba(30,130,180,0.3);
+  }
+  .sims-foot {
+    text-align: center;
+    margin-top: 36px;
+    font-size: 12px;
+    color: #08608a;
+    opacity: 0.8;
+  }
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.7), rgba(100,180,220,0.1));
+    border: 1px solid rgba(255,255,255,0.4);
+  }
 
-    footer {
-        text-align: center;
-        padding: 40px 20px;
-        color: #999;
-        font-size: 0.9rem;
-    }
-
-    @media (max-width: 600px) {
-        header {
-            padding: 50px 20px 40px;
-        }
-
-        main {
-            padding: 40px 20px;
-        }
-
-        .game-card {
-            min-height: 260px;
-            padding: 28px;
-        }
-    }
+  @media (max-width: 500px) {
+    .game-table .thumb { width: 90px; height: 60px; }
+    .game-table .name { font-size: 16px; }
+    .welcome h1 { font-size: 24px; }
+    .sim-card { width: 100%; }
+  }
 </style>
-```
-
 </head>
+<body class="mode-games">
 
-<body>
+<div class="topbar">
+  <div class="logo-row">
+    <svg class="logo-icon" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="1" width="46" height="46" fill="#ff0" stroke="#000" stroke-width="3"/>
+      <circle cx="16" cy="20" r="4" fill="#000"/>
+      <circle cx="32" cy="20" r="4" fill="#000"/>
+      <path d="M14 30 Q24 38 34 30" fill="none" stroke="#000" stroke-width="3"/>
+    </svg>
+    <div class="logo-text">PNGG LABZ</div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn on" id="btn-games" onclick="go('games')">Jogos</button>
+    <button class="tab-btn" id="btn-sims" onclick="go('sims')">Simulações</button>
+  </div>
+</div>
 
-```
-<header>
-    <h1>IA Labz</h1>
+<div class="view on" id="view-games">
+  <div class="games-wrap">
 
-    <p>Jogos, experimentos e projetos criados com inteligência artificial.</p>
-</header>
-
-<main>
-
-    <h2 class="games-title">Experimentos</h2>
-
-    <div class="games-grid">
-
-        <a href="mmo-life/" class="game-card">
-
-            <div>
-                <div class="game-icon">🌍</div>
-
-                <h2>MMO Life</h2>
-
-                <p>
-                    Viva uma vida virtual, evolua seu personagem,
-                    trabalhe, fique rico e construa sua própria história.
-                </p>
-            </div>
-
-            <div class="play-button">
-                Jogar →
-            </div>
-
-        </a>
-
-
-        <a href="art-market/" class="game-card">
-
-            <div>
-                <div class="game-icon">🎨</div>
-
-                <h2>Art Market</h2>
-
-                <p>
-                    Compre, venda e descubra obras de arte
-                    enquanto tenta construir seu próprio império.
-                </p>
-            </div>
-
-            <div class="play-button">
-                Jogar →
-            </div>
-
-        </a>
-
+    <div class="welcome">
+      <h1>~* PNGG LABZ *~</h1>
+      <p class="slogan">jogos na maioria ruins e pra piorar feitos com IA</p>
     </div>
 
+    <marquee scrollamount="5">
+      ★ bem-vindo ao meu site ★ &nbsp; best viewed in any browser &nbsp; ★ under construction forever ★ &nbsp; sem download ★ &nbsp; jogos duvidosos ★
+    </marquee>
 
-    <div class="coming-soon">
-
-        <h3>🧪 Mais experimentos em breve</h3>
-
-        <p>
-            Novos projetos estão sendo criados no IA Labz...
-        </p>
-
+    <div>
+      você é o visitante nº
+      <span class="hit-counter" id="hits">0001337</span>
     </div>
 
-</main>
+    <hr class="stars">
 
+    <div class="section-title">↓ meus jogos ↓</div>
 
-<footer>
-    IA Labz • 2026
-</footer>
-```
+    <table class="game-table">
+      <tr>
+        <td style="width:130px">
+          <a href="empire-builder.html">
+            <span class="thumb">
+              <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+                <rect width="120" height="80" fill="#3a8fd0"/>
+                <rect x="8" y="6" width="104" height="68" fill="#ece9d8" stroke="#00138c" stroke-width="1.5"/>
+                <rect x="8" y="6" width="104" height="12" fill="#105ce6"/>
+                <text x="12" y="15" font-family="Tahoma" font-size="7" fill="#fff" font-weight="bold">Empire Builder</text>
+                <rect x="12" y="22" width="72" height="46" fill="#0d2b57"/>
+                <polygon points="20,35 28,30 36,35 36,43 28,48 20,43" fill="#3d8b4f"/>
+                <polygon points="36,43 44,38 52,43 52,51 44,56 36,51" fill="#2d6b3f"/>
+                <polygon points="52,35 60,30 68,35 68,43 60,48 52,43" fill="#c2b280"/>
+                <rect x="40" y="40" width="6" height="6" fill="#e8d5a8"/>
+                <circle cx="48" cy="32" r="2.5" fill="#1c62d6"/>
+                <rect x="88" y="22" width="20" height="46" fill="#dbe6f6" stroke="#7f9db9"/>
+                <rect x="90" y="26" width="16" height="5" fill="#1a6ef0"/>
+                <rect x="90" y="36" width="12" height="8" fill="#6ec06e"/>
+              </svg>
+            </span>
+          </a>
+        </td>
+        <td>
+          <div class="name"><a href="empire-builder.html">Empire Builder</a></div>
+          <a class="go" href="empire-builder.html">► JOGAR</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a href="netops-admin.html">
+            <span class="thumb">
+              <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+                <rect width="120" height="80" fill="#3a8cc9"/>
+                <rect x="8" y="6" width="104" height="68" fill="#c0c0c0" stroke="#000" stroke-width="1.2"/>
+                <rect x="8" y="6" width="104" height="12" fill="#000080"/>
+                <text x="12" y="15" font-family="Tahoma" font-size="6.5" fill="#fff" font-weight="bold">NetOps Admin '98</text>
+                <rect x="12" y="22" width="44" height="46" fill="#fff" stroke="#808080"/>
+                <rect x="14" y="24" width="40" height="6" fill="#000080"/>
+                <rect x="14" y="32" width="40" height="5" fill="#e0e0e0"/>
+                <rect x="14" y="39" width="40" height="5" fill="#e0e0e0"/>
+                <rect x="14" y="46" width="40" height="5" fill="#c0ffc0"/>
+                <rect x="14" y="53" width="40" height="5" fill="#e0e0e0"/>
+                <rect x="60" y="22" width="48" height="32" fill="#000"/>
+                <text x="62" y="30" font-family="Consolas,monospace" font-size="4.5" fill="#0f0">[sys] online</text>
+                <text x="62" y="38" font-family="Consolas,monospace" font-size="4.5" fill="#0f0">&lt;p1&gt; lag???</text>
+                <text x="62" y="46" font-family="Consolas,monospace" font-size="4.5" fill="#ff0">&lt;admin&gt; ok</text>
+                <rect x="60" y="56" width="48" height="12" fill="#d4d0c8" stroke="#808080"/>
+              </svg>
+            </span>
+          </a>
+        </td>
+        <td>
+          <div class="name"><a href="netops-admin.html">NetOps Admin '98</a></div>
+          <a class="go" href="netops-admin.html">► JOGAR</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a href="art-market.html">
+            <span class="thumb">
+              <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+                <rect width="120" height="80" fill="#d7d5cb"/>
+                <rect x="30" y="10" width="56" height="44" fill="#f4f2ec" stroke="#6d2a3a" stroke-width="1.5"/>
+                <rect x="34" y="14" width="48" height="36" fill="#fff"/>
+                <path d="M38 40 Q50 20 62 36 T80 30" fill="none" stroke="#6d2a3a" stroke-width="2.5"/>
+                <path d="M40 42 Q52 28 66 38" fill="none" stroke="#b28a2e" stroke-width="2"/>
+                <circle cx="48" cy="24" r="4" fill="#4b5d45" opacity="0.75"/>
+                <ellipse cx="96" cy="52" rx="13" ry="10" fill="#ece9e0" stroke="#c3c0b2"/>
+                <circle cx="92" cy="50" r="2.8" fill="#6d2a3a"/>
+                <circle cx="99" cy="49" r="2.8" fill="#b28a2e"/>
+                <circle cx="95" cy="56" r="2.8" fill="#4b5d45"/>
+                <rect x="30" y="60" width="56" height="9" rx="2" fill="#6d2a3a"/>
+                <text x="58" y="67" text-anchor="middle" font-family="Georgia,serif" font-size="6" fill="#f6ece9">avaliar</text>
+              </svg>
+            </span>
+          </a>
+        </td>
+        <td>
+          <div class="name"><a href="art-market.html">Art Market</a></div>
+          <a class="go" href="art-market.html">► JOGAR</a>
+        </td>
+      </tr>
+    </table>
 
+    <div class="construction">
+      <div style="font-size:28px">🚧</div>
+      <b class="blink">UNDER CONSTRUCTION</b><br>
+      mais jogos ruins em breve
+    </div>
+
+    <hr class="stars">
+
+    <div class="footer-games">
+      <div class="by">feito por mim</div>
+      <div class="claude">e o Claude</div>
+      <div style="margin-top:10px;font-size:12px;color:#888">
+        © 2026 pngg labz · não afiliado a nada
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="view" id="view-sims">
+  <div class="orb" style="width:180px;height:180px;top:10%;left:-30px;opacity:0.55"></div>
+  <div class="orb" style="width:100px;height:100px;top:40%;right:8%;opacity:0.45"></div>
+
+  <div class="sims-wrap">
+    <div class="sims-hero">
+      <div class="kicker">Laboratory Online</div>
+      <h1>Simulações &amp; Experimentos</h1>
+      <p>Modelos vivos de evolução e matemática. Explore sem pressa.</p>
+    </div>
+
+    <div class="sims-grid">
+      <a class="sim-card" href="evolution-lab.html">
+        <div class="art">
+          <svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="es" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#c8ecff"/>
+                <stop offset="100%" stop-color="#5aaa7a"/>
+              </linearGradient>
+            </defs>
+            <rect width="320" height="140" fill="url(#es)"/>
+            <ellipse cx="80" cy="115" rx="100" ry="28" fill="#6dcf8a" opacity="0.85"/>
+            <ellipse cx="240" cy="120" rx="90" ry="24" fill="#5bbb7a" opacity="0.8"/>
+            <ellipse cx="70" cy="85" rx="18" ry="13" fill="#7dcf9a" stroke="#fff" stroke-width="1.5"/>
+            <circle cx="78" cy="81" r="4" fill="#fff"/><circle cx="79" cy="81" r="2" fill="#0a3a55"/>
+            <ellipse cx="150" cy="95" rx="14" ry="10" fill="#5ec4f0" stroke="#fff" stroke-width="1.5"/>
+            <circle cx="157" cy="92" r="3.5" fill="#fff"/><circle cx="158" cy="92" r="1.8" fill="#0a3a55"/>
+            <ellipse cx="220" cy="80" rx="16" ry="12" fill="#a0e0c0" stroke="#fff" stroke-width="1.5"/>
+            <circle cx="228" cy="76" r="4" fill="#fff"/><circle cx="229" cy="76" r="2" fill="#0a3a55"/>
+            <circle cx="100" cy="105" r="3" fill="#ffe566"/>
+            <circle cx="180" cy="110" r="2.5" fill="#ffe566"/>
+          </svg>
+        </div>
+        <div class="body">
+          <h2>Evolution Lab</h2>
+          <p>Criaturas com rede neural evoluem e formam espécies em tempo real.</p>
+          <span class="cta">Abrir →</span>
+        </div>
+      </a>
+
+      <a class="sim-card" href="function-lab.html">
+        <div class="art">
+          <svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="fs" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#eaf7ff"/>
+                <stop offset="100%" stop-color="#8fd0f0"/>
+              </linearGradient>
+            </defs>
+            <rect width="320" height="140" fill="url(#fs)"/>
+            <rect x="20" y="14" width="280" height="112" rx="12" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.7)"/>
+            <line x1="30" y1="70" x2="290" y2="70" stroke="rgba(10,58,85,0.15)"/>
+            <line x1="160" y1="24" x2="160" y2="116" stroke="rgba(10,58,85,0.15)"/>
+            <path d="M40 100 Q90 30 140 80 T240 50 T280 85" fill="none" stroke="#f0a050" stroke-width="2" stroke-dasharray="5 4" opacity="0.7"/>
+            <path d="M40 95 Q95 40 145 75 T245 55 T280 80" fill="none" stroke="#2a9fd4" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="110" cy="50" r="5" fill="#5ec4f0" stroke="#fff" stroke-width="1.5"/>
+            <circle cx="160" cy="72" r="5" fill="#2a9fd4" stroke="#fff" stroke-width="1.5"/>
+            <circle cx="230" cy="48" r="5" fill="#5ec4f0" stroke="#fff" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="body">
+          <h2>Lab de Funções</h2>
+          <p>Digite, desenhe e desafie funções. Livre, Desafio, Estudos e Battle.</p>
+          <span class="cta">Abrir →</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="sims-foot">PNGG LABZ · 2026</div>
+  </div>
+</div>
+
+<script>
+function go(tab) {
+  var games = tab === 'games';
+  document.body.className = games ? 'mode-games' : 'mode-sims';
+  document.getElementById('view-games').className = games ? 'view on' : 'view';
+  document.getElementById('view-sims').className = games ? 'view' : 'view on';
+  document.getElementById('btn-games').className = games ? 'tab-btn on' : 'tab-btn';
+  document.getElementById('btn-sims').className = games ? 'tab-btn' : 'tab-btn on';
+  try { localStorage.setItem('pngg-tab', tab); } catch(e) {}
+}
+try {
+  if (localStorage.getItem('pngg-tab') === 'sims') go('sims');
+} catch(e) {}
+
+(function(){
+  var el = document.getElementById('hits');
+  var n = 1337;
+  try {
+    var s = localStorage.getItem('pngg-hits');
+    if (s) n = parseInt(s, 10) || 1337;
+    n += 1;
+    localStorage.setItem('pngg-hits', String(n));
+  } catch(e) {}
+  el.textContent = String(n).padStart(7, '0');
+})();
+</script>
 </body>
 </html>
