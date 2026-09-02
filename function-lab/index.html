@@ -1,0 +1,2400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab de Funções</title>
+<style>
+  :root{
+    --bg:#1c1e24;
+    --panel:#25272e;
+    --canvas-bg:#202127;
+    --border:#383b44;
+    --border-strong:#4b4f5a;
+    --text:#e7e9ee;
+    --text-muted:#9aa0ac;
+    --text-faint:#6b7280;
+    --accent:#5b8def;
+    --accent-dark:#3b73d6;
+    --accent-bg:rgba(91,141,239,.15);
+    --target:#fb923c;
+    --target-bg:rgba(251,146,60,.15);
+    --success:#4ade80;
+    --success-bg:rgba(74,222,128,.14);
+    --warning:#fbbf24;
+    --danger:#f87171;
+    --danger-bg:rgba(248,113,113,.14);
+    --grid-minor:#2c2f37;
+    --grid-major:#464a55;
+    --tick-text:#7d8391;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+  body.light{
+    --bg:#f0f2f5;
+    --panel:#ffffff;
+    --canvas-bg:#f8f9fb;
+    --border:#d8dce3;
+    --border-strong:#b8bec8;
+    --text:#1a1d24;
+    --text-muted:#5a6170;
+    --text-faint:#8b929e;
+    --accent:#3b73d6;
+    --accent-dark:#2a5bb8;
+    --accent-bg:rgba(59,115,214,.12);
+    --target:#e67e22;
+    --target-bg:rgba(230,126,34,.12);
+    --success:#22a55b;
+    --success-bg:rgba(34,165,91,.12);
+    --warning:#d4a017;
+    --danger:#e74c3c;
+    --danger-bg:rgba(231,76,60,.12);
+    --grid-minor:#e8eaef;
+    --grid-major:#c5cad3;
+    --tick-text:#6b7280;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font);
+    min-height:100vh;
+    padding:24px 16px 60px;
+    font-size:14px;
+    line-height:1.5;
+    transition:background .2s, color .2s;
+  }
+  .app{max-width:1100px;margin:0 auto;}
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px; flex-wrap:wrap;
+    padding-bottom:18px; margin-bottom:20px;
+    border-bottom:1px solid var(--border);
+  }
+  .brand h1{margin:0; font-size:19px; font-weight:700; color:var(--text); letter-spacing:-0.01em;}
+  .brand .subtitle{margin:3px 0 0; font-size:13px; color:var(--text-muted);}
+  .mode-toggle{
+    display:flex; gap:4px; background:var(--panel); border:1px solid var(--border);
+    border-radius:8px; padding:3px; flex-wrap:wrap;
+  }
+  .mode-btn{
+    font-family:var(--font); font-size:13px; font-weight:600;
+    background:transparent; color:var(--text-muted); border:none; border-radius:6px;
+    padding:8px 12px; cursor:pointer; transition:background .12s, color .12s;
+  }
+  .mode-btn:hover{color:var(--text); background:var(--bg);}
+  .mode-btn.active{background:var(--accent); color:#0e1116;}
+  body.light .mode-btn.active{color:#fff;}
+  body.light .btn-primary{color:#fff;}
+  body.light .toggle-btn.active{color:#fff;}
+  body.light .cursor-readout{background:rgba(255,255,255,.92);}
+  .mode-btn:focus-visible, button:focus-visible, input:focus-visible{
+    outline:2px solid var(--accent); outline-offset:2px;
+  }
+
+  .panel-wrap{
+    display:grid; grid-template-columns: 1.45fr 1fr; gap:18px; align-items:start;
+  }
+  @media(max-width:820px){ .panel-wrap{grid-template-columns:1fr;} }
+
+  .scope-wrap{display:flex; flex-direction:column; gap:10px;}
+  .scope{
+    position:relative; width:100%; aspect-ratio: 4 / 3;
+    background:var(--canvas-bg);
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+    cursor:crosshair;
+  }
+  .scope canvas{display:block; width:100%; height:100%;}
+  .cursor-readout{
+    position:absolute; left:10px; top:10px; font-size:12px; color:var(--text);
+    background:rgba(37,39,46,.92); border:1px solid var(--border);
+    padding:4px 9px; border-radius:6px; font-family:var(--mono);
+    pointer-events:none; z-index:2;
+  }
+
+  .scope-toolbar{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:9px 12px; font-size:12.5px; color:var(--text-muted);
+  }
+  .scope-toolbar button{
+    font-family:var(--font); background:var(--canvas-bg); color:var(--text);
+    border:1px solid var(--border-strong); border-radius:6px; width:28px; height:28px;
+    cursor:pointer; font-size:15px; line-height:1;
+  }
+  .scope-toolbar button:hover{border-color:var(--accent); color:var(--accent);}
+  .scope-toolbar button.text{width:auto; padding:0 10px; font-size:12px;}
+  #viewRange, #estViewRange{color:var(--text); min-width:96px; text-align:center; font-family:var(--mono);}
+
+  .sync-block{display:flex; align-items:center; gap:10px; flex:1; min-width:180px;}
+  .sync-label{font-weight:600; color:var(--text); white-space:nowrap;}
+  .sync-bar-track{flex:1; height:8px; background:var(--grid-minor); border-radius:4px; overflow:hidden; min-width:60px;}
+  .sync-bar-fill{height:100%; width:0%; background:var(--danger); transition:width .12s, background .12s;}
+  #syncValue{font-family:var(--mono); font-weight:700; min-width:38px; text-align:right;}
+  .round-readout{color:var(--text); white-space:nowrap;}
+  .round-readout b{color:var(--accent);}
+
+  .control-panel{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    padding:16px; display:flex; flex-direction:column; gap:10px;
+    max-height:calc(100vh - 120px); overflow-y:auto;
+  }
+  .control-panel label{font-size:12px; font-weight:600; color:var(--text-muted);}
+  #formulaInput{
+    font-family:var(--mono); font-size:15px; background:var(--canvas-bg);
+    border:1px solid var(--border-strong); border-radius:7px; color:var(--text);
+    padding:10px 12px; width:100%;
+  }
+  #formulaInput:focus{border-color:var(--accent);}
+  .error-banner{
+    display:none; align-items:flex-start; gap:8px; font-size:12.5px; color:var(--danger);
+    background:var(--danger-bg); border:1px solid rgba(248,113,113,.35); border-radius:7px; padding:8px 10px;
+  }
+  .error-banner.show{display:flex;}
+  .presets{display:flex; flex-wrap:wrap; gap:6px; margin-top:2px;}
+  .preset-chip{
+    font-family:var(--mono); font-size:11.5px; background:var(--canvas-bg); color:var(--text-muted);
+    border:1px solid var(--border-strong); border-radius:6px; padding:5px 10px; cursor:pointer;
+  }
+  .preset-chip:hover{color:var(--accent); border-color:var(--accent);}
+  .hint{font-size:12px; color:var(--text-faint); line-height:1.55; margin:2px 0 0;}
+
+  /* Feedback da função */
+  .fn-feedback{
+    display:none; flex-direction:column; gap:8px;
+    background:var(--canvas-bg); border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px; font-size:12.5px;
+  }
+  .fn-feedback.show{display:flex;}
+  .fn-feedback .fn-type{
+    font-size:14px; font-weight:700; color:var(--accent); font-family:var(--mono);
+  }
+  .fn-feedback .fn-desc{color:var(--text-muted); line-height:1.55;}
+  .fn-feedback .fn-facts{display:flex; flex-direction:column; gap:5px; margin-top:2px;}
+  .fn-feedback .fn-fact{
+    color:var(--text-muted); padding:5px 0;
+    border-top:1px solid var(--border); line-height:1.5;
+  }
+  .fn-feedback .fn-fact b{color:var(--text); font-family:var(--mono);}
+  .fn-feedback .fn-tip{
+    margin-top:4px; padding:8px 10px;
+    background:rgba(251,191,36,.08); border-left:3px solid var(--warning);
+    border-radius:0 6px 6px 0; color:var(--text-muted); line-height:1.5;
+  }
+  .fn-feedback .fn-tip strong{color:var(--warning);}
+  .root-pills{display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;}
+  .root-pill{
+    font-family:var(--mono); font-size:12px; padding:4px 10px; border-radius:6px;
+    background:var(--accent-bg); color:var(--accent); border:1px solid rgba(91,141,239,.35);
+  }
+  .root-pill.none{background:var(--danger-bg); color:var(--danger); border-color:rgba(248,113,113,.35);}
+  .root-pill.one{background:rgba(251,191,36,.12); color:var(--warning); border-color:rgba(251,191,36,.35);}
+
+  .family-label{font-size:16px; font-weight:700; color:var(--text); margin:0; font-family:var(--mono);}
+
+  .param-rows{display:flex; flex-direction:column; gap:14px; margin:4px 0;}
+  .param-row{display:flex; flex-direction:column; gap:5px;}
+  .param-top{display:flex; align-items:center; gap:8px;}
+  .param-key{
+    width:22px; height:22px; border-radius:5px; background:var(--accent-bg);
+    color:var(--accent); display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; font-family:var(--mono); flex-shrink:0;
+  }
+  .param-slider{flex:1; accent-color:var(--accent); height:6px;}
+  .param-number{
+    width:62px; font-family:var(--mono); font-size:12.5px; text-align:right;
+    background:var(--canvas-bg); border:1px solid var(--border-strong); border-radius:6px; padding:4px 6px; color:var(--text);
+  }
+  .proximity-track{height:5px; background:var(--grid-minor); border-radius:3px; margin-left:30px; overflow:hidden;}
+  .proximity-fill{height:100%; width:0%; background:var(--danger); transition:width .12s, background .12s;}
+
+  .btn-primary, .btn-secondary{
+    font-family:var(--font); font-size:13px; font-weight:600;
+    padding:10px; border-radius:7px; cursor:pointer; border:1px solid transparent;
+  }
+  .btn-primary{background:var(--accent); color:#0e1116;}
+  .btn-primary:hover{background:var(--accent-dark); color:#fff;}
+  .btn-primary:disabled{background:var(--border-strong); color:var(--text-faint); cursor:default;}
+  .btn-secondary{background:transparent; color:var(--accent); border-color:var(--accent);}
+  .btn-secondary:hover{background:var(--accent-bg);}
+
+  .result-panel{
+    display:none; flex-direction:column; gap:8px; font-size:12.5px;
+    background:var(--canvas-bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px;
+  }
+  .result-panel.show{display:flex;}
+  .result-panel .result-score{font-size:15px; font-weight:700; color:var(--text); margin-bottom:4px;}
+  .result-panel .result-feedback{
+    font-size:12.5px; color:var(--text-muted); line-height:1.55;
+    background:rgba(91,141,239,.08); border-left:3px solid var(--accent);
+    padding:8px 10px; border-radius:0 6px 6px 0; margin:4px 0 6px;
+  }
+  .result-row{display:flex; align-items:flex-start; gap:7px; color:var(--text-muted); line-height:1.45;}
+  .result-row .badge{
+    width:16px; height:16px; border-radius:50%; flex-shrink:0; margin-top:2px;
+    display:flex; align-items:center; justify-content:center; font-size:10px; color:#0e1116; font-weight:700;
+  }
+  .badge.ok{background:var(--success);}
+  .badge.no{background:var(--danger); color:#fff;}
+  .result-row b{color:var(--text); font-family:var(--mono);}
+  .result-tip{
+    font-size:12px; color:var(--text-faint); margin-top:6px; padding-top:8px;
+    border-top:1px solid var(--border); line-height:1.5;
+  }
+  .result-tip strong{color:var(--warning);}
+
+  .history{margin-top:2px;}
+  .history-title{font-size:11.5px; font-weight:600; color:var(--text-faint); text-transform:uppercase; letter-spacing:.03em; margin-bottom:6px;}
+  .history-list{display:flex; flex-direction:column; gap:4px;}
+  .history-row{
+    display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted);
+    padding:5px 8px; background:var(--canvas-bg); border-radius:6px;
+  }
+  .history-row b{color:var(--text); font-family:var(--mono);}
+
+  .summary-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.55);
+    display:flex; align-items:center; justify-content:center; z-index:10; padding:20px;
+  }
+  .summary-card{
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:28px 30px; text-align:center; max-width:340px; width:100%;
+    box-shadow:0 12px 32px rgba(0,0,0,.4);
+  }
+  .summary-card h2{margin:0 0 12px; font-size:15px; font-weight:700; color:var(--text);}
+  #summaryScore{font-size:32px; font-weight:800; color:var(--accent); margin:0; font-family:var(--mono);}
+  #summaryRank{color:var(--text-muted); font-size:13px; margin:6px 0 16px;}
+  .summary-history{display:flex; flex-direction:column; gap:4px; margin-bottom:20px; text-align:left;}
+  #restartBtn{
+    font-family:var(--font); font-size:13px; font-weight:600;
+    background:var(--accent); color:#0e1116; border:none; border-radius:7px;
+    padding:11px 24px; cursor:pointer; width:100%;
+  }
+  #restartBtn:hover{background:var(--accent-dark); color:#fff;}
+
+  /* Estudos */
+  .estudos-nav{display:flex; gap:6px; flex-wrap:wrap;}
+  .estudos-nav-btn{
+    font-family:var(--font); font-size:12.5px; font-weight:600;
+    background:var(--canvas-bg); color:var(--text-muted); border:1px solid var(--border-strong);
+    border-radius:6px; padding:8px 14px; cursor:pointer;
+  }
+  .estudos-nav-btn:hover{color:var(--accent); border-color:var(--accent);}
+  .estudos-nav-btn.active{background:var(--accent-bg); color:var(--accent); border-color:var(--accent);}
+  .lesson-card{display:none; flex-direction:column; gap:14px;}
+  .lesson-card.active{display:flex;}
+  .lesson-card h2{margin:0; font-size:16px; font-weight:700; color:var(--text);}
+  .formula-big{
+    font-family:var(--mono); font-size:17px; text-align:center;
+    background:var(--canvas-bg); border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px; color:var(--accent); font-weight:700;
+  }
+  .formula-box{
+    font-family:var(--mono); font-size:13.5px; text-align:center;
+    background:var(--canvas-bg); border:1px solid var(--border); border-radius:8px;
+    padding:10px 12px; color:var(--text); line-height:1.7;
+  }
+  .formula-box .hl{color:var(--accent); font-weight:700;}
+  .section-title{
+    margin:0; font-size:12px; font-weight:700; color:var(--text-faint);
+    text-transform:uppercase; letter-spacing:.04em;
+  }
+  .simple-list{display:flex; flex-direction:column; gap:8px;}
+  .simple-item{
+    display:flex; gap:12px; align-items:flex-start;
+    background:var(--canvas-bg); border-radius:8px; padding:10px 12px;
+  }
+  .simple-item .num{
+    min-width:28px; height:28px; border-radius:50%; background:var(--accent-bg);
+    color:var(--accent); display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:13px; flex-shrink:0; font-family:var(--mono);
+  }
+  .simple-item .txt{font-size:13px; color:var(--text-muted); line-height:1.55;}
+  .simple-item .txt b{color:var(--text);}
+  .try-row{display:flex; flex-wrap:wrap; gap:6px;}
+  .try-chip{
+    font-family:var(--mono); font-size:12px; background:var(--canvas-bg); color:var(--accent);
+    border:1px solid var(--accent); border-radius:6px; padding:6px 12px; cursor:pointer;
+  }
+  .try-chip:hover{background:var(--accent-bg);}
+  .mini-tip{
+    font-size:12.5px; color:var(--text-muted); line-height:1.55;
+    background:rgba(251,191,36,.08); border-left:3px solid var(--warning);
+    padding:10px 12px; border-radius:0 6px 6px 0;
+  }
+  .mini-tip strong{color:var(--warning);}
+
+  /* Calculadora interativa nos estudos */
+  .calc-box{
+    background:var(--canvas-bg); border:1px solid var(--border); border-radius:8px;
+    padding:12px; display:flex; flex-direction:column; gap:10px;
+  }
+  .calc-row{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  }
+  .calc-row label{font-size:12px; font-weight:700; color:var(--accent); font-family:var(--mono); min-width:18px;}
+  .calc-row input{
+    width:70px; font-family:var(--mono); font-size:13px; text-align:right;
+    background:var(--panel); border:1px solid var(--border-strong); border-radius:6px;
+    padding:6px 8px; color:var(--text);
+  }
+  .calc-out{
+    font-size:13px; color:var(--text-muted); line-height:1.6;
+    border-top:1px solid var(--border); padding-top:10px;
+  }
+  .calc-out b{color:var(--text); font-family:var(--mono);}
+  .calc-out .ok{color:var(--success);}
+  .calc-out .warn{color:var(--warning);}
+  .calc-out .bad{color:var(--danger);}
+
+  /* Desenhar */
+  .draw-fit-type{display:flex; gap:6px;}
+  .draw-fit-type button{
+    flex:1; font-family:var(--font); font-size:12.5px; font-weight:600;
+    background:var(--canvas-bg); color:var(--text-muted); border:1px solid var(--border-strong);
+    border-radius:6px; padding:8px; cursor:pointer;
+  }
+  .draw-fit-type button.active{
+    background:var(--accent-bg); color:var(--accent); border-color:var(--accent);
+  }
+  .draw-result{
+    display:none; flex-direction:column; gap:8px;
+    background:var(--canvas-bg); border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px;
+  }
+  .draw-result.show{display:flex;}
+  .draw-result .fit-formula{
+    font-family:var(--mono); font-size:16px; font-weight:700; color:var(--accent);
+    text-align:center; padding:8px 0;
+  }
+  .draw-result .fit-quality{font-size:12.5px; color:var(--text-muted); text-align:center;}
+  .draw-result .fit-explain{
+    font-size:12.5px; color:var(--text-muted); line-height:1.55;
+    border-top:1px solid var(--border); padding-top:8px;
+  }
+  .draw-result .fit-explain b{color:var(--text);}
+  .point-count{font-size:12px; color:var(--text-faint);}
+
+  /* Battle */
+  .battle-stats{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
+  .battle-stat{font-family:var(--mono); font-size:13px; color:var(--text); background:var(--canvas-bg); border:1px solid var(--border); border-radius:6px; padding:6px 12px;}
+  .battle-stat b{color:var(--accent);}
+  .battle-stat.danger b{color:var(--danger);}
+  .battle-msg{font-size:13px; color:var(--text-muted); line-height:1.5; background:var(--canvas-bg); border:1px solid var(--border); border-radius:8px; padding:10px 12px;}
+  .battle-msg.hit{border-color:var(--success); color:var(--success);}
+  .battle-msg.miss{border-color:var(--danger); color:var(--danger);}
+  .battle-msg.win{border-color:var(--accent); color:var(--accent); font-weight:700;}
+  .battle-ammo{display:flex; gap:4px; flex-wrap:wrap;}
+  .ammo-dot{width:10px; height:10px; border-radius:50%; background:var(--accent); opacity:.9;}
+  .ammo-dot.used{background:var(--border-strong); opacity:.5;}
+  .battle-presets{display:flex; flex-wrap:wrap; gap:6px;}
+  .battle-level-info{font-size:12.5px; color:var(--text-muted); line-height:1.5;}
+  .battle-level-info b{color:var(--text); font-family:var(--mono);}
+  .battle-hint{font-size:12.5px; color:var(--text-muted); line-height:1.5; background:rgba(251,191,36,.08); border-left:3px solid var(--warning); padding:9px 11px; border-radius:0 6px 6px 0;}
+  #battleFormulaInput{font-family:var(--mono); font-size:15px; background:var(--canvas-bg); border:1px solid var(--border-strong); border-radius:7px; color:var(--text); padding:10px 12px; width:100%;}
+  #battleFormulaInput:focus{border-color:var(--accent);}
+  #battleViewRange{color:var(--text); min-width:96px; text-align:center; font-family:var(--mono);}
+  #battleRestartBtn{font-family:var(--font); font-size:13px; font-weight:600; background:var(--accent); color:#0e1116; border:none; border-radius:7px; padding:11px 24px; cursor:pointer; width:100%;}
+  body.light #battleRestartBtn{color:#fff;}
+  #battleRestartBtn:hover{background:var(--accent-dark); color:#fff;}
+  /* Settings */
+  .settings-section{display:flex; flex-direction:column; gap:14px;}
+  .settings-section h2{margin:0; font-size:16px; font-weight:700; color:var(--text);}
+  .setting-row{display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--canvas-bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px;}
+  .setting-info{display:flex; flex-direction:column; gap:2px;}
+  .setting-info .setting-name{font-size:13.5px; font-weight:600; color:var(--text);}
+  .setting-info .setting-desc{font-size:12px; color:var(--text-faint);}
+  .toggle-group{display:flex; gap:4px; background:var(--panel); border:1px solid var(--border); border-radius:7px; padding:3px;}
+  .toggle-btn{font-family:var(--font); font-size:12.5px; font-weight:600; background:transparent; color:var(--text-muted); border:none; border-radius:5px; padding:7px 14px; cursor:pointer;}
+  .toggle-btn.active{background:var(--accent); color:#0e1116;}
+  .switch{position:relative; width:44px; height:24px; flex-shrink:0;}
+  .switch input{opacity:0; width:0; height:0;}
+  .switch .slider{position:absolute; inset:0; background:var(--border-strong); border-radius:12px; cursor:pointer; transition:background .2s;}
+  .switch .slider::before{content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:transform .2s;}
+  .switch input:checked + .slider{background:var(--accent);}
+  .switch input:checked + .slider::before{transform:translateX(20px);}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <h1>Lab de Funções</h1>
+      <p class="subtitle" id="modeSubtitle">Digite uma função e veja o gráfico + explicação</p>
+    </div>
+    <div class="mode-toggle" role="tablist">
+      <button class="mode-btn active" data-mode="livre" role="tab" aria-selected="true">Livre</button>
+      <button class="mode-btn" data-mode="desenhar" role="tab" aria-selected="false">Desenhar</button>
+      <button class="mode-btn" data-mode="desafio" role="tab" aria-selected="false">Desafio</button>
+      <button class="mode-btn" data-mode="estudos" role="tab" aria-selected="false">Estudos</button>
+      <button class="mode-btn" data-mode="battle" role="tab" aria-selected="false">Battle</button>
+      <button class="mode-btn" data-mode="settings" role="tab" aria-selected="false">Settings</button>
+    </div>
+  </header>
+
+  <main class="panel-wrap" id="mainPanel">
+    <section class="scope-wrap">
+      <div class="scope" id="scope">
+        <canvas id="canvas"></canvas>
+        <div class="cursor-readout" id="cursorReadout">x = 0.00&nbsp;&nbsp;y = 0.00</div>
+      </div>
+
+      <div class="scope-toolbar" id="livreToolbar">
+        <button id="zoomOut" title="Afastar">&minus;</button>
+        <span id="viewRange">-6 a 6</span>
+        <button id="zoomIn" title="Aproximar">+</button>
+        <button class="text" id="resetView">Redefinir</button>
+      </div>
+
+      <div class="scope-toolbar" id="desenharToolbar" style="display:none">
+        <button class="text" id="clearPoints">Limpar pontos</button>
+        <span class="point-count" id="pointCount">0 pontos</span>
+        <button class="text" id="undoPoint" title="Desfazer">↶</button>
+      </div>
+
+      <div class="scope-toolbar" id="desafioToolbar" style="display:none">
+        <div class="sync-block">
+          <span class="sync-label">Sincronia</span>
+          <div class="sync-bar-track"><div class="sync-bar-fill" id="syncBarFill"></div></div>
+          <span id="syncValue">0%</span>
+        </div>
+        <div class="round-readout">Rodada <b id="roundNum">1</b>/5 · <b id="totalScore">0</b> pts</div>
+      </div>
+
+      <div class="scope-toolbar" id="estudosToolbar" style="display:none">
+        <button id="estZoomOut" title="Afastar">&minus;</button>
+        <span id="estViewRange">-6 a 6</span>
+        <button id="estZoomIn" title="Aproximar">+</button>
+        <button class="text" id="estResetView">Redefinir</button>
+      </div>
+      <div class="scope-toolbar" id="battleToolbar" style="display:none">
+        <button id="battleZoomOut" title="Afastar">&minus;</button>
+        <span id="battleViewRange">-8 a 8</span>
+        <button id="battleZoomIn" title="Aproximar">+</button>
+        <button class="text" id="battleResetView">Redefinir</button>
+        <div class="battle-stats" style="margin-left:auto">
+          <span class="battle-stat">Nível <b id="battleLevel">1</b></span>
+          <span class="battle-stat">Pontos <b id="battleScore">0</b></span>
+          <span class="battle-stat danger">Vidas <b id="battleLives">3</b></span>
+        </div>
+      </div>
+      <div class="scope-toolbar" id="settingsToolbar" style="display:none">
+        <span style="color:var(--text-muted)">Ajuste as preferências no painel →</span>
+      </div>
+    </section>
+
+    <!-- LIVRE -->
+    <aside class="control-panel" id="livrePanel">
+      <label for="formulaInput">f(x) =</label>
+      <input type="text" id="formulaInput" value="x² - 5x + 6" autocomplete="off" spellcheck="false" autocapitalize="off">
+      <div class="error-banner" id="formulaError">⚠ <span id="formulaErrorText"></span></div>
+      <div class="presets" id="presets"></div>
+      <div class="fn-feedback" id="fnFeedback"></div>
+      <p class="hint">Aceita <b style="color:var(--text-muted)">x²</b>, <b style="color:var(--text-muted)">x^2</b>, frações como <b style="color:var(--text-muted)">1/2</b> ou <b style="color:var(--text-muted)">½</b>. Funções: sin cos tan sqrt abs exp ln log, pi, e.</p>
+    </aside>
+
+    <!-- DESENHAR -->
+    <aside class="control-panel" id="desenharPanel" style="display:none">
+      <p class="family-label" style="font-size:15px;">Desenhe pontos no gráfico</p>
+      <p class="hint">Clique no gráfico para marcar pontos. Escolha o tipo e calcule a função.</p>
+      <label>Tipo de ajuste</label>
+      <div class="draw-fit-type">
+        <button type="button" class="active" data-fit="linear">Linear (reta)</button>
+        <button type="button" data-fit="quadratic">Quadrática</button>
+      </div>
+      <button class="btn-primary" id="fitBtn" disabled>Calcular função</button>
+      <div class="draw-result" id="drawResult"></div>
+      <p class="hint">Mínimo: 2 pontos (linear) ou 3 (quadrática).</p>
+    </aside>
+
+    <!-- DESAFIO -->
+    <aside class="control-panel" id="desafioPanel" style="display:none">
+      <p class="family-label" id="familyLabel">y = a·x + b</p>
+      <p class="hint">Curva <span style="color:var(--target)">laranja</span> = alvo. Ajuste até a <span style="color:var(--accent)">azul</span> ficar igual.</p>
+      <div class="param-rows" id="paramRows"></div>
+      <button class="btn-primary" id="checkBtn">Confirmar</button>
+      <button class="btn-secondary" id="nextBtn" style="display:none">Próxima rodada →</button>
+      <div class="result-panel" id="resultPanel"></div>
+      <div class="history" id="historyBlock" style="display:none">
+        <div class="history-title">Histórico</div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+    </aside>
+
+    <!-- ESTUDOS -->
+    <aside class="control-panel" id="estudosPanel" style="display:none">
+      <div class="estudos-nav">
+        <button class="estudos-nav-btn active" data-lesson="afim">Função afim</button>
+        <button class="estudos-nav-btn" data-lesson="quadratica">Função quadrática</button>
+      </div>
+
+      <!-- ===== AFIM ===== -->
+      <div class="lesson-card active" id="lesson-afim">
+        <h2>Função afim (reta)</h2>
+        <div class="formula-big">y = ax + b</div>
+
+        <p class="section-title">O que cada letra faz</p>
+        <div class="simple-list">
+          <div class="simple-item">
+            <div class="num">a</div>
+            <div class="txt"><b>Coeficiente angular</b> — inclinação da reta.<br>
+              a &gt; 0 sobe · a &lt; 0 desce · a = 0 horizontal<br>
+              Quanto maior |a|, mais íngreme.
+            </div>
+          </div>
+          <div class="simple-item">
+            <div class="num">b</div>
+            <div class="txt"><b>Coeficiente linear</b> — onde corta o eixo y (x = 0).<br>
+              Aumentar b sobe a reta · diminuir desce.
+            </div>
+          </div>
+        </div>
+
+        <p class="section-title">Fórmulas importantes</p>
+        <div class="formula-box">
+          Inclinação: <span class="hl">a = (y₂ − y₁) / (x₂ − x₁)</span><br>
+          Zero da função (corta o eixo x): <span class="hl">x = −b / a</span><br>
+          (desde que a ≠ 0)
+        </div>
+
+        <p class="section-title">Calculadora — digite a e b</p>
+        <div class="calc-box">
+          <div class="calc-row">
+            <label>a</label><input type="number" id="calcAfimA" value="2" step="0.5">
+            <label>b</label><input type="number" id="calcAfimB" value="-4" step="0.5">
+          </div>
+          <div class="calc-out" id="calcAfimOut"></div>
+        </div>
+
+        <p class="section-title">Veja no gráfico</p>
+        <div class="try-row">
+          <button class="try-chip" data-expr="x">y = x</button>
+          <button class="try-chip" data-expr="2*x">y = 2x</button>
+          <button class="try-chip" data-expr="-x">y = −x</button>
+          <button class="try-chip" data-expr="x+3">y = x + 3</button>
+          <button class="try-chip" data-expr="(1/2)*x-2">y = ½x − 2</button>
+          <button class="try-chip" data-expr="2*x-4">y = 2x − 4</button>
+        </div>
+
+        <div class="mini-tip">
+          <strong>Truque:</strong> a = quanto y muda quando x anda 1 unidade. Se a = 2, cada +1 em x sobe y em 2.
+        </div>
+      </div>
+
+      <!-- ===== QUADRÁTICA ===== -->
+      <div class="lesson-card" id="lesson-quadratica">
+        <h2>Função quadrática (parábola)</h2>
+        <div class="formula-big">y = ax² + bx + c</div>
+
+        <p class="section-title">O que cada letra faz</p>
+        <div class="simple-list">
+          <div class="simple-item">
+            <div class="num">a</div>
+            <div class="txt"><b>Abertura</b><br>
+              a &gt; 0 → ∪ (mínimo) · a &lt; 0 → ∩ (máximo)<br>
+              |a| grande = estreita · |a| pequeno = aberta
+            </div>
+          </div>
+          <div class="simple-item">
+            <div class="num">b</div>
+            <div class="txt"><b>Desloca o vértice</b> para a esquerda/direita (junto com a).</div>
+          </div>
+          <div class="simple-item">
+            <div class="num">c</div>
+            <div class="txt"><b>Intercepto y</b> — valor quando x = 0. Sobe ou desce a parábola.</div>
+          </div>
+        </div>
+
+        <p class="section-title">Todas as fórmulas</p>
+        <div class="formula-box">
+          Discriminante: <span class="hl">Δ = b² − 4ac</span><br>
+          Raízes (Bhaskara): <span class="hl">x = (−b ± √Δ) / (2a)</span><br>
+          &nbsp;&nbsp;→ <span class="hl">x₁</span> com − &nbsp;&nbsp; <span class="hl">x₂</span> com +<br>
+          Vértice: <span class="hl">x<sub>v</sub> = −b / (2a)</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">y<sub>v</sub> = −Δ / (4a)</span> &nbsp;ou&nbsp; y<sub>v</sub> = f(x<sub>v</sub>)<br>
+          Soma das raízes: <span class="hl">x₁ + x₂ = −b/a</span><br>
+          Produto das raízes: <span class="hl">x₁ · x₂ = c/a</span>
+        </div>
+
+        <p class="section-title">O que o Δ diz</p>
+        <div class="simple-list">
+          <div class="simple-item">
+            <div class="num" style="font-size:11px;">Δ&gt;0</div>
+            <div class="txt">Duas raízes reais diferentes — a parábola corta o eixo x em <b>dois pontos</b> (x₁ e x₂).</div>
+          </div>
+          <div class="simple-item">
+            <div class="num" style="font-size:11px;">Δ=0</div>
+            <div class="txt">Uma raiz real (raiz dupla) — toca o eixo x em <b>um ponto</b> (o vértice).</div>
+          </div>
+          <div class="simple-item">
+            <div class="num" style="font-size:11px;">Δ&lt;0</div>
+            <div class="txt">Nenhuma raiz real — <b>não corta</b> o eixo x.</div>
+          </div>
+        </div>
+
+        <p class="section-title">Calculadora — digite a, b, c</p>
+        <div class="calc-box">
+          <div class="calc-row">
+            <label>a</label><input type="number" id="calcQuadA" value="1" step="0.5">
+            <label>b</label><input type="number" id="calcQuadB" value="-5" step="0.5">
+            <label>c</label><input type="number" id="calcQuadC" value="6" step="0.5">
+          </div>
+          <div class="calc-out" id="calcQuadOut"></div>
+        </div>
+
+        <p class="section-title">Veja no gráfico</p>
+        <div class="try-row">
+          <button class="try-chip" data-expr="x²">y = x²</button>
+          <button class="try-chip" data-expr="-x²">y = −x²</button>
+          <button class="try-chip" data-expr="x²-4">y = x² − 4</button>
+          <button class="try-chip" data-expr="x²-5*x+6">y = x² − 5x + 6</button>
+          <button class="try-chip" data-expr="x²-2*x+1">y = x² − 2x + 1</button>
+          <button class="try-chip" data-expr="x²+1">y = x² + 1</button>
+          <button class="try-chip" data-expr="(1/2)*x²-2">y = ½x² − 2</button>
+        </div>
+
+        <div class="mini-tip">
+          <strong>Ordem para estudar:</strong> 1) olhe o sinal de a (abre para cima/baixo) → 2) calcule Δ → 3) ache x₁ e x₂ → 4) ache o vértice.
+        </div>
+      </div>
+    </aside>
+
+    <!-- BATTLE -->
+    <aside class="control-panel" id="battlePanel" style="display:none">
+      <p class="family-label" style="font-size:15px;">⚔ Graph Battle</p>
+      <p class="hint">Desenhe uma função que passe pelos inimigos (bolinhas vermelhas) para eliminá-los. Cada tiro gasta 1 munição.</p>
+      <div class="battle-level-info" id="battleLevelInfo">Nível <b>1</b> — elimine todos os inimigos!</div>
+      <div class="battle-hint" id="battleHint">💡 Dica: observe as coordenadas dos inimigos.</div>
+      <button class="btn-secondary" id="battleHintBtn" type="button">💡 Mostrar dica</button>
+      <label for="battleFormulaInput">f(x) =</label>
+      <input type="text" id="battleFormulaInput" value="" placeholder="ex: 2*x+1 ou x^2-4" autocomplete="off" spellcheck="false" autocapitalize="off">
+      <div class="error-banner" id="battleFormulaError">⚠ <span id="battleFormulaErrorText"></span></div>
+      <div class="battle-presets" id="battlePresets"></div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <span style="font-size:12px; color:var(--text-muted);">Munição:</span>
+        <div class="battle-ammo" id="battleAmmo"></div>
+      </div>
+      <button class="btn-primary" id="battleFireBtn">Disparar função ⚡</button>
+      <button class="btn-secondary" id="battleNextLevelBtn" style="display:none">Próximo nível →</button>
+      <button class="btn-secondary" id="battleRestartLevelBtn">Reiniciar nível</button>
+      <div class="battle-msg" id="battleMsg">Digite uma função e dispare para eliminar os inimigos.</div>
+    </aside>
+
+    <!-- SETTINGS -->
+    <aside class="control-panel" id="settingsPanel" style="display:none">
+      <div class="settings-section">
+        <h2>Configurações</h2>
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-name">Aparência</span>
+            <span class="setting-desc">Tema escuro ou claro</span>
+          </div>
+          <div class="toggle-group" id="themeToggle">
+            <button type="button" class="toggle-btn active" data-theme="dark">Dark</button>
+            <button type="button" class="toggle-btn" data-theme="light">Light</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-name">Marcadores de raiz</span>
+            <span class="setting-desc">Pontos verdes onde a função corta o eixo x</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="showRootsToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-name">Leitura do cursor</span>
+            <span class="setting-desc">Mostrar x, y e f(x) no canto do gráfico</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="showCursorToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="hint" style="margin-top:8px;">As preferências são salvas neste navegador.</p>
+      </div>
+    </aside>
+
+  </main>
+</div>
+
+<div class="summary-overlay" id="summaryOverlay" style="display:none">
+  <div class="summary-card">
+    <h2>Sessão concluída</h2>
+    <p id="summaryScore">0 / 500</p>
+    <p id="summaryRank">Rank</p>
+    <div class="summary-history" id="summaryHistory"></div>
+    <button id="restartBtn">Jogar novamente</button>
+  </div>
+</div>
+
+
+<div class="summary-overlay" id="battleGameOver" style="display:none">
+  <div class="summary-card">
+    <h2 id="battleGameOverTitle">Game Over</h2>
+    <p style="font-size:28px;font-weight:800;color:var(--accent);margin:0;font-family:var(--mono)"><span id="battleFinalScore">0</span> pts</p>
+    <p id="battleFinalRank" style="color:var(--text-muted);font-size:13px;margin:6px 0 16px">Rank</p>
+    <button id="battleRestartBtn">Jogar novamente</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ==================== SETTINGS STATE ==================== */
+  let showRootMarkers = true;
+  let showCursorReadout = true;
+
+  function loadSettings(){
+    try{
+      const theme = localStorage.getItem('fnlab-theme') || 'dark';
+      applyTheme(theme);
+      showRootMarkers = localStorage.getItem('fnlab-roots') !== '0';
+      showCursorReadout = localStorage.getItem('fnlab-cursor') !== '0';
+      const rootsEl = document.getElementById('showRootsToggle');
+      const cursorEl = document.getElementById('showCursorToggle');
+      if(rootsEl) rootsEl.checked = showRootMarkers;
+      if(cursorEl) cursorEl.checked = showCursorReadout;
+      document.getElementById('cursorReadout').style.display = showCursorReadout ? '' : 'none';
+    }catch(e){}
+  }
+
+  function applyTheme(theme){
+    if(theme === 'light') document.body.classList.add('light');
+    else document.body.classList.remove('light');
+    document.querySelectorAll('#themeToggle .toggle-btn').forEach(b=>{
+      b.classList.toggle('active', b.dataset.theme === theme);
+    });
+    try{ localStorage.setItem('fnlab-theme', theme); }catch(e){}
+  }
+
+
+  /* ==================== NORMALIZAÇÃO DE ENTRADA ==================== */
+  const KNOWN_FUNCS = ['sin','cos','tan','sqrt','abs','exp','ln','log','asin','acos','atan'];
+
+  function normalizeExpr(str){
+    let s = str || '';
+    // unicode superscripts → ^n
+    s = s.replace(/²/g, '^2').replace(/³/g, '^3').replace(/¹/g, '^1').replace(/⁰/g, '^0');
+    s = s.replace(/⁴/g, '^4').replace(/⁵/g, '^5').replace(/⁶/g, '^6');
+    s = s.replace(/⁷/g, '^7').replace(/⁸/g, '^8').replace(/⁹/g, '^9');
+    // vulgar fractions
+    s = s.replace(/½/g, '(1/2)').replace(/⅓/g, '(1/3)').replace(/⅔/g, '(2/3)');
+    s = s.replace(/¼/g, '(1/4)').replace(/¾/g, '(3/4)').replace(/⅕/g, '(1/5)');
+    s = s.replace(/⅖/g, '(2/5)').replace(/⅗/g, '(3/5)').replace(/⅘/g, '(4/5)');
+    s = s.replace(/⅙/g, '(1/6)').replace(/⅚/g, '(5/6)').replace(/⅛/g, '(1/8)');
+    s = s.replace(/⅜/g, '(3/8)').replace(/⅝/g, '(5/8)').replace(/⅞/g, '(7/8)');
+    // common minus/times signs
+    s = s.replace(/−/g, '-').replace(/×/g, '*').replace(/·/g, '*');
+    // implicit multiplication: 2x → 2*x, 2( → 2*(, )x → )*x, )( → )*(
+    s = s.replace(/(\d)\s*([a-zA-Z(])/g, '$1*$2');
+    s = s.replace(/(\))\s*([a-zA-Z(\d])/g, '$1*$2');
+    // x( → x*(  BUT keep sin(, cos(, sqrt( etc. as function calls
+    s = s.replace(/([a-zA-Z]+)\s*\(/g, function(match, name){
+      const lower = name.toLowerCase();
+      if(KNOWN_FUNCS.indexOf(lower) >= 0) return name + '(';
+      return name + '*(';
+    });
+    return s;
+  }
+
+  /* ==================== PARSER ==================== */
+  function tokenize(str){
+    const tokens=[];
+    const s=str.replace(/\s+/g,'');
+    let i=0;
+    while(i<s.length){
+      const c=s[i];
+      if(/[0-9.]/.test(c)){
+        let j=i; while(j<s.length && /[0-9.]/.test(s[j])) j++;
+        const val=parseFloat(s.slice(i,j));
+        if(isNaN(val)) throw new Error('Número inválido');
+        tokens.push({type:'num', value:val}); i=j;
+      } else if(/[a-zA-Z]/.test(c)){
+        let j=i; while(j<s.length && /[a-zA-Z]/.test(s[j])) j++;
+        tokens.push({type:'ident', value:s.slice(i,j)}); i=j;
+      } else if('+-*/^()'.includes(c)){
+        tokens.push({type:'op', value:c}); i++;
+      } else {
+        throw new Error('Caractere inválido: "'+c+'"');
+      }
+    }
+    return tokens;
+  }
+
+  const FUNCS=['sin','cos','tan','sqrt','abs','exp','ln','log','asin','acos','atan'];
+
+  function parseExpr(tokens){
+    let pos=0;
+    const peek=()=>tokens[pos];
+    const next=()=>tokens[pos++];
+    function canStartFactor(tok){
+      if(!tok) return false;
+      return tok.type==='num' || tok.type==='ident' || (tok.type==='op' && tok.value==='(');
+    }
+    function parseExpression(){
+      let node=parseTerm();
+      while(peek() && peek().type==='op' && (peek().value==='+'||peek().value==='-')){
+        const op=next().value;
+        node={type:'bin', op, left:node, right:parseTerm()};
+      }
+      return node;
+    }
+    function parseTerm(){
+      let node=parseUnary();
+      while(peek() && ((peek().type==='op' && (peek().value==='*'||peek().value==='/')) || canStartFactor(peek()))){
+        let op='*';
+        if(peek().type==='op' && (peek().value==='*'||peek().value==='/')) op=next().value;
+        node={type:'bin', op, left:node, right:parseUnary()};
+      }
+      return node;
+    }
+    function parseUnary(){
+      if(peek() && peek().type==='op' && (peek().value==='-'||peek().value==='+')){
+        const op=next().value;
+        return {type:'unary', op, value:parseUnary()};
+      }
+      return parsePower();
+    }
+    function parsePower(){
+      let node=parseFactor();
+      if(peek() && peek().type==='op' && peek().value==='^'){
+        next();
+        node={type:'bin', op:'^', left:node, right:parseUnary()};
+      }
+      return node;
+    }
+    function parseFactor(){
+      const tok=peek();
+      if(!tok) throw new Error('Expressão incompleta');
+      if(tok.type==='num'){ next(); return {type:'num', value:tok.value}; }
+      if(tok.type==='op' && tok.value==='('){
+        next();
+        const node=parseExpression();
+        if(!(peek() && peek().type==='op' && peek().value===')')) throw new Error('Parêntese não fechado');
+        next();
+        return node;
+      }
+      if(tok.type==='ident'){
+        const name=tok.value.toLowerCase();
+        next();
+        if(FUNCS.includes(name)){
+          if(!(peek() && peek().type==='op' && peek().value==='(')) throw new Error('Use parênteses após '+name+'(...)');
+          next();
+          const arg=parseExpression();
+          if(!(peek() && peek().type==='op' && peek().value===')')) throw new Error('Parêntese não fechado em '+name);
+          next();
+          return {type:'call', name, arg};
+        }
+        if(name==='pi') return {type:'num', value:Math.PI};
+        if(name==='e') return {type:'num', value:Math.E};
+        if(name==='x') return {type:'var'};
+        throw new Error('Identificador desconhecido: '+name);
+      }
+      throw new Error('Token inesperado');
+    }
+    const ast=parseExpression();
+    if(pos<tokens.length) throw new Error('Caracteres extras na expressão');
+    return ast;
+  }
+
+  function evalNode(node,x){
+    switch(node.type){
+      case 'num': return node.value;
+      case 'var': return x;
+      case 'unary': { const v=evalNode(node.value,x); return node.op==='-'?-v:v; }
+      case 'bin': {
+        const l=evalNode(node.left,x), r=evalNode(node.right,x);
+        switch(node.op){ case '+': return l+r; case '-': return l-r; case '*': return l*r; case '/': return l/r; case '^': return Math.pow(l,r); }
+        break;
+      }
+      case 'call': {
+        const a=evalNode(node.arg,x);
+        switch(node.name){
+          case 'sin': return Math.sin(a); case 'cos': return Math.cos(a); case 'tan': return Math.tan(a);
+          case 'sqrt': return Math.sqrt(a); case 'abs': return Math.abs(a); case 'exp': return Math.exp(a);
+          case 'ln': return Math.log(a); case 'log': return Math.log10(a);
+          case 'asin': return Math.asin(a); case 'acos': return Math.acos(a); case 'atan': return Math.atan(a);
+        }
+      }
+    }
+  }
+
+  function compileFunction(exprStr){
+    const norm = normalizeExpr(exprStr);
+    const ast=parseExpr(tokenize(norm));
+    return function(x){ return evalNode(ast,x); };
+  }
+
+  /* ==================== FORMATAÇÃO ==================== */
+  function fmtNum(n){
+    if(!isFinite(n)) return '—';
+    const r=Math.round(n*1000)/1000;
+    return (Math.abs(r)<1e-9?0:r).toString();
+  }
+
+  function prettyCoeff(n){
+    // tenta fração simples
+    const frac = toPrettyFraction(n);
+    if(frac) return frac;
+    return fmtNum(n);
+  }
+
+  function toPrettyFraction(n, maxDen){
+    maxDen = maxDen || 24;
+    if(!isFinite(n)) return null;
+    const sign = n<0 ? '-' : '';
+    const a = Math.abs(n);
+    if(Math.abs(a-Math.round(a))<1e-9) return sign + Math.round(a);
+    for(let den=2; den<=maxDen; den++){
+      const num = Math.round(a*den);
+      if(Math.abs(a - num/den)<1e-6){
+        // simplify
+        const g = gcd(num, den);
+        return sign + (num/g) + '/' + (den/g);
+      }
+    }
+    return null;
+  }
+  function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=b; b=a%b; a=t; } return a||1; }
+
+  function formatPoly(a,b,c){
+    // ax²+bx+c
+    const parts=[];
+    if(Math.abs(a)>1e-9){
+      const ca = Math.abs(a-1)<1e-9 ? '' : Math.abs(a+1)<1e-9 ? '-' : prettyCoeff(a);
+      parts.push(ca+'x²');
+    }
+    if(Math.abs(b)>1e-9){
+      const sign = parts.length ? (b>=0?' + ':' − ') : (b<0?'-':'');
+      const cb = Math.abs(Math.abs(b)-1)<1e-9 ? '' : prettyCoeff(Math.abs(b));
+      parts.push(sign+cb+'x');
+    }
+    if(Math.abs(c)>1e-9 || !parts.length){
+      const sign = parts.length ? (c>=0?' + ':' − ') : (c<0?'-':'');
+      parts.push(sign+prettyCoeff(Math.abs(c)));
+    }
+    return parts.join('');
+  }
+
+  function formatLinear(a,b){
+    let s='';
+    if(Math.abs(a)<1e-9) return prettyCoeff(b);
+    const ca = Math.abs(a-1)<1e-9 ? '' : Math.abs(a+1)<1e-9 ? '-' : prettyCoeff(a);
+    s = ca+'x';
+    if(Math.abs(b)>1e-9) s += (b>=0?' + ':' − ') + prettyCoeff(Math.abs(b));
+    return s;
+  }
+
+  /* ==================== ANÁLISE DA FUNÇÃO ==================== */
+  function analyzeFunction(exprStr, fn){
+    const s = normalizeExpr(exprStr||'').replace(/\s+/g,'').toLowerCase();
+    const facts = [];
+    let type = 'Função geral';
+    let desc = 'Esta expressão define y em função de x.';
+    let tip = '';
+    let rootsHtml = '';
+
+    const hasSin = /sin\(|cos\(|tan\(/.test(s);
+    const hasExp = /exp\(|\^x|e\^/.test(s);
+    const hasSqrt = /sqrt\(/.test(s);
+    const hasAbs = /abs\(/.test(s);
+    const hasLog = /ln\(|log\(/.test(s);
+    const hasX2 = /x\^2|x\*x/.test(s);
+    const hasX3 = /x\^3/.test(s);
+    const hasX = /x/.test(s);
+    const onlyConst = !hasX && !hasSin && !hasExp && !hasSqrt && !hasAbs && !hasLog;
+
+    if(onlyConst){
+      type = 'Função constante';
+      desc = 'y não muda com x — reta horizontal.';
+      tip = 'Caso especial da afim com a = 0.';
+    } else if(hasSin && !hasX2){
+      type = 'Função trigonométrica';
+      desc = 'Onda periódica. Repete o mesmo padrão.';
+      tip = 'Amplitude = altura; coeficiente de x = frequência.';
+    } else if(hasExp){
+      type = 'Função exponencial';
+      desc = 'Cresce ou decresce de forma acelerada.';
+      tip = 'Compare com uma reta: a exponencial muda cada vez mais rápido.';
+    } else if(hasLog){
+      type = 'Função logarítmica';
+      desc = 'Inversa da exponencial. Cresce devagar.';
+      tip = 'Domínio: argumento do log > 0.';
+    } else if(hasAbs){
+      type = 'Função modular';
+      desc = 'Gráfico em V. Parte negativa vira para cima.';
+      tip = 'abs(x) = x se x ≥ 0, e −x se x < 0.';
+    } else if(hasSqrt){
+      type = 'Função raiz';
+      desc = 'Só existe para o interior ≥ 0. Cresce cada vez mais devagar.';
+      tip = 'Domínio: o que está dentro da raiz ≥ 0.';
+    } else if(hasX3){
+      type = 'Função cúbica';
+      desc = 'Polinômio de grau 3.';
+      tip = 'Pode ter até duas mudanças de concavidade.';
+    } else if(hasX2){
+      type = 'Função quadrática (parábola)';
+      desc = 'Polinômio de grau 2. O gráfico é uma parábola.';
+      try{
+        const y0 = fn(0), y1 = fn(1), ym1 = fn(-1);
+        const c = y0;
+        const a = ((y1 + ym1)/2) - c;
+        const b = (y1 - ym1)/2;
+        // verificar se é realmente quadrática amostrando outro ponto
+        const y2 = fn(2), pred2 = a*4 + b*2 + c;
+        if(Math.abs(y2-pred2)>1e-4){
+          // pode ter termos extras; ainda mostra aproximação
+        }
+        facts.push('Forma: <b>y = '+formatPoly(a,b,c)+'</b>');
+
+        if(Math.abs(a)>1e-9){
+          const delta = b*b - 4*a*c;
+          const xv = -b/(2*a);
+          const yv = fn(xv);
+          facts.push('Discriminante <b>Δ = '+prettyCoeff(delta)+'</b>');
+          facts.push('Vértice: <b>('+fmtNum(xv)+', '+fmtNum(yv)+')</b>');
+          facts.push(a>0
+            ? 'Abre para <b>cima</b> (mínimo no vértice)'
+            : 'Abre para <b>baixo</b> (máximo no vértice)');
+          facts.push('Corta o eixo y em <b>(0, '+fmtNum(c)+')</b>');
+
+          // raízes x1, x2
+          if(delta > 1e-9){
+            const sq = Math.sqrt(delta);
+            const x1 = (-b - sq)/(2*a);
+            const x2 = (-b + sq)/(2*a);
+            const lo = Math.min(x1,x2), hi = Math.max(x1,x2);
+            facts.push('Raízes: <b>x₁ = '+fmtNum(lo)+'</b> e <b>x₂ = '+fmtNum(hi)+'</b>');
+            rootsHtml = '<div class="root-pills">'+
+              '<span class="root-pill">x₁ = '+fmtNum(lo)+'</span>'+
+              '<span class="root-pill">x₂ = '+fmtNum(hi)+'</span>'+
+              '<span class="root-pill">Δ &gt; 0 → 2 raízes</span></div>';
+          } else if(Math.abs(delta)<=1e-9){
+            const x1 = -b/(2*a);
+            facts.push('Raiz dupla: <b>x₁ = x₂ = '+fmtNum(x1)+'</b>');
+            rootsHtml = '<div class="root-pills">'+
+              '<span class="root-pill one">x₁ = x₂ = '+fmtNum(x1)+'</span>'+
+              '<span class="root-pill one">Δ = 0 → 1 raiz</span></div>';
+          } else {
+            facts.push('Sem raízes reais (não corta o eixo x)');
+            rootsHtml = '<div class="root-pills">'+
+              '<span class="root-pill none">sem x₁, x₂ reais</span>'+
+              '<span class="root-pill none">Δ &lt; 0</span></div>';
+          }
+        }
+      }catch(e){}
+      tip = 'Fórmulas: Δ = b²−4ac · x = (−b±√Δ)/(2a) · xᵥ = −b/(2a). Veja tudo na aba Estudos.';
+    } else if(hasX){
+      try{
+        const y0 = fn(0), y1 = fn(1);
+        const b = y0, a = y1 - y0;
+        const y2 = fn(2), pred2 = a*2+b;
+        const linear = Math.abs(y2-pred2)<1e-6;
+        if(linear){
+          type = 'Função afim (reta)';
+          desc = 'O gráfico é uma reta. Forma: y = ax + b.';
+          facts.push('Forma: <b>y = '+formatLinear(a,b)+'</b>');
+          facts.push('Inclinação <b>a = '+prettyCoeff(a)+'</b>'+(a>0?' (sobe)':a<0?' (desce)':' (horizontal)'));
+          facts.push('Corta o eixo y em <b>(0, '+fmtNum(b)+')</b>');
+          if(Math.abs(a)>1e-9){
+            const xz = -b/a;
+            facts.push('Zero (corta o eixo x): <b>x = '+fmtNum(xz)+'</b>');
+            rootsHtml = '<div class="root-pills"><span class="root-pill">x = '+fmtNum(xz)+' (raiz)</span></div>';
+          } else {
+            facts.push(Math.abs(b)<1e-9 ? 'É a reta y = 0 (eixo x)' : 'Nunca corta o eixo x (paralela)');
+          }
+          tip = 'a = Δy/Δx. Zero: x = −b/a.';
+        } else {
+          type = 'Função em x';
+          desc = 'Não é só uma reta. Explore o gráfico.';
+          tip = 'Na aba Estudos você revisa afim e quadrática.';
+        }
+      }catch(e){
+        type = 'Função em x';
+        desc = 'Depende de x.';
+      }
+    }
+
+    try{
+      const samples = [-2,-1,0,1,2].map(x=>{
+        let y; try{ y=fn(x);}catch(e){y=NaN;}
+        return isFinite(y) ? 'f('+x+')='+fmtNum(y) : null;
+      }).filter(Boolean);
+      if(samples.length && facts.length<6){
+        facts.push('Valores: '+samples.slice(0,5).map(s=>'<b>'+s+'</b>').join(' · '));
+      }
+    }catch(e){}
+
+    return {type, desc, facts, tip, rootsHtml};
+  }
+
+  /* ==================== CANVAS ==================== */
+  const canvas=document.getElementById('canvas');
+  const ctx=canvas.getContext('2d');
+  const scopeEl=document.getElementById('scope');
+  const cursorReadout=document.getElementById('cursorReadout');
+
+  let W=0,H=0,DPR=1;
+  function resizeCanvas(){
+    const rect=scopeEl.getBoundingClientRect();
+    DPR=window.devicePixelRatio||1;
+    W=rect.width; H=rect.height;
+    canvas.width=Math.round(W*DPR); canvas.height=Math.round(H*DPR);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    render();
+  }
+  new ResizeObserver(resizeCanvas).observe(scopeEl);
+
+  function niceStep(range, targetPx, sizePx){
+    const roughStep=range/(sizePx/targetPx);
+    const mag=Math.pow(10,Math.floor(Math.log10(roughStep||1)));
+    const norm=roughStep/mag;
+    let step;
+    if(norm<1.5) step=1; else if(norm<3.5) step=2; else if(norm<7.5) step=5; else step=10;
+    return step*mag;
+  }
+
+  function squareFit(xmin,xmax,ymin,ymax){
+    const xRange=xmax-xmin, yRange=ymax-ymin;
+    const idealYRange = xRange*(H/W);
+    if(idealYRange >= yRange - 1e-9){
+      const cy=(ymin+ymax)/2;
+      return {xmin,xmax,ymin:cy-idealYRange/2,ymax:cy+idealYRange/2};
+    } else {
+      const idealXRange = yRange*(W/H);
+      const cx=(xmin+xmax)/2;
+      return {xmin:cx-idealXRange/2,xmax:cx+idealXRange/2,ymin,ymax};
+    }
+  }
+
+  function drawGrid(view){
+    ctx.clearRect(0,0,W,H);
+    const {xmin,xmax,ymin,ymax}=view;
+    const toPx=x=>(x-xmin)/(xmax-xmin)*W;
+    const toPy=y=>H-(y-ymin)/(ymax-ymin)*H;
+    const step=niceStep(xmax-xmin,58,W);
+
+    ctx.lineWidth=1;
+    ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--grid-minor').trim();
+    ctx.beginPath();
+    for(let x=Math.ceil(xmin/step)*step; x<=xmax; x+=step){
+      const px=Math.round(toPx(x))+.5; ctx.moveTo(px,0); ctx.lineTo(px,H);
+    }
+    for(let y=Math.ceil(ymin/step)*step; y<=ymax; y+=step){
+      const py=Math.round(toPy(y))+.5; ctx.moveTo(0,py); ctx.lineTo(W,py);
+    }
+    ctx.stroke();
+
+    ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--grid-major').trim();
+    ctx.lineWidth=1.4;
+    ctx.beginPath();
+    if(xmin<0 && xmax>0){ const px=Math.round(toPx(0))+.5; ctx.moveTo(px,0); ctx.lineTo(px,H); }
+    if(ymin<0 && ymax>0){ const py=Math.round(toPy(0))+.5; ctx.moveTo(0,py); ctx.lineTo(W,py); }
+    ctx.stroke();
+
+    ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--tick-text').trim();
+    ctx.font='10.5px '+getComputedStyle(document.body).fontFamily;
+    const yAxisPx = (xmin<0 && xmax>0) ? toPx(0) : 2;
+    const xAxisPy = (ymin<0 && ymax>0) ? toPy(0) : H-3;
+    for(let x=Math.ceil(xmin/step)*step; x<=xmax; x+=step){
+      if(Math.abs(x)<step/1000) continue;
+      ctx.fillText(fmtNum(x), toPx(x)+3, Math.min(H-3, Math.max(10,xAxisPy-3)));
+    }
+    for(let y=Math.ceil(ymin/step)*step; y<=ymax; y+=step){
+      if(Math.abs(y)<step/1000) continue;
+      ctx.fillText(fmtNum(y), Math.min(W-26, Math.max(2,yAxisPx+3)), toPy(y)-3);
+    }
+  }
+
+  function drawCurve(fn, view, color, opts){
+    opts=opts||{};
+    const {xmin,xmax,ymin,ymax}=view;
+    const toPx=x=>(x-xmin)/(xmax-xmin)*W;
+    const toPy=y=>H-(y-ymin)/(ymax-ymin)*H;
+    const yPad=(ymax-ymin);
+
+    ctx.save();
+    ctx.strokeStyle=color;
+    ctx.lineWidth=opts.lineWidth||2.2;
+    if(opts.dashed) ctx.setLineDash([6,5]);
+
+    ctx.beginPath();
+    let started=false;
+    let prevPy=null;
+    for(let px=0; px<=W; px+=1){
+      const x=xmin+(px/W)*(xmax-xmin);
+      let y;
+      try{ y=fn(x); }catch(e){ y=NaN; }
+      const valid=isFinite(y) && y>ymin-yPad*3 && y<ymax+yPad*3;
+      if(!valid){ started=false; prevPy=null; continue; }
+      const py=toPy(y);
+      if(prevPy!==null && Math.abs(py-prevPy)>H*0.9){ started=false; }
+      if(!started){ ctx.moveTo(px,py); started=true; } else { ctx.lineTo(px,py); }
+      prevPy=py;
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawPoints(pts, view){
+    const {xmin,xmax,ymin,ymax}=view;
+    const toPx=x=>(x-xmin)/(xmax-xmin)*W;
+    const toPy=y=>H-(y-ymin)/(ymax-ymin)*H;
+    ctx.save();
+    pts.forEach(p=>{
+      const px=toPx(p.x), py=toPy(p.y);
+      ctx.beginPath();
+      ctx.arc(px,py,5,0,Math.PI*2);
+      ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--target').trim();
+      ctx.fill();
+      ctx.strokeStyle='#0e1116';
+      ctx.lineWidth=1.5;
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  function drawRootMarkers(roots, view){
+    if(!showRootMarkers || !roots || !roots.length) return;
+    const {xmin,xmax,ymin,ymax}=view;
+    const toPx=x=>(x-xmin)/(xmax-xmin)*W;
+    const toPy=y=>H-(y-ymin)/(ymax-ymin)*H;
+    ctx.save();
+    roots.forEach(x=>{
+      if(x<xmin||x>xmax) return;
+      const px=toPx(x), py=toPy(0);
+      ctx.beginPath();
+      ctx.arc(px,py,6,0,Math.PI*2);
+      ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--success').trim();
+      ctx.fill();
+      ctx.strokeStyle='#0e1116';
+      ctx.lineWidth=1.5;
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  function drawEnemies(enemies, view){
+    if(!enemies) return;
+    const {xmin,xmax,ymin,ymax}=view;
+    const toPx=x=>(x-xmin)/(xmax-xmin)*W;
+    const toPy=y=>H-(y-ymin)/(ymax-ymin)*H;
+    ctx.save();
+    enemies.forEach(e=>{
+      if(e.dead) return;
+      const px=toPx(e.x), py=toPy(e.y);
+      ctx.beginPath();
+      ctx.arc(px,py,12,0,Math.PI*2);
+      ctx.fillStyle='rgba(248,113,113,0.25)';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(px,py,8,0,Math.PI*2);
+      ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--danger').trim()||'#f87171';
+      ctx.fill();
+      ctx.strokeStyle='#0e1116';
+      ctx.lineWidth=1.5;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(px-2,py-2,2,0,Math.PI*2);
+      ctx.fillStyle='#fff';
+      ctx.fill();
+    });
+    ctx.restore();
+  }
+
+
+  /* ==================== ESTADO ==================== */
+  let mode='livre';
+  let livreView={xmin:-6,xmax:6,ycenter:0};
+  let livreFn=null, livreErr=null;
+  let currentRoots=[];
+
+  function livreBounds(){
+    const xRange=livreView.xmax-livreView.xmin;
+    const yRange = W>0 ? xRange*(H/W) : xRange;
+    return {
+      xmin:livreView.xmin, xmax:livreView.xmax,
+      ymin:livreView.ycenter-yRange/2, ymax:livreView.ycenter+yRange/2
+    };
+  }
+
+  /* ==================== DESENHAR ==================== */
+  let drawPointsList = [];
+  let fitType = 'linear';
+  let fittedFn = null;
+
+  function updatePointCount(){
+    document.getElementById('pointCount').textContent = drawPointsList.length + ' ponto' + (drawPointsList.length!==1?'s':'');
+    const minPts = fitType==='linear' ? 2 : 3;
+    document.getElementById('fitBtn').disabled = drawPointsList.length < minPts;
+  }
+
+  function fitLinear(pts){
+    const n = pts.length;
+    let sx=0, sy=0, sxx=0, sxy=0;
+    pts.forEach(p=>{ sx+=p.x; sy+=p.y; sxx+=p.x*p.x; sxy+=p.x*p.y; });
+    const den = n*sxx - sx*sx;
+    if(Math.abs(den)<1e-12) return null;
+    const a = (n*sxy - sx*sy)/den;
+    const b = (sy - a*sx)/n;
+    let ssTot=0, ssRes=0;
+    const meanY = sy/n;
+    pts.forEach(p=>{
+      const pred = a*p.x + b;
+      ssRes += (p.y-pred)*(p.y-pred);
+      ssTot += (p.y-meanY)*(p.y-meanY);
+    });
+    const r2 = ssTot<1e-12 ? 1 : Math.max(0, 1 - ssRes/ssTot);
+    return {a, b, r2, fn: x => a*x + b};
+  }
+
+  function fitQuadratic(pts){
+    const n = pts.length;
+    let s1=0,sx=0,sx2=0,sx3=0,sx4=0,sy=0,sxy=0,sx2y=0;
+    pts.forEach(p=>{
+      const x=p.x, y=p.y, x2=x*x;
+      s1++; sx+=x; sx2+=x2; sx3+=x2*x; sx4+=x2*x2;
+      sy+=y; sxy+=x*y; sx2y+=x2*y;
+    });
+    function det3(a11,a12,a13,a21,a22,a23,a31,a32,a33){
+      return a11*(a22*a33-a23*a32)-a12*(a21*a33-a23*a31)+a13*(a21*a32-a22*a31);
+    }
+    const D = det3(sx4,sx3,sx2, sx3,sx2,sx, sx2,sx,s1);
+    if(Math.abs(D)<1e-14) return null;
+    const Da = det3(sx2y,sx3,sx2, sxy,sx2,sx, sy,sx,s1);
+    const Db = det3(sx4,sx2y,sx2, sx3,sxy,sx, sx2,sy,s1);
+    const Dc = det3(sx4,sx3,sx2y, sx3,sx2,sxy, sx2,sx,sy);
+    const a=Da/D, b=Db/D, c=Dc/D;
+    let ssTot=0, ssRes=0;
+    const meanY = sy/n;
+    pts.forEach(p=>{
+      const pred = a*p.x*p.x + b*p.x + c;
+      ssRes += (p.y-pred)*(p.y-pred);
+      ssTot += (p.y-meanY)*(p.y-meanY);
+    });
+    const r2 = ssTot<1e-12 ? 1 : Math.max(0, 1 - ssRes/ssTot);
+    return {a, b, c, r2, fn: x => a*x*x + b*x + c};
+  }
+
+  function runFit(){
+    const minPts = fitType==='linear' ? 2 : 3;
+    if(drawPointsList.length < minPts) return;
+    const info = fitType==='linear' ? fitLinear(drawPointsList) : fitQuadratic(drawPointsList);
+    const box = document.getElementById('drawResult');
+    if(!info){
+      box.innerHTML = '<div class="fit-explain">Não foi possível ajustar. Tente outros pontos.</div>';
+      box.classList.add('show');
+      fittedFn=null; render(); return;
+    }
+    fittedFn = info.fn;
+    const formula = fitType==='linear' ? 'y = '+formatLinear(info.a,info.b) : 'y = '+formatPoly(info.a,info.b,info.c);
+    const pct = Math.round(info.r2*100);
+    let quality = pct>=95 ? 'Ajuste excelente' : pct>=80 ? 'Bom ajuste' : pct>=60 ? 'Ajuste razoável' : 'Ajuste fraco';
+    let explain = '';
+    if(fitType==='linear'){
+      explain = '<b>a = '+prettyCoeff(info.a)+'</b> (inclinação). <b>b = '+prettyCoeff(info.b)+'</b> (intercepto y).';
+      if(Math.abs(info.a)>1e-9){
+        const xz=-info.b/info.a;
+        explain += ' Zero: <b>x = '+fmtNum(xz)+'</b>.';
+      }
+    } else {
+      const delta = info.b*info.b - 4*info.a*info.c;
+      explain = '<b>a = '+prettyCoeff(info.a)+'</b>, <b>b = '+prettyCoeff(info.b)+'</b>, <b>c = '+prettyCoeff(info.c)+'</b>. ';
+      explain += 'Δ = <b>'+prettyCoeff(delta)+'</b>. ';
+      if(delta>1e-9 && Math.abs(info.a)>1e-9){
+        const sq=Math.sqrt(delta);
+        const x1=(-info.b-sq)/(2*info.a), x2=(-info.b+sq)/(2*info.a);
+        explain += 'Raízes: <b>x₁ = '+fmtNum(Math.min(x1,x2))+'</b>, <b>x₂ = '+fmtNum(Math.max(x1,x2))+'</b>.';
+      } else if(Math.abs(delta)<=1e-9 && Math.abs(info.a)>1e-9){
+        explain += 'Raiz dupla: <b>x = '+fmtNum(-info.b/(2*info.a))+'</b>.';
+      } else {
+        explain += 'Sem raízes reais.';
+      }
+    }
+    box.innerHTML =
+      '<div class="fit-formula">'+formula+'</div>'+
+      '<div class="fit-quality">'+quality+' (R² = '+pct+'%)</div>'+
+      '<div class="fit-explain">'+explain+'</div>';
+    box.classList.add('show');
+    render();
+  }
+
+
+  /* ==================== BATTLE ==================== */
+  const HIT_TOLERANCE = 0.55;
+  const MAX_AMMO = 5;
+  let battleLevel = 1;
+  let battleScore = 0;
+  let battleLives = 3;
+  let battleAmmo = MAX_AMMO;
+  let battleEnemies = [];
+  let battleFn = null;
+  let battleView = {xmin:-8, xmax:8, ycenter:0};
+  let battleWonLevel = false;
+
+  function battleBounds(){
+    const xRange = battleView.xmax - battleView.xmin;
+    const yRange = W>0 ? xRange*(H/W) : xRange;
+    return {
+      xmin: battleView.xmin, xmax: battleView.xmax,
+      ymin: battleView.ycenter - yRange/2, ymax: battleView.ycenter + yRange/2
+    };
+  }
+
+  // Battle procedural: cada fase sorteia uma função simples e coloca os inimigos
+  // exatamente sobre ela. O gerador evita números gigantes e repetições recentes.
+  let currentBattleChallenge = null;
+  let recentBattleKeys = [];
+
+  function randChoice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+  function makeLinearChallenge(){
+    const slopes = [-2,-1,-0.5,0.5,1,2];
+    const a = randChoice(slopes);
+    const b = randInt(-3,3);
+    const expr = (a===1?'x':a===-1?'-x':a+'*x') + (b>0?'+'+b:b<0?String(b):'');
+    return {
+      type:'linear', expr,
+      key:'L:'+a+':'+b,
+      label:'reta',
+      hint: a>0
+        ? 'É uma reta crescente. Veja quanto y muda quando x aumenta 1 e depois descubra onde ela corta o eixo y.'
+        : 'É uma reta decrescente. Veja quanto y muda quando x aumenta 1 e depois descubra onde ela corta o eixo y.'
+    };
+  }
+
+  function makeQuadraticChallenge(){
+    // Forma y = a(x-h)^2 + k, com parâmetros pequenos e fáceis de enxergar.
+    const a = randChoice([-1,1]);
+    const h = randInt(-2,2);
+    const k = randInt(-3,2);
+    let base;
+    if(h===0) base='x^2';
+    else if(h>0) base='(x-'+h+')^2';
+    else base='(x+'+Math.abs(h)+')^2';
+    let expr = (a===-1?'-':'') + base + (k>0?'+'+k:k<0?String(k):'');
+    return {
+      type:'quadratic', expr,
+      key:'Q:'+a+':'+h+':'+k,
+      label:'parábola',
+      hint:'É uma parábola. Ache primeiro o vértice: o ponto mais alto/baixo mostra o deslocamento horizontal e vertical.'
+    };
+  }
+
+  function generateBattleChallenge(level){
+    // Mais retas no começo; parábolas entram gradualmente.
+    const allowQuadratic = level >= 4;
+    let challenge = null;
+    for(let tries=0; tries<30; tries++){
+      const useQuad = allowQuadratic && Math.random() < Math.min(0.25 + level*0.015, 0.5);
+      challenge = useQuad ? makeQuadraticChallenge() : makeLinearChallenge();
+      if(!recentBattleKeys.includes(challenge.key)) break;
+    }
+    recentBattleKeys.push(challenge.key);
+    if(recentBattleKeys.length>6) recentBattleKeys.shift();
+    return challenge;
+  }
+
+  function makeEnemyXs(challenge, level){
+    if(challenge.type==='linear'){
+      const sets = [
+        [-4,-2,0,2,4], [-3,-1,0,2,4], [-4,-1,1,3],
+        [-3,0,1,3], [-4,-2,1,3]
+      ];
+      return randChoice(sets).slice(0, level<3 ? 3 : level<7 ? 4 : 5);
+    }
+    // Para parábola, pontos simétricos ajudam a perceber o vértice.
+    const m = challenge.expr.match(/\(x([+-])(\d+)\)\^2/);
+    let h=0;
+    if(m) h = m[1]==='-' ? Number(m[2]) : -Number(m[2]);
+    return [h-2,h-1,h,h+1,h+2];
+  }
+
+  function spawnEnemies(level, reroll){
+    if(reroll || !currentBattleChallenge){
+      currentBattleChallenge = generateBattleChallenge(level);
+    }
+    const targetFn = compileFunction(currentBattleChallenge.expr);
+    let xs = makeEnemyXs(currentBattleChallenge, level);
+    let enemies = xs.map(x=>({x,y:targetFn(x),dead:false}))
+      .filter(e=>isFinite(e.y) && Math.abs(e.y)<=5.5);
+
+    // Segurança: se algum sorteio deixar poucos pontos visíveis, busca pontos próximos.
+    if(enemies.length < 3){
+      enemies=[];
+      for(let x=-5; x<=5; x++){
+        const y=targetFn(x);
+        if(isFinite(y) && Math.abs(y)<=5.5) enemies.push({x,y,dead:false});
+      }
+      if(enemies.length>5) enemies=enemies.slice(0,5);
+    }
+    return enemies;
+  }
+
+  function getBattlePattern(){
+    return currentBattleChallenge || {label:'função',hint:'Observe a relação entre as coordenadas dos inimigos.'};
+  }
+
+  function updateBattleHint(reveal){
+    const hintEl = document.getElementById('battleHint');
+    const pattern = getBattlePattern();
+    if(!reveal){
+      hintEl.innerHTML = '💡 <b>Dica:</b> os inimigos foram gerados por uma única função simples. Tente encontrar o padrão entre os pontos.';
+      return;
+    }
+    hintEl.innerHTML = '💡 <b>Dica do nível:</b> ' + pattern.hint +
+      '<br><span style="color:var(--text-faint)">Família: ' + pattern.label + '.</span>';
+  }
+
+  function updateBattleHUD(){
+    document.getElementById('battleLevel').textContent = battleLevel;
+    document.getElementById('battleScore').textContent = battleScore;
+    document.getElementById('battleLives').textContent = battleLives;
+    const ammoEl = document.getElementById('battleAmmo');
+    ammoEl.innerHTML = '';
+    for(let i=0; i<MAX_AMMO; i++){
+      const d = document.createElement('div');
+      d.className = 'ammo-dot' + (i >= battleAmmo ? ' used' : '');
+      ammoEl.appendChild(d);
+    }
+    const alive = battleEnemies.filter(e=>!e.dead).length;
+    const pattern = getBattlePattern();
+    document.getElementById('battleLevelInfo').innerHTML =
+      'Nível <b>'+battleLevel+'</b> — '+alive+' inimigo'+(alive!==1?'s':'')+
+      ' restante'+(alive!==1?'s':'')+' · '+
+      '<span style="color:var(--text-faint)">desafio: '+pattern.label+'</span>';
+  }
+
+  function startBattleLevel(reroll){
+    battleEnemies = spawnEnemies(battleLevel, reroll !== false);
+    battleAmmo = MAX_AMMO;
+    battleFn = null;
+    battleWonLevel = false;
+    document.getElementById('battleFormulaInput').value = '';
+    document.getElementById('battleFormulaError').classList.remove('show');
+    document.getElementById('battleNextLevelBtn').style.display = 'none';
+    document.getElementById('battleFireBtn').disabled = false;
+    document.getElementById('battleMsg').className = 'battle-msg';
+    document.getElementById('battleMsg').textContent = 'Use os pontos dos inimigos para descobrir uma função simples.';
+    updateBattleHint(false);
+    updateBattleHUD();
+    render();
+  }
+
+  function fireBattle(){
+    if(battleWonLevel || battleLives <= 0) return;
+    const input = document.getElementById('battleFormulaInput').value.trim();
+    if(!input){
+      document.getElementById('battleFormulaErrorText').textContent = 'Digite uma função';
+      document.getElementById('battleFormulaError').classList.add('show');
+      return;
+    }
+    let fn;
+    try{
+      fn = compileFunction(input);
+      fn(0); fn(1);
+      document.getElementById('battleFormulaError').classList.remove('show');
+    }catch(e){
+      document.getElementById('battleFormulaErrorText').textContent = e.message;
+      document.getElementById('battleFormulaError').classList.add('show');
+      return;
+    }
+    if(battleAmmo <= 0){
+      document.getElementById('battleMsg').className = 'battle-msg miss';
+      document.getElementById('battleMsg').textContent = 'Sem munição! Reinicie o nível.';
+      return;
+    }
+    battleFn = fn;
+    battleAmmo--;
+    let hits = 0;
+    battleEnemies.forEach(e=>{
+      if(e.dead) return;
+      let y;
+      try{ y = fn(e.x); }catch(err){ y = NaN; }
+      if(isFinite(y) && Math.abs(y - e.y) <= HIT_TOLERANCE){
+        e.dead = true;
+        hits++;
+        battleScore += 100 + battleLevel * 20;
+      }
+    });
+    updateBattleHUD();
+    const alive = battleEnemies.filter(e=>!e.dead).length;
+    const msg = document.getElementById('battleMsg');
+    if(hits > 0){
+      msg.className = 'battle-msg hit';
+      msg.textContent = 'Acertou '+hits+' inimigo'+(hits>1?'s':'')+'! +'+(hits*(100+battleLevel*20))+' pts';
+    } else {
+      msg.className = 'battle-msg miss';
+      msg.textContent = 'Errou! A curva não passou perto o suficiente.';
+    }
+    if(alive === 0){
+      battleWonLevel = true;
+      battleScore += 50 * battleLevel;
+      msg.className = 'battle-msg win';
+      msg.textContent = 'Nível '+battleLevel+' completo! +'+(50*battleLevel)+' bônus';
+      document.getElementById('battleNextLevelBtn').style.display = '';
+      document.getElementById('battleFireBtn').disabled = true;
+      updateBattleHUD();
+    } else if(battleAmmo <= 0){
+      battleLives--;
+      updateBattleHUD();
+      if(battleLives <= 0){
+        showBattleGameOver();
+      } else {
+        msg.className = 'battle-msg miss';
+        msg.textContent = 'Sem munição! Perdeu 1 vida. Reinicie o nível ou tente outra função.';
+      }
+    }
+    render();
+  }
+
+  function showBattleGameOver(){
+    document.getElementById('battleFinalScore').textContent = battleScore;
+    let rank = 'Recruta';
+    if(battleScore >= 2000) rank = 'General das Funções';
+    else if(battleScore >= 1200) rank = 'Coronel';
+    else if(battleScore >= 600) rank = 'Capitão';
+    else if(battleScore >= 300) rank = 'Sargento';
+    document.getElementById('battleGameOverTitle').textContent = 'Game Over';
+    document.getElementById('battleFinalRank').textContent = rank;
+    document.getElementById('battleGameOver').style.display = 'flex';
+  }
+
+  function resetBattleGame(){
+    battleLevel = 1;
+    battleScore = 0;
+    battleLives = 3;
+    document.getElementById('battleGameOver').style.display = 'none';
+    currentBattleChallenge = null;
+    recentBattleKeys = [];
+    startBattleLevel(true);
+  }
+
+  const BATTLE_PRESETS = ['x','2*x','-x+3','x^2','x^2-4','-x^2+5','(1/2)*x','sin(x)','abs(x)'];
+  BATTLE_PRESETS.forEach(p=>{
+    const chip = document.createElement('button');
+    chip.className = 'preset-chip';
+    chip.type = 'button';
+    chip.textContent = p;
+    chip.addEventListener('click', ()=>{ document.getElementById('battleFormulaInput').value = p; });
+    document.getElementById('battlePresets').appendChild(chip);
+  });
+
+  document.getElementById('battleHintBtn').addEventListener('click', ()=> updateBattleHint(true));
+  document.getElementById('battleFireBtn').addEventListener('click', fireBattle);
+  document.getElementById('battleNextLevelBtn').addEventListener('click', ()=>{ battleLevel++; startBattleLevel(true); });
+  document.getElementById('battleRestartLevelBtn').addEventListener('click', ()=>{ startBattleLevel(false); });
+  document.getElementById('battleRestartBtn').addEventListener('click', resetBattleGame);
+  document.getElementById('battleFormulaInput').addEventListener('keydown', e=>{ if(e.key === 'Enter') fireBattle(); });
+  document.getElementById('battleZoomIn').addEventListener('click', ()=>{
+    const cx = (battleView.xmin+battleView.xmax)/2;
+    const half = (battleView.xmax-battleView.xmin)/2 * 0.72;
+    battleView.xmin = cx-half; battleView.xmax = cx+half; render();
+  });
+  document.getElementById('battleZoomOut').addEventListener('click', ()=>{
+    const cx = (battleView.xmin+battleView.xmax)/2;
+    const half = (battleView.xmax-battleView.xmin)/2 / 0.72;
+    battleView.xmin = cx-half; battleView.xmax = cx+half; render();
+  });
+  document.getElementById('battleResetView').addEventListener('click', ()=>{
+    battleView = {xmin:-8, xmax:8, ycenter:0}; render();
+  });
+
+
+  /* ==================== RENDER ==================== */
+  function render(){
+    if(mode==='desafio'){ renderDesafio(); return; }
+    if(mode==='battle'){
+      const view = battleBounds();
+      drawGrid(view);
+      if(battleFn) drawCurve(battleFn, view, getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#5b8def', {lineWidth:2.6});
+      drawEnemies(battleEnemies, view);
+      document.getElementById('battleViewRange').textContent = fmtNum(view.xmin)+' a '+fmtNum(view.xmax);
+      return;
+    }
+    if(mode==='settings'){
+      drawGrid(livreBounds());
+      return;
+    }
+    const view = livreBounds();
+    drawGrid(view);
+    if(mode==='desenhar'){
+      if(fittedFn) drawCurve(fittedFn, view, getComputedStyle(document.documentElement).getPropertyValue('--accent').trim());
+      drawPoints(drawPointsList, view);
+    } else {
+      if(livreFn && !livreErr){
+        drawCurve(livreFn, view, getComputedStyle(document.documentElement).getPropertyValue('--accent').trim());
+        drawRootMarkers(currentRoots, view);
+      }
+    }
+    const label = fmtNum(view.xmin)+' a '+fmtNum(view.xmax);
+    document.getElementById('viewRange').textContent = label;
+    const estRange = document.getElementById('estViewRange');
+    if(estRange) estRange.textContent = label;
+  }
+
+  /* ==================== LIVRE ==================== */
+  const formulaInput=document.getElementById('formulaInput');
+  const formulaError=document.getElementById('formulaError');
+  const formulaErrorText=document.getElementById('formulaErrorText');
+  const fnFeedback=document.getElementById('fnFeedback');
+  const presetsEl=document.getElementById('presets');
+  const PRESETS=['x','2*x+1','x²','x²-4','x²-5*x+6','x²-2*x+1','-x²+3','(1/2)*x','sin(x)','abs(x)'];
+
+  PRESETS.forEach(p=>{
+    const chip=document.createElement('button');
+    chip.className='preset-chip'; chip.type='button'; chip.textContent=p;
+    chip.addEventListener('click',()=>{ formulaInput.value=p; updateFormula(); });
+    presetsEl.appendChild(chip);
+  });
+
+  function extractRootsFromAnalysis(analysis, fn){
+    // parse from facts is hard; recompute for quadratic
+    currentRoots = [];
+    try{
+      const y0=fn(0), y1=fn(1), ym1=fn(-1);
+      const c=y0, a=((y1+ym1)/2)-c, b=(y1-ym1)/2;
+      if(Math.abs(a)<1e-9){
+        if(Math.abs(b)>1e-9) currentRoots = [-c/b];
+        return;
+      }
+      const delta=b*b-4*a*c;
+      if(delta>1e-9){
+        const sq=Math.sqrt(delta);
+        currentRoots=[(-b-sq)/(2*a), (-b+sq)/(2*a)];
+      } else if(Math.abs(delta)<=1e-9){
+        currentRoots=[-b/(2*a)];
+      }
+    }catch(e){}
+  }
+
+  function updateFormula(){
+    try{
+      livreFn=compileFunction(formulaInput.value||'0');
+      livreFn(1);
+      livreErr=null; formulaError.classList.remove('show');
+      const analysis = analyzeFunction(formulaInput.value, livreFn);
+      extractRootsFromAnalysis(analysis, livreFn);
+      let html = '<div class="fn-type">'+analysis.type+'</div>';
+      html += '<div class="fn-desc">'+analysis.desc+'</div>';
+      if(analysis.rootsHtml) html += analysis.rootsHtml;
+      if(analysis.facts.length){
+        html += '<div class="fn-facts">';
+        analysis.facts.forEach(f=>{ html += '<div class="fn-fact">'+f+'</div>'; });
+        html += '</div>';
+      }
+      if(analysis.tip){
+        html += '<div class="fn-tip"><strong>Dica:</strong> '+analysis.tip+'</div>';
+      }
+      fnFeedback.innerHTML = html;
+      fnFeedback.classList.add('show');
+    }catch(e){
+      livreErr=e.message; formulaErrorText.textContent=e.message; formulaError.classList.add('show');
+      fnFeedback.classList.remove('show');
+      currentRoots=[];
+    }
+    render();
+  }
+  formulaInput.addEventListener('input',updateFormula);
+
+  function zoomView(factor){
+    const cx=(livreView.xmin+livreView.xmax)/2;
+    const half=(livreView.xmax-livreView.xmin)/2*factor;
+    livreView.xmin=cx-half; livreView.xmax=cx+half;
+    render();
+  }
+  function zoomAt(px,py,factor){
+    const rect=canvas.getBoundingClientRect();
+    if(mode==='battle'){
+      const before=battleBounds();
+      const mathX = before.xmin + (px/rect.width)*(before.xmax-before.xmin);
+      const mathY = before.ymax - (py/rect.height)*(before.ymax-before.ymin);
+      const half=(battleView.xmax-battleView.xmin)/2*factor;
+      battleView.xmin = mathX - (px/rect.width)*half*2;
+      battleView.xmax = battleView.xmin + half*2;
+      const yRangeNew = half*2*(H/W);
+      const ymaxNew = mathY + (py/rect.height)*yRangeNew;
+      battleView.ycenter = ymaxNew - yRangeNew/2;
+    } else {
+      const before=livreBounds();
+      const mathX = before.xmin + (px/rect.width)*(before.xmax-before.xmin);
+      const mathY = before.ymax - (py/rect.height)*(before.ymax-before.ymin);
+      const half=(livreView.xmax-livreView.xmin)/2*factor;
+      livreView.xmin = mathX - (px/rect.width)*half*2;
+      livreView.xmax = livreView.xmin + half*2;
+      const yRangeNew = half*2*(H/W);
+      const ymaxNew = mathY + (py/rect.height)*yRangeNew;
+      livreView.ycenter = ymaxNew - yRangeNew/2;
+    }
+    render();
+  }
+
+  document.getElementById('zoomIn').addEventListener('click',()=>zoomView(0.72));
+  document.getElementById('zoomOut').addEventListener('click',()=>zoomView(1/0.72));
+  document.getElementById('resetView').addEventListener('click',()=>{
+    livreView={xmin:-6,xmax:6,ycenter:0}; render();
+  });
+  document.getElementById('estZoomIn').addEventListener('click',()=>zoomView(0.72));
+  document.getElementById('estZoomOut').addEventListener('click',()=>zoomView(1/0.72));
+  document.getElementById('estResetView').addEventListener('click',()=>{
+    livreView={xmin:-6,xmax:6,ycenter:0}; render();
+  });
+
+  /* ==================== INTERAÇÃO CANVAS ==================== */
+  let dragging=false, dragLast=null;
+
+  canvas.addEventListener('pointerdown', e=>{
+    const rect=canvas.getBoundingClientRect();
+    const px=e.clientX-rect.left, py=e.clientY-rect.top;
+
+    if(mode==='desenhar'){
+      const view = livreBounds();
+      const mathX = view.xmin + (px/rect.width)*(view.xmax-view.xmin);
+      const mathY = view.ymax - (py/rect.height)*(view.ymax-view.ymin);
+      drawPointsList.push({x: Math.round(mathX*100)/100, y: Math.round(mathY*100)/100});
+      fittedFn=null;
+      document.getElementById('drawResult').classList.remove('show');
+      updatePointCount();
+      render();
+      return;
+    }
+
+    if(mode==='livre' || mode==='estudos' || mode==='battle'){
+      dragging=true; dragLast={x:e.clientX,y:e.clientY};
+      canvas.setPointerCapture(e.pointerId);
+    }
+  });
+  canvas.addEventListener('pointerup', ()=>{ dragging=false; dragLast=null; });
+  canvas.addEventListener('pointerleave', ()=>{ dragging=false; dragLast=null; });
+  canvas.addEventListener('pointermove', e=>{
+    const rect=canvas.getBoundingClientRect();
+    const px=e.clientX-rect.left, py=e.clientY-rect.top;
+    const view = mode==='desafio' ? desafioView : (mode==='battle' ? battleBounds() : livreBounds());
+    const mathX = view.xmin + (px/rect.width)*(view.xmax-view.xmin);
+    const mathY = view.ymax - (py/rect.height)*(view.ymax-view.ymin);
+    let extra='';
+    if((mode==='livre'||mode==='estudos') && livreFn && !livreErr){
+      try{ const y=livreFn(mathX); if(isFinite(y)) extra='  f(x) = '+fmtNum(y); }catch(e){}
+    }
+    if(mode==='desenhar' && fittedFn){
+      try{ const y=fittedFn(mathX); if(isFinite(y)) extra='  f(x) ≈ '+fmtNum(y); }catch(e){}
+    }
+    if(mode==='battle' && battleFn){
+      try{ const y=battleFn(mathX); if(isFinite(y)) extra='  f(x) = '+fmtNum(y); }catch(e){}
+    }
+    if(showCursorReadout) cursorReadout.textContent = 'x = '+mathX.toFixed(2)+'  y = '+mathY.toFixed(2)+extra;
+
+    if((mode==='livre'||mode==='estudos') && dragging && dragLast){
+      const dxPx=e.clientX-dragLast.x, dyPx=e.clientY-dragLast.y;
+      const unitsPerPx=(livreView.xmax-livreView.xmin)/rect.width;
+      livreView.xmin-=dxPx*unitsPerPx; livreView.xmax-=dxPx*unitsPerPx;
+      livreView.ycenter+=dyPx*unitsPerPx;
+      dragLast={x:e.clientX,y:e.clientY};
+      render();
+    }
+    if(mode==='battle' && dragging && dragLast){
+      const dxPx=e.clientX-dragLast.x, dyPx=e.clientY-dragLast.y;
+      const unitsPerPx=(battleView.xmax-battleView.xmin)/rect.width;
+      battleView.xmin-=dxPx*unitsPerPx; battleView.xmax-=dxPx*unitsPerPx;
+      battleView.ycenter+=dyPx*unitsPerPx;
+      dragLast={x:e.clientX,y:e.clientY};
+      render();
+    }
+  });
+  canvas.addEventListener('wheel', e=>{
+    if(mode==='desafio' || mode==='settings') return;
+    e.preventDefault();
+    const rect=canvas.getBoundingClientRect();
+    zoomAt(e.clientX-rect.left, e.clientY-rect.top, e.deltaY>0?1.12:0.89);
+  }, {passive:false});
+
+  document.querySelectorAll('.draw-fit-type button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.draw-fit-type button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      fitType = btn.dataset.fit;
+      fittedFn=null;
+      document.getElementById('drawResult').classList.remove('show');
+      updatePointCount();
+      render();
+    });
+  });
+  document.getElementById('fitBtn').addEventListener('click', runFit);
+  document.getElementById('clearPoints').addEventListener('click',()=>{
+    drawPointsList=[]; fittedFn=null;
+    document.getElementById('drawResult').classList.remove('show');
+    updatePointCount(); render();
+  });
+  document.getElementById('undoPoint').addEventListener('click',()=>{
+    drawPointsList.pop();
+    fittedFn=null;
+    document.getElementById('drawResult').classList.remove('show');
+    updatePointCount(); render();
+  });
+
+  /* ==================== CALCULADORAS DOS ESTUDOS ==================== */
+  function updateCalcAfim(){
+    const a = parseFloat(document.getElementById('calcAfimA').value);
+    const b = parseFloat(document.getElementById('calcAfimB').value);
+    const out = document.getElementById('calcAfimOut');
+    if(!isFinite(a)||!isFinite(b)){ out.innerHTML='Digite números válidos.'; return; }
+    let html = 'Função: <b>y = '+formatLinear(a,b)+'</b><br>';
+    html += 'Inclinação a = <b>'+prettyCoeff(a)+'</b> '+(a>0?'(sobe)':a<0?'(desce)':'(horizontal)')+'<br>';
+    html += 'Corta o eixo y em <b>(0, '+fmtNum(b)+')</b><br>';
+    if(Math.abs(a)>1e-9){
+      const xz = -b/a;
+      html += 'Zero da função: <b>x = '+fmtNum(xz)+'</b> <span class="ok">→ corta o eixo x</span>';
+    } else {
+      html += Math.abs(b)<1e-9
+        ? '<span class="ok">É a reta y = 0</span>'
+        : '<span class="warn">Não corta o eixo x (paralela)</span>';
+    }
+    out.innerHTML = html;
+    // atualiza gráfico
+    formulaInput.value = formatLinear(a,b).replace(/²/g,'^2');
+    // better: build expression
+    let expr = '';
+    if(Math.abs(a)>1e-9) expr += (Math.abs(a-1)<1e-9?'':Math.abs(a+1)<1e-9?'-':a)+'*x';
+    if(Math.abs(b)>1e-9){
+      if(expr && b>=0) expr += '+';
+      expr += b;
+    }
+    if(!expr) expr='0';
+    formulaInput.value = expr;
+    updateFormula();
+  }
+
+  function updateCalcQuad(){
+    const a = parseFloat(document.getElementById('calcQuadA').value);
+    const b = parseFloat(document.getElementById('calcQuadB').value);
+    const c = parseFloat(document.getElementById('calcQuadC').value);
+    const out = document.getElementById('calcQuadOut');
+    if(!isFinite(a)||!isFinite(b)||!isFinite(c)){ out.innerHTML='Digite números válidos.'; return; }
+    if(Math.abs(a)<1e-12){
+      out.innerHTML='<span class="warn">Se a = 0, não é quadrática — vira afim.</span>';
+      return;
+    }
+    const delta = b*b - 4*a*c;
+    const xv = -b/(2*a);
+    const yv = -delta/(4*a);
+    let html = 'Função: <b>y = '+formatPoly(a,b,c)+'</b><br>';
+    html += 'Δ = b² − 4ac = <b>'+prettyCoeff(delta)+'</b><br>';
+    html += 'Vértice: <b>('+fmtNum(xv)+', '+fmtNum(yv)+')</b> — '+(a>0?'mínimo':'máximo')+'<br>';
+    html += 'Corta o eixo y em <b>(0, '+fmtNum(c)+')</b><br>';
+
+    if(delta > 1e-9){
+      const sq = Math.sqrt(delta);
+      const x1 = (-b - sq)/(2*a);
+      const x2 = (-b + sq)/(2*a);
+      const lo=Math.min(x1,x2), hi=Math.max(x1,x2);
+      html += '<span class="ok">Δ &gt; 0 → duas raízes reais</span><br>';
+      html += '<b>x₁ = '+fmtNum(lo)+'</b> &nbsp;&nbsp; <b>x₂ = '+fmtNum(hi)+'</b><br>';
+      html += 'Soma x₁+x₂ = <b>'+fmtNum(-b/a)+'</b> · Produto x₁·x₂ = <b>'+fmtNum(c/a)+'</b>';
+    } else if(Math.abs(delta)<=1e-9){
+      const x1 = -b/(2*a);
+      html += '<span class="warn">Δ = 0 → raiz dupla</span><br>';
+      html += '<b>x₁ = x₂ = '+fmtNum(x1)+'</b>';
+    } else {
+      html += '<span class="bad">Δ &lt; 0 → sem raízes reais</span> (não corta o eixo x)';
+    }
+    out.innerHTML = html;
+
+    // gráfico
+    let expr = '';
+    if(Math.abs(a-1)<1e-9) expr = 'x^2';
+    else if(Math.abs(a+1)<1e-9) expr = '-x^2';
+    else expr = a+'*x^2';
+    if(Math.abs(b)>1e-9){
+      if(b>=0) expr += '+';
+      expr += (Math.abs(b-1)<1e-9?'':Math.abs(b+1)<1e-9?'-':b)+ (Math.abs(Math.abs(b)-1)<1e-9?'':'') + (Math.abs(Math.abs(b)-1)<1e-9 ? 'x' : '*x');
+      // simplify
+      if(Math.abs(b-1)<1e-9) expr = expr.replace(/\+$/,'') + '+x';
+      else if(Math.abs(b+1)<1e-9) expr += ''; // already handled poorly
+    }
+    // rebuild cleanly
+    const parts=[];
+    if(Math.abs(a-1)<1e-9) parts.push('x^2');
+    else if(Math.abs(a+1)<1e-9) parts.push('-x^2');
+    else parts.push(a+'*x^2');
+    if(Math.abs(b)>1e-9){
+      if(Math.abs(b-1)<1e-9) parts.push('+x');
+      else if(Math.abs(b+1)<1e-9) parts.push('-x');
+      else parts.push((b>=0?'+':'')+b+'*x');
+    }
+    if(Math.abs(c)>1e-9) parts.push((c>=0?'+':'')+c);
+    formulaInput.value = parts.join('');
+    updateFormula();
+  }
+
+  document.getElementById('calcAfimA').addEventListener('input', updateCalcAfim);
+  document.getElementById('calcAfimB').addEventListener('input', updateCalcAfim);
+  document.getElementById('calcQuadA').addEventListener('input', updateCalcQuad);
+  document.getElementById('calcQuadB').addEventListener('input', updateCalcQuad);
+  document.getElementById('calcQuadC').addEventListener('input', updateCalcQuad);
+
+  /* ==================== DESAFIO ==================== */
+  const PARAM_EXPLAIN = {
+    linear: {
+      a: 'a é a inclinação: maior |a| = mais íngreme; + sobe, − desce.',
+      b: 'b é onde a reta corta o eixo y.'
+    },
+    quadratic: {
+      a: 'a controla a abertura: + sobe (∪), − desce (∩).',
+      b: 'b desloca o vértice. xᵥ = −b/(2a).',
+      c: 'c é o intercepto y.'
+    },
+    sine: {
+      a: 'a é a amplitude.',
+      b: 'b é a frequência.',
+      c: 'c é a fase.',
+      d: 'd desloca verticalmente.'
+    }
+  };
+
+  function familyKey(label){
+    if(label.indexOf('x²')>=0 || label.indexOf('x^2')>=0) return 'quadratic';
+    if(label.indexOf('sin')>=0) return 'sine';
+    return 'linear';
+  }
+
+  function feedbackPhrase(sync){
+    if(sync>=95) return 'Excelente — as curvas estão quase iguais.';
+    if(sync>=80) return 'Muito bom. Refine os parâmetros restantes.';
+    if(sync>=60) return 'No caminho certo. Ajuste um parâmetro de cada vez.';
+    if(sync>=40) return 'Ainda longe. Ajuste a forma (a) primeiro, depois deslocamentos.';
+    return 'Bem diferente do alvo. Revise a aba Estudos.';
+  }
+
+  const FAMILIES=[
+    { label:'y = a·x + b',
+      params:[{key:'a',min:-3,max:3,step:0.5},{key:'b',min:-5,max:5,step:0.5}],
+      fn:(p,x)=>p.a*x+p.b, domain:[-6,6] },
+    { label:'y = a·x² + b·x + c',
+      params:[{key:'a',min:-2,max:2,step:0.5},{key:'b',min:-3,max:3,step:0.5},{key:'c',min:-4,max:4,step:0.5}],
+      fn:(p,x)=>p.a*x*x+p.b*x+p.c, domain:[-6,6] },
+    { label:'y = a·sin(b·x + c) + d',
+      params:[{key:'a',min:0.5,max:3,step:0.5},{key:'b',min:0.5,max:2,step:0.25},{key:'c',min:0,max:6,step:0.5},{key:'d',min:-2,max:2,step:0.5}],
+      fn:(p,x)=>p.a*Math.sin(p.b*x+p.c)+p.d, domain:[-6.3,6.3] },
+  ];
+
+  const TOTAL_ROUNDS=5;
+  let round=1, totalScore=0, locked=false;
+  let family=null, targetParams=null, userParams=null;
+  let desafioView={xmin:-6,xmax:6,ymin:-6,ymax:6};
+  let roundHistory=[];
+
+  const familyLabelEl=document.getElementById('familyLabel');
+  const paramRowsEl=document.getElementById('paramRows');
+  const checkBtn=document.getElementById('checkBtn');
+  const nextBtn=document.getElementById('nextBtn');
+  const resultPanel=document.getElementById('resultPanel');
+  const syncValueEl=document.getElementById('syncValue');
+  const syncBarFill=document.getElementById('syncBarFill');
+  const roundNumEl=document.getElementById('roundNum');
+  const totalScoreEl=document.getElementById('totalScore');
+  const historyBlock=document.getElementById('historyBlock');
+  const historyList=document.getElementById('historyList');
+
+  function randStep(min,max,step){
+    const n=Math.round((max-min)/step);
+    const idx=Math.floor(Math.random()*(n+1));
+    return Math.round((min+idx*step)*100)/100;
+  }
+
+  function syncColor(pct){
+    return pct>=90 ? 'var(--success)' : pct>=60 ? 'var(--warning)' : 'var(--danger)';
+  }
+
+  function newRound(){
+    locked=false;
+    const r = Math.random();
+    family = r<0.4 ? FAMILIES[0] : r<0.75 ? FAMILIES[1] : FAMILIES[2];
+    targetParams={}; userParams={};
+    family.params.forEach(p=>{
+      let v=randStep(p.min,p.max,p.step);
+      if((p.key==='a') && Math.abs(v)<1e-9) v = p.step;
+      targetParams[p.key]=v;
+      let start = p.min + (p.max-p.min)*0.5;
+      start = Math.round(start/p.step)*p.step;
+      userParams[p.key]=start;
+    });
+
+    familyLabelEl.textContent=family.label;
+    paramRowsEl.innerHTML='';
+    family.params.forEach(p=>{
+      const row=document.createElement('div'); row.className='param-row';
+      const top=document.createElement('div'); top.className='param-top';
+      const key=document.createElement('div'); key.className='param-key'; key.textContent=p.key;
+      const slider=document.createElement('input');
+      slider.type='range'; slider.className='param-slider';
+      slider.min=p.min; slider.max=p.max; slider.step=p.step; slider.value=userParams[p.key];
+      const number=document.createElement('input');
+      number.type='number'; number.className='param-number';
+      number.min=p.min; number.max=p.max; number.step=p.step; number.value=userParams[p.key];
+      const proxTrack=document.createElement('div'); proxTrack.className='proximity-track';
+      const proxFill=document.createElement('div'); proxFill.className='proximity-fill';
+      proxTrack.appendChild(proxFill);
+
+      function setParam(v){
+        v=Math.min(p.max, Math.max(p.min, v));
+        v=Math.round(v/p.step)*p.step;
+        v=Math.round(v*100)/100;
+        userParams[p.key]=v;
+        slider.value=v; number.value=v;
+        const prox=Math.max(0, 100*(1-Math.abs(v-targetParams[p.key])/(p.max-p.min)));
+        proxFill.style.width=prox+'%';
+        proxFill.style.background=syncColor(prox);
+        renderDesafio();
+      }
+      slider.addEventListener('input',()=>setParam(parseFloat(slider.value)));
+      number.addEventListener('change',()=>setParam(parseFloat(number.value)||0));
+
+      top.appendChild(key); top.appendChild(slider); top.appendChild(number);
+      row.appendChild(top); row.appendChild(proxTrack);
+      paramRowsEl.appendChild(row);
+      setParam(userParams[p.key]);
+    });
+
+    checkBtn.style.display=''; checkBtn.disabled=false;
+    nextBtn.style.display='none';
+    resultPanel.classList.remove('show'); resultPanel.innerHTML='';
+    roundNumEl.textContent=round;
+    totalScoreEl.textContent=totalScore;
+    renderHistory();
+    fitDesafioView();
+    renderDesafio();
+  }
+
+  function fitDesafioView(){
+    const [dmin,dmax]=family.domain;
+    let ymin=Infinity, ymax=-Infinity;
+    for(let i=0;i<=80;i++){
+      const x=dmin+(dmax-dmin)*i/80;
+      const yt=family.fn(targetParams,x);
+      if(isFinite(yt)){ ymin=Math.min(ymin,yt); ymax=Math.max(ymax,yt); }
+    }
+    if(!isFinite(ymin)){ ymin=-5; ymax=5; }
+    const pad=Math.max((ymax-ymin)*0.35, 1);
+    desafioView=squareFit(dmin,dmax,ymin-pad,ymax+pad);
+  }
+
+  function computeSync(){
+    const [dmin,dmax]=family.domain;
+    let sumSq=0, n=0, tmin=Infinity, tmax=-Infinity;
+    for(let i=0;i<=120;i++){
+      const x=dmin+(dmax-dmin)*i/120;
+      const yt=family.fn(targetParams,x);
+      const yu=family.fn(userParams,x);
+      if(isFinite(yt) && isFinite(yu)){
+        sumSq+=(yt-yu)*(yt-yu); n++;
+        tmin=Math.min(tmin,yt); tmax=Math.max(tmax,yt);
+      }
+    }
+    if(n===0) return 0;
+    const rmse=Math.sqrt(sumSq/n);
+    const scale=Math.max(tmax-tmin,1);
+    const normError=Math.min(rmse/scale,1.5);
+    return Math.max(0, Math.round(100*(1-normError/1.0)));
+  }
+
+  function renderDesafio(){
+    drawGrid(desafioView);
+    drawCurve(x=>family.fn(targetParams,x), desafioView, getComputedStyle(document.documentElement).getPropertyValue('--target').trim(), {dashed:true});
+    drawCurve(x=>family.fn(userParams,x), desafioView, getComputedStyle(document.documentElement).getPropertyValue('--accent').trim());
+    const sync=computeSync();
+    syncValueEl.textContent=sync+'%';
+    syncBarFill.style.width=sync+'%';
+    syncBarFill.style.background=syncColor(sync);
+    syncValueEl.style.color=syncColor(sync);
+  }
+
+  function renderHistory(){
+    if(roundHistory.length===0){ historyBlock.style.display='none'; return; }
+    historyBlock.style.display='';
+    historyList.innerHTML='';
+    roundHistory.forEach(h=>{
+      const row=document.createElement('div'); row.className='history-row';
+      row.innerHTML='<span>Rodada '+h.round+' — '+h.label+'</span><b>'+h.score+' pts</b>';
+      historyList.appendChild(row);
+    });
+  }
+
+  checkBtn.addEventListener('click',()=>{
+    if(locked) return;
+    locked=true;
+    const sync=computeSync();
+    totalScore+=sync;
+    totalScoreEl.textContent=totalScore;
+    roundHistory.push({round, label:family.label, score:sync});
+    renderHistory();
+
+    const fk=familyKey(family.label);
+    const explains=PARAM_EXPLAIN[fk]||{};
+
+    resultPanel.innerHTML='';
+    const scoreDiv=document.createElement('div');
+    scoreDiv.className='result-score';
+    scoreDiv.textContent=sync+' pontos nesta rodada';
+    resultPanel.appendChild(scoreDiv);
+
+    const fb=document.createElement('div');
+    fb.className='result-feedback';
+    fb.textContent=feedbackPhrase(sync);
+    resultPanel.appendChild(fb);
+
+    family.params.forEach(p=>{
+      const diff=userParams[p.key]-targetParams[p.key];
+      const ok=Math.abs(diff)<=p.step+1e-9;
+      const dirTxt = ok ? 'certo' : (diff>0 ? 'um pouco alto' : 'um pouco baixo');
+      const row=document.createElement('div'); row.className='result-row';
+      let extra='';
+      if(explains[p.key]){
+        extra=' <span style="display:block;margin-top:3px;font-size:11.5px;color:var(--text-faint)">'+explains[p.key]+'</span>';
+      }
+      row.innerHTML='<span class="badge '+(ok?'ok':'no')+'">'+(ok?'✓':'✕')+'</span>'+
+        '<span>'+p.key+': você <b>'+userParams[p.key]+'</b> · alvo <b>'+targetParams[p.key]+'</b> ('+dirTxt+')'+extra+'</span>';
+      resultPanel.appendChild(row);
+    });
+
+    const tip=document.createElement('div');
+    tip.className='result-tip';
+    tip.innerHTML = sync<80
+      ? '<strong>Dica:</strong> revise Estudos e ajuste a forma (a) antes dos deslocamentos.'
+      : '<strong>Ótimo:</strong> explique em voz alta o papel de cada parâmetro.';
+    resultPanel.appendChild(tip);
+    resultPanel.classList.add('show');
+
+    checkBtn.style.display='none';
+    nextBtn.style.display = round<TOTAL_ROUNDS ? '' : 'none';
+    if(round>=TOTAL_ROUNDS){ setTimeout(showSummary, 700); }
+  });
+
+  nextBtn.addEventListener('click',()=>{ round++; newRound(); });
+
+  function showSummary(){
+    document.getElementById('summaryScore').textContent=totalScore+' / '+(TOTAL_ROUNDS*100);
+    let rank='Estagiário(a)';
+    const pct=totalScore/(TOTAL_ROUNDS*100);
+    if(pct>=0.9) rank='Especialista em Funções';
+    else if(pct>=0.75) rank='Analista Avançado(a)';
+    else if(pct>=0.5) rank='Técnico(a) Júnior';
+    document.getElementById('summaryRank').textContent=rank;
+    const hist=document.getElementById('summaryHistory');
+    hist.innerHTML='';
+    roundHistory.forEach(h=>{
+      const row=document.createElement('div'); row.className='history-row';
+      row.innerHTML='<span>Rodada '+h.round+' — '+h.label+'</span><b>'+h.score+' pts</b>';
+      hist.appendChild(row);
+    });
+    document.getElementById('summaryOverlay').style.display='flex';
+  }
+
+  document.getElementById('restartBtn').addEventListener('click',()=>{
+    round=1; totalScore=0; roundHistory=[];
+    document.getElementById('summaryOverlay').style.display='none';
+    newRound();
+  });
+
+  /* ==================== ESTUDOS NAV ==================== */
+  document.querySelectorAll('.estudos-nav-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.estudos-nav-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.lesson-card').forEach(c=>c.classList.remove('active'));
+      const card=document.getElementById('lesson-'+btn.dataset.lesson);
+      if(card) card.classList.add('active');
+      if(btn.dataset.lesson==='afim') updateCalcAfim();
+      else updateCalcQuad();
+    });
+  });
+
+  document.querySelectorAll('.try-chip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      const expr=chip.dataset.expr;
+      if(!expr) return;
+      formulaInput.value=expr;
+      updateFormula();
+      livreView={xmin:-6,xmax:6,ycenter:0};
+      render();
+    });
+  });
+
+
+  /* ==================== SETTINGS LISTENERS ==================== */
+  document.querySelectorAll('#themeToggle .toggle-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ applyTheme(btn.dataset.theme); render(); });
+  });
+  document.getElementById('showRootsToggle').addEventListener('change', e=>{
+    showRootMarkers = e.target.checked;
+    try{ localStorage.setItem('fnlab-roots', showRootMarkers ? '1' : '0'); }catch(err){}
+    render();
+  });
+  document.getElementById('showCursorToggle').addEventListener('change', e=>{
+    showCursorReadout = e.target.checked;
+    cursorReadout.style.display = showCursorReadout ? '' : 'none';
+    try{ localStorage.setItem('fnlab-cursor', showCursorReadout ? '1' : '0'); }catch(err){}
+  });
+
+  /* ==================== TROCA DE MODO ==================== */
+  const modeSubtitle=document.getElementById('modeSubtitle');
+  document.querySelectorAll('.mode-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.mode-btn').forEach(b=>{b.classList.remove('active'); b.setAttribute('aria-selected','false');});
+      btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+      mode=btn.dataset.mode;
+      const isLivre=mode==='livre';
+      const isDesenhar=mode==='desenhar';
+      const isDesafio=mode==='desafio';
+      const isEstudos=mode==='estudos';
+      const isBattle=mode==='battle';
+      const isSettings=mode==='settings';
+      document.getElementById('livrePanel').style.display=isLivre?'':'none';
+      document.getElementById('desenharPanel').style.display=isDesenhar?'':'none';
+      document.getElementById('desafioPanel').style.display=isDesafio?'':'none';
+      document.getElementById('estudosPanel').style.display=isEstudos?'':'none';
+      document.getElementById('battlePanel').style.display=isBattle?'':'none';
+      document.getElementById('settingsPanel').style.display=isSettings?'':'none';
+      document.getElementById('livreToolbar').style.display=isLivre?'':'none';
+      document.getElementById('desenharToolbar').style.display=isDesenhar?'':'none';
+      document.getElementById('desafioToolbar').style.display=isDesafio?'':'none';
+      document.getElementById('estudosToolbar').style.display=isEstudos?'':'none';
+      document.getElementById('battleToolbar').style.display=isBattle?'':'none';
+      document.getElementById('settingsToolbar').style.display=isSettings?'':'none';
+      if(isLivre) modeSubtitle.textContent='Digite uma função e veja o gráfico + explicação';
+      else if(isDesenhar) modeSubtitle.textContent='Marque pontos e descubra a função';
+      else if(isDesafio) modeSubtitle.textContent='Ajuste os parâmetros até sincronizar com o alvo';
+      else if(isEstudos) {
+        modeSubtitle.textContent='Afim e quadrática — fórmulas + calculadora interativa';
+        updateCalcAfim();
+      }
+      else if(isBattle) {
+        modeSubtitle.textContent='Elimine os inimigos com o gráfico da sua função';
+        if(battleEnemies.length===0) startBattleLevel(true);
+      }
+      else if(isSettings) modeSubtitle.textContent='Preferências do Lab de Funções';
+      render();
+    });
+  });
+
+  /* ==================== INIT ==================== */
+  loadSettings();
+  updateFormula();
+  newRound();
+  updatePointCount();
+  resizeCanvas();
+})();
+</script>
+</body>
+</html>
