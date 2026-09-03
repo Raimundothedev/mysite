@@ -1,0 +1,2163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nutcase Wizard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f2e3bf;
+  --paper-dark:#e2cea1;
+  --paper2:#e4cf9f;
+  --ink:#33241c;
+  --ink-soft:#6a5545;
+  --wood:#7c4e2c;
+  --wood-dark:#563a22;
+  --line:#4a3527;
+  --tape:#e8c98a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Patrick Hand', 'Bradley Hand', 'Segoe Print', cursive;
+  color:#33241c;
+  background:#241a14;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+}
+#app{display:flex;height:100%;width:100%}
+
+/* ---------- LABORATÓRIO ---------- */
+#lab{position:relative;flex:1;min-width:0;overflow:hidden;cursor:default}
+#scene{display:block;width:100%;height:100%;touch-action:none}
+
+#title{
+  position:absolute;left:22px;top:14px;
+  font-family:'Amatic SC', 'Patrick Hand', cursive;
+  font-size:clamp(28px,3.4vw,46px);line-height:.9;
+  color:#3a2a1f;letter-spacing:.5px;
+  transform:rotate(-2.2deg);pointer-events:none;
+  text-shadow:1px 1px 0 rgba(255,255,255,.35);
+}
+#title small{display:block;font-family:'Patrick Hand',cursive;font-size:15px;color:#7a5f47;letter-spacing:.3px;transform:rotate(.8deg)}
+
+#hint{
+  position:absolute;left:50%;bottom:14px;transform:translateX(-50%) rotate(-.6deg);
+  font-size:16px;color:#6b5340;background:rgba(246,233,205,.72);
+  padding:5px 14px;border-radius:14px 12px 15px 11px;
+  border:1.5px solid rgba(90,68,50,.35);pointer-events:none;
+  white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis;
+  transition:opacity .35s;
+}
+
+.pbar{
+  position:absolute;transform:translateX(-50%) rotate(-.7deg);
+  opacity:0;transition:opacity .25s;pointer-events:none;
+}
+.pbar.on{opacity:1}
+#mixbar{left:50%;width:min(280px,60%)}
+#grindbar{width:min(150px,24%)}
+#grindbar .lbl{font-size:15px}
+#grindbar .track{height:12px}
+.pbar .lbl{font-size:17px;color:#4a3527;text-align:center;margin-bottom:3px;letter-spacing:.6px}
+.pbar .track{
+  height:16px;border:2px solid #4a3527;border-radius:10px 9px 11px 8px;
+  background:rgba(246,233,205,.8);padding:2px;overflow:hidden;
+}
+.pbar .fill{
+  height:100%;width:0%;border-radius:8px;
+  background:repeating-linear-gradient(115deg,#b5762f 0 9px,#c98a3d 9px 18px);
+  transition:width .12s linear;
+}
+
+.tool-btn{
+  position:absolute;left:16px;bottom:16px;
+  font-family:'Patrick Hand',cursive;font-size:16px;color:#4a3527;
+  background:rgba(246,233,205,.9);border:2px solid #4a3527;
+  border-radius:12px 10px 13px 9px;padding:6px 12px;cursor:pointer;
+  transform:rotate(-1.5deg);transition:transform .12s, background .12s;
+}
+.tool-btn:hover{background:#f7ebd0;transform:rotate(-1.5deg) translateY(-2px)}
+.tool-btn:active{transform:rotate(-1.5deg) translateY(1px)}
+.tool-btn[hidden]{display:none}
+
+/* ---------- PAINEL ---------- */
+#panel{
+  width:clamp(196px,21vw,268px);flex:none;position:relative;
+  background:
+    radial-gradient(circle at 20% 12%, rgba(255,255,255,.35), transparent 45%),
+    linear-gradient(#f0e0ba,#e6d2a6);
+  border-left:3px solid #4a3527;
+  box-shadow:-8px 0 18px rgba(30,18,10,.28);
+  display:flex;flex-direction:column;
+}
+#panel::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(rgba(120,92,60,.20) 1px, transparent 1.2px);
+  background-size:9px 9px;
+}
+.tabs{display:flex;border-bottom:3px solid #4a3527;position:relative;z-index:1}
+.tab{
+  flex:1;font-family:'Amatic SC',cursive;font-weight:700;font-size:23px;letter-spacing:.6px;
+  padding:12px 4px 9px;background:#d9c396;color:#6f5a44;border:none;cursor:pointer;
+  border-right:2px dashed rgba(74,53,39,.5);
+}
+.tab:last-child{border-right:none}
+.tab.active{background:#f6e9cd;color:#33241c;box-shadow:inset 0 -4px 0 #b5762f}
+.tab:focus-visible{outline:3px solid #b5762f;outline-offset:-3px}
+
+.list{flex:1;overflow-y:auto;padding:12px 11px 18px;position:relative;z-index:1;scrollbar-width:thin}
+.list[hidden]{display:none}
+
+.chip{
+  display:flex;align-items:center;gap:9px;width:100%;
+  padding:7px 9px;margin-bottom:8px;
+  background:#f7edd5;border:2px solid #4a3527;
+  border-radius:14px 11px 15px 10px;
+  cursor:grab;touch-action:none;user-select:none;
+  box-shadow:2px 3px 0 rgba(74,53,39,.28);
+  transition:transform .11s ease, box-shadow .11s ease;
+}
+.chip:nth-child(even){transform:rotate(.7deg)}
+.chip:nth-child(odd){transform:rotate(-.6deg)}
+.chip:hover{transform:translate(-1px,-2px) rotate(0deg);box-shadow:3px 5px 0 rgba(74,53,39,.32)}
+.chip.grabbing{opacity:.35;cursor:grabbing}
+.chip .bubble{
+  width:34px;height:34px;flex:none;display:grid;place-items:center;font-size:19px;
+  background:#fff8e6;border:2px solid #4a3527;border-radius:50% 48% 52% 50%;
+}
+.chip .nm{font-size:17px;line-height:1.05}
+.chip .pr{font-size:13px;color:#8a6a4d}
+.chip.locked{background:#e6d5ae;color:#96805f;cursor:default;box-shadow:none;border-style:dashed}
+.chip.locked .bubble{background:#ded0ae;color:#a08c6c}
+.chip.locked:hover{transform:rotate(-.6deg)}
+.chip .bubble.vial{padding:2px}
+.chip .bubble.vial svg{display:block}
+.chip .tally{margin-left:auto;font-size:16px;color:#7a5a34;align-self:flex-end}
+.chip .rec{font-size:16px;letter-spacing:.5px;line-height:1.15}
+.chip .rec .plus{color:#9a8163;font-size:13px;margin:0 1px}
+.chip.potion{cursor:grab}
+.chip.potion:active{cursor:grabbing}
+.potref{font-size:14px;font-weight:600}
+#ghost.vialghost{background:none;border:none;filter:drop-shadow(3px 7px 5px rgba(30,18,10,.45))}
+#ghost.vialghost svg{display:block}
+
+/* livro de receitas */
+#bookBtn{left:auto;right:16px;bottom:auto;top:14px;transform:rotate(1.6deg)}
+#bookBtn:hover{transform:rotate(1.6deg) translateY(-2px)}
+#book{position:fixed;inset:0;z-index:65;display:none;place-items:center;background:rgba(40,26,16,.45)}
+#book.on{display:grid}
+.tome{
+  width:min(720px,92vw);max-height:86vh;display:flex;flex-direction:column;
+  background:linear-gradient(#faf1da,#f0e2ba);
+  border:3px solid #4a3527;border-radius:20px 16px 22px 15px;
+  box-shadow:7px 10px 0 rgba(35,22,13,.35);padding:18px 20px 16px;position:relative;
+  overflow:hidden;
+}
+.tome h2{font-family:'Amatic SC',cursive;font-size:38px;line-height:.95;letter-spacing:.5px;flex:none}
+.tome .sub{font-size:16px;color:#7a5f47;margin-bottom:10px;flex:none}
+.tome .spine{position:absolute;left:50%;top:96px;bottom:56px;width:2px;background:repeating-linear-gradient(#c4a878 0 7px,transparent 7px 14px);pointer-events:none}
+.tome .scroll{flex:1;min-height:0;overflow-y:auto;padding-right:4px;-webkit-overflow-scrolling:touch}
+.tome h3{
+  font-family:'Amatic SC',cursive;font-size:26px;letter-spacing:.5px;
+  margin:8px 0 2px;color:#5d4835;
+}
+.recipes{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px 26px;
+  padding:4px 2px 10px;border-top:2px dashed rgba(74,53,39,.4);
+}
+.rrow .rn em{font-style:normal;font-size:14px;color:#96805f}
+.rrow{display:flex;align-items:baseline;gap:8px;padding:5px 4px;border-bottom:1px dotted rgba(74,53,39,.28)}
+.rrow .dot{width:11px;height:11px;flex:none;border:1.6px solid #4a3527;border-radius:50%;transform:translateY(1px)}
+.rrow .rn{font-size:17px;flex:1;min-width:0}
+.rrow .ri{font-size:17px;letter-spacing:1px;white-space:nowrap}
+.rrow.hidden .rn{color:#9a8567}
+.rrow.hidden .ri{filter:grayscale(1);opacity:.45}
+.tome footer{display:flex;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap;flex:none}
+.tome label{font-size:16px;color:#5d4835;display:flex;align-items:center;gap:6px;cursor:pointer}
+.tome .close{margin-left:auto}
+@media (max-width:640px){ .recipes{grid-template-columns:1fr} .tome .spine{display:none} }
+
+.empty{margin:26px 8px;font-size:16px;color:#7d654d;line-height:1.35;text-align:center;transform:rotate(-1deg)}
+.empty .big{font-size:30px;display:block;margin-bottom:6px;opacity:.65}
+
+/* ---------- FANTASMA DE ARRASTE ---------- */
+#ghost{
+  position:fixed;left:0;top:0;z-index:60;pointer-events:none;display:none;
+  width:48px;height:48px;place-items:center;font-size:27px;
+  background:#fff8e6;border:2.5px solid #4a3527;border-radius:50% 47% 53% 50%;
+  filter:drop-shadow(3px 7px 5px rgba(30,18,10,.4));
+  transform:translate(-50%,-50%) scale(1.12) rotate(-7deg);
+}
+#ghost.on{display:grid}
+
+/* ---------- RESULTADO ---------- */
+#result{
+  position:fixed;inset:0;z-index:70;display:none;place-items:center;
+  background:rgba(40,26,16,.42);
+}
+#result.on{display:grid}
+.card{
+  width:min(330px,86vw);background:linear-gradient(#faf0d8,#f1e0b6);
+  border:3px solid #4a3527;border-radius:22px 18px 24px 16px;
+  padding:20px 20px 18px;text-align:center;position:relative;
+  box-shadow:6px 9px 0 rgba(35,22,13,.35);
+  transform:rotate(-1.3deg) scale(.86);opacity:0;
+  animation:pop .38s cubic-bezier(.2,1.5,.4,1) forwards;
+}
+@keyframes pop{to{transform:rotate(-1.3deg) scale(1);opacity:1}}
+.card::before{
+  content:"";position:absolute;top:-13px;left:50%;transform:translateX(-50%) rotate(-3deg);
+  width:86px;height:22px;background:rgba(232,201,138,.85);border:1.5px solid rgba(74,53,39,.35);
+}
+.card .flask{margin:6px auto 2px;display:block}
+.card .bigicon{
+  width:88px;height:88px;margin:8px auto 2px;display:grid;place-items:center;font-size:46px;
+  border:3px solid #33241c;border-radius:50% 47% 53% 49%;background:#fff8e6;
+}
+.card h2{font-family:'Amatic SC',cursive;font-size:34px;line-height:1;margin:4px 0 2px;letter-spacing:.5px}
+.card .eff{font-size:18px;color:#7a5a34}
+.card .rec-card{font-size:19px;letter-spacing:1px;margin-top:4px;color:#5d4835}
+.card .rec-card .plus{font-size:14px;color:#9a8163;margin:0 2px}
+.card .desc{font-size:16px;color:#6a5545;margin:9px 4px 14px;line-height:1.3}
+.card button{
+  font-family:'Amatic SC',cursive;font-size:25px;letter-spacing:1px;
+  padding:6px 26px 4px;background:#b5762f;color:#fdf4de;
+  border:2.5px solid #4a3527;border-radius:14px 11px 15px 10px;cursor:pointer;
+  box-shadow:3px 4px 0 rgba(74,53,39,.45);
+}
+.card button:hover{background:#c8873b}
+.card button:active{transform:translate(2px,3px);box-shadow:1px 1px 0 rgba(74,53,39,.45)}
+.card .newtag{
+  position:absolute;top:8px;right:-14px;transform:rotate(9deg);
+  font-family:'Amatic SC',cursive;font-size:20px;background:#5f8f4e;color:#f6f0d8;
+  border:2px solid #33241c;padding:1px 10px 0;border-radius:9px 7px 10px 6px;
+}
+
+@media (max-width:620px){
+  #title{font-size:26px}
+  #title small{display:none}
+  #hint{font-size:14px;bottom:8px}
+}
+@media (prefers-reduced-motion:reduce){
+  .card{animation:none;opacity:1;transform:rotate(-1.3deg)}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <main id="lab">
+    <canvas id="scene"></canvas>
+    <h1 id="title">Nutcase Wizard<small>oficina de poções duvidosas</small></h1>
+    <div id="mixbar" class="pbar"><div class="lbl">mexendo…</div><div class="track"><div class="fill"></div></div></div>
+    <div id="grindbar" class="pbar"><div class="lbl">moendo…</div><div class="track"><div class="fill"></div></div></div>
+    <button class="tool-btn" id="dump" hidden>🧹 Esvaziar caldeirão</button>
+    <button class="tool-btn" id="bookBtn">📖 Livro de receitas</button>
+    <p id="hint">Arraste um ingrediente para o caldeirão</p>
+  </main>
+
+  <aside id="panel">
+    <div class="tabs">
+      <button class="tab active" id="tabIng" data-tab="ing">INGREDIENTES</button>
+      <button class="tab" id="tabPot" data-tab="pot">POÇÕES</button>
+    </div>
+    <div class="list" id="listIng"></div>
+    <div class="list" id="listPot" hidden></div>
+  </aside>
+</div>
+
+<div id="ghost"></div>
+<div id="result"></div>
+<div id="book"></div>
+
+<script>
+"use strict";
+(function(){
+
+/* ============================================================
+   DADOS
+   ============================================================ */
+const ING = {
+  // 6 iniciais
+  erva:     {name:'Erva',        emoji:'🌿', prop:'Cura',     color:'#6fae53', sink:0.10, solid:true, base:true},
+  flor:     {name:'Flor',        emoji:'🌸', prop:'Cura',     color:'#e58cb0', sink:0.05, solid:true, base:true},
+  cogumelo: {name:'Cogumelo',    emoji:'🍄', prop:'Veneno',   color:'#b0563f', sink:0.45, solid:true, base:true},
+  pimenta:  {name:'Pimenta',     emoji:'🌶️', prop:'Fogo',     color:'#d1442f', sink:0.35, solid:true, base:true},
+  pedra:    {name:'Pedra',       emoji:'🪨', prop:'Terra',    color:'#8b8478', sink:1.00, solid:true, base:true},
+  agua:     {name:'Água',        emoji:'💧', prop:'Pureza',   color:'#5fa8d3', sink:0.55, solid:false,base:true},
+  // feitos no moedor
+  sal:      {name:'Sal',         emoji:'🧂', prop:'Conserva', color:'#e8e4dc', sink:0.75, solid:true},
+  esporo:   {name:'Esporo',      emoji:'🌫️', prop:'Veneno',   color:'#b9b7a4', sink:0.05, solid:true},
+  semente:  {name:'Semente',     emoji:'🌰', prop:'Vida',     color:'#a8703c', sink:0.65, solid:true},
+  cristal:  {name:'Cristal',     emoji:'✨', prop:'Magia',    color:'#9b7ede', sink:0.70, solid:true},
+  osso:     {name:'Osso',        emoji:'🦴', prop:'Morte',    color:'#ded3b4', sink:0.90, solid:true},
+  pena:     {name:'Pena',        emoji:'🪶', prop:'Ar',       color:'#cfd6df', sink:0.00, solid:true},
+  sombra:   {name:'Pó de Sombra',emoji:'🌑', prop:'Sombra',   color:'#4c4757', sink:0.80, solid:true},
+  sol:      {name:'Pó de Sol',   emoji:'☀️', prop:'Luz',      color:'#f2c33c', sink:0.10, solid:true},
+  // feitos no caldeirão
+  limao:    {name:'Limão',       emoji:'🍋', prop:'Ácido',    color:'#e3d24a', sink:0.30, solid:true},
+  gelo:     {name:'Gelo',        emoji:'🧊', prop:'Frio',     color:'#a8dcf0', sink:0.20, solid:true},
+  mel:      {name:'Mel',         emoji:'🍯', prop:'Doçura',   color:'#d99b2a', sink:0.60, solid:false},
+  cera:     {name:'Cera',        emoji:'🕯️', prop:'Selo',     color:'#e8d9a8', sink:0.15, solid:true}
+};
+const ING_ORDER = ['erva','flor','cogumelo','pimenta','pedra','agua',
+                   'sal','esporo','semente','cristal','osso','pena','sombra','sol',
+                   'limao','gelo','mel','cera'];
+
+// O moedor só aceita sólidos e trabalha com um ou dois ingredientes.
+const GRIND = [
+  {k:['pedra'],           out:'sal',     desc:'A pedra vira sal. Ninguém neste porão sabe explicar.'},
+  {k:['cogumelo'],        out:'esporo',  desc:'Uma nuvem de pó com opinião própria.'},
+  {k:['erva','flor'],     out:'semente', desc:'Sobrou uma semente teimosa no fundo da tigela.'},
+  {k:['pedra','sal'],     out:'cristal', desc:'Prensado até começar a brilhar sozinho.'},
+  {k:['pedra','esporo'],  out:'osso',    desc:'Havia um fóssil dentro da pedra. Agora está aqui.'},
+  {k:['semente','osso'],  out:'pena',    desc:'Um corvo trocou o osso por uma pena. Bom negócio?'},
+  {k:['osso','esporo'],   out:'sombra',  desc:'Esse pó não reflete a luz da vela.'},
+  {k:['cristal','sal'],   out:'sol',     desc:'Brilha e esquenta a mão. Segure pelo frasco.'},
+  {k:['gelo','sal'],      out:'agua',    desc:'O sal derreteu o gelo. Água de volta ao vidro.'}
+];
+const GRIND_FAIL = [
+  'Virou pó. Só pó.',
+  'A tigela está mais suja e você, mais sábio.',
+  'Nada. Mas o barulho foi satisfatório.',
+  'Isso aqui não combina nem moído.'
+];
+
+const RECIPES = [
+  // clássicas
+  // ingredientes que precisam de fogo e caldeirão
+  {k:['agua','semente'],           out:'limao', name:'Limão',  color:'#e3d24a', desc:'Plantou, cresceu e deu fruta. Rápido demais.'},
+  {k:['agua','sombra'],            out:'gelo',  name:'Gelo',   color:'#a8dcf0', desc:'A sombra roubou todo o calor da água.'},
+  {k:['flor','semente','agua'],    out:'mel',   name:'Mel',    color:'#d99b2a', desc:'Abelhas apareceram do nada e foram embora satisfeitas.'},
+  {k:['mel','semente'],            out:'cera',  name:'Cera',   color:'#e8d9a8', desc:'O mel endureceu em volta da semente.'},
+  {k:['erva','flor'],        name:'Poção de Cura',      eff:'Cura +2',      color:'#5fbf6a', desc:'Cheira a jardim depois da chuva.'},
+  {k:['cogumelo','agua'],    name:'Poção de Veneno',    eff:'Veneno +2',    color:'#8fbf3f', desc:'Borbulha sozinha. Isso é normal? Não.'},
+  {k:['pimenta','agua'],     name:'Poção de Fogo',      eff:'Fogo +3',      color:'#ef7a34', desc:'Morna por fora, absurda por dentro.'},
+  {k:['cristal','agua'],     name:'Poção Mágica',       eff:'Magia +4',     color:'#a97bea', desc:'Faz um som de sininho quando ninguém olha.'},
+  {k:['erva','agua'],        name:'Chá de Bruxo',       eff:'Descanso +1',  color:'#a8c96b', desc:'Sem graça, mas honesto.'},
+  {k:['pedra','agua'],       name:'Poção de Lama',      eff:'Terra +1',     color:'#8b6b4a', desc:'Pesada. Muito pesada. Não deixe cair no pé.'},
+  {k:['cristal','flor'],     name:'Poção do Sonho',     eff:'Sonhos +3',    color:'#d3a3e8', desc:'Um cheiro de manhã de domingo.'},
+  {k:['pimenta','pedra'],    name:'Poção Vulcânica',    eff:'Fogo +5',      color:'#c8462a', desc:'A colher derreteu um pouco. Só um pouco.'},
+  {k:['flor','agua'],        name:'Perfume de Fada',    eff:'Charme +1',    color:'#f0a9c9', desc:'As traças da parede fugiram encantadas.'},
+  {k:['cristal','pimenta'],  name:'Poção de Raio',      eff:'Choque +3',    color:'#63c9dd', desc:'Seu cabelo já está em pé. Bom sinal.'},
+  {k:['cogumelo','flor'],    name:'Poção do Riso',      eff:'Riso +2',      color:'#e0b64a', desc:'Rir sozinho num porão é sempre esquisito.'},
+  {k:['erva','cristal'],     name:'Poção do Bosque',    eff:'Vida +3',      color:'#4fae8c', desc:'Nasceu um cogumelo na sua manga.'},
+  {k:['erva','pedra'],       name:'Poção do Musgo',     eff:'Resistência +2',color:'#7c9a5c', desc:'Endurece a pele e amolece o humor.'},
+  {k:['cogumelo','pimenta'], name:'Poção do Delírio',   eff:'Delírio +3',   color:'#c0653f', desc:'A parede acabou de acenar de volta.'},
+  // mel
+  {k:['mel','erva'],         name:'Xarope de Tosse',    eff:'Garganta +2',  color:'#cfa63c', desc:'Ruim o bastante para funcionar.'},
+  {k:['mel','flor'],         name:'Néctar de Abelha',   eff:'Energia +2',   color:'#f2c14e', desc:'Três abelhas apareceram do nada.'},
+  {k:['mel','agua'],         name:'Hidromel Fraco',     eff:'Coragem +1',   color:'#d8a83f', desc:'Coragem suficiente para falar com o gato.'},
+  {k:['mel','pimenta'],      name:'Calda Ardida',       eff:'Fogo +2',      color:'#dd7f2c', desc:'Doce por dois segundos. Só dois.'},
+  {k:['mel','cristal'],      name:'Poção Dourada',      eff:'Sorte +3',     color:'#e9c15c', desc:'Você acha uma moeda no bolso. Não era sua.'},
+  // osso
+  {k:['osso','agua'],        name:'Caldo de Ossos',     eff:'Vigor +2',     color:'#d8cdb0', desc:'Sopa de guerra. Ninguém pede repetição.'},
+  {k:['osso','pedra'],       name:'Poção do Golem',     eff:'Defesa +4',    color:'#9b937f', desc:'Você range ao andar, mas ninguém te derruba.'},
+  {k:['osso','cogumelo'],    name:'Poção Necromante',   eff:'Morte +4',     color:'#7b8a6a', desc:'Algo bateu na porta do porão. Ignore.'},
+  {k:['osso','pimenta'],     name:'Sopro de Dragão',    eff:'Fogo +6',      color:'#e0602a', desc:'Espirre longe das cortinas.'},
+  // pena
+  {k:['pena','agua'],        name:'Poção de Leveza',    eff:'Salto +2',     color:'#cfe3f2', desc:'Seus pés esqueceram o chão por um instante.'},
+  {k:['pena','cristal'],     name:'Poção de Voo',       eff:'Voo +4',       color:'#b9d4f0', desc:'O teto está bem mais perto do que parece.'},
+  {k:['pena','erva'],        name:'Poção da Brisa',     eff:'Velocidade +2',color:'#b8dbc0', desc:'Os papéis da mesa voaram todos. Valeu.'},
+  {k:['pena','mel'],         name:'Poção do Canário',   eff:'Canto +2',     color:'#ecd486', desc:'Você cantou. O caldeirão pediu para parar.'},
+  // gelo
+  {k:['gelo','agua'],        name:'Poção de Gelo',      eff:'Frio +3',      color:'#8fd0ec', desc:'A colher grudou na língua de alguém antes.'},
+  {k:['gelo','pimenta'],     name:'Choque Térmico',     eff:'Fogo e Frio +4',color:'#9ba9d6', desc:'Metade ferve, metade congela. Escolha um lado.'},
+  {k:['gelo','flor'],        name:'Flor de Inverno',    eff:'Calma +2',     color:'#c9e6f2', desc:'Silêncio de manhã com neve.'},
+  {k:['gelo','cristal'],     name:'Inverno Eterno',     eff:'Frio +5',      color:'#7fb8e0', desc:'A vela do canto apagou sozinha.'},
+  {k:['gelo','osso'],        name:'Poção do Espectro',  eff:'Fantasma +3',  color:'#dbe4f2', desc:'Sua sombra atrasou meio segundo.'},
+  // limão
+  {k:['limao','agua'],       name:'Limonada Alquímica', eff:'Refresco +1',  color:'#eae05a', desc:'A única poção que dá para servir em visita.'},
+  {k:['limao','pedra'],      name:'Ácido Corrosivo',    eff:'Corrosão +4',  color:'#c8d84a', desc:'Furou a bancada. De novo.'},
+  {k:['limao','cogumelo'],   name:'Poção Azeda',        eff:'Náusea +2',    color:'#b7c93f', desc:'Seu estômago já pediu demissão.'},
+  {k:['limao','mel'],        name:'Doce e Azedo',       eff:'Apetite +2',   color:'#e8c447', desc:'Estranhamente, isto aqui é comestível.'},
+  {k:['limao','pena'],       name:'Poção Efervescente', eff:'Bolhas +2',    color:'#dbe87f', desc:'Espirra e faz cócegas no nariz.'},
+  {k:['limao','gelo'],       name:'Sorvete de Bruxa',   eff:'Refresco +3',  color:'#d7ef9a', desc:'Dor de cabeça garantida em três goles.'},
+  // elixires (três ingredientes)
+  {k:['erva','flor','agua'],       name:'Elixir da Vida',      eff:'Cura +6',      color:'#63d17a', desc:'A receita que o mestre nunca quis ensinar.'},
+  {k:['cristal','osso','pena'],    name:'Elixir da Alma',      eff:'Espírito +6',  color:'#dbe4f2', desc:'Alguém sussurrou seu nome. Provavelmente você.'},
+  {k:['pimenta','gelo','cristal'], name:'Elixir das Estações', eff:'Equilíbrio +5',color:'#a3d3d8', desc:'Quatro climas dentro de um frasco.'},
+  {k:['mel','limao','agua'],       name:'Poção de Domingo',    eff:'Ânimo +3',     color:'#ecd06a', desc:'Nada de mágico. Só um bom dia.'},
+  {k:['osso','pedra','cogumelo'],  name:'Elixir do Cemitério', eff:'Morte +7',     color:'#6f7f66', desc:'O caldeirão ficou frio de repente.'},
+  // pares restantes — quase toda dupla tem nome próprio
+  {k:['cogumelo','cristal'], name:'Feitiço Torto',        eff:'Magia instável +3', color:'#a06fa0', desc:'Metade dos feitiços sai ao contrário.'},
+  {k:['cogumelo','erva'],    name:'Chão de Floresta',     eff:'Camuflagem +2', color:'#6f8f4e', desc:'Você cheira a mato molhado. Os bichos gostam.'},
+  {k:['cogumelo','gelo'],    name:'Esporo Congelado',     eff:'Torpor +3',     color:'#9fc0a8', desc:'Lento demais até para reclamar do frio.'},
+  {k:['cogumelo','mel'],     name:'Doce Duvidoso',        eff:'Sono +3',       color:'#c99b48', desc:'Gostoso. E depois você acorda no chão.'},
+  {k:['cogumelo','pedra'],   name:'Poção do Trol',        eff:'Força +3',      color:'#8a8560', desc:'Você já não cabe na porta do porão.'},
+  {k:['cogumelo','pena'],    name:'Esporo Voador',        eff:'Alastrar +2',   color:'#b9b28e', desc:'Espirre e a sala inteira vira floresta.'},
+  {k:['cristal','limao'],    name:'Poção Cintilante',     eff:'Clareza +3',    color:'#d6e85f', desc:'Tudo fica nítido, inclusive suas dívidas.'},
+  {k:['cristal','osso'],     name:'Poção do Oráculo',     eff:'Visão +4',      color:'#c4b9e0', desc:'Um crânio antigo respondeu. Mal, mas respondeu.'},
+  {k:['cristal','pedra'],    name:'Cristal Bruto',        eff:'Armadura +3',   color:'#9d9ac0', desc:'Sua pele brilha e arranha os móveis.'},
+  {k:['erva','gelo'],        name:'Chá Gelado do Bruxo',  eff:'Refresco +2',   color:'#9fd0b4', desc:'Melhor que o quente. Não conte a ninguém.'},
+  {k:['erva','limao'],       name:'Tônico Azedo',         eff:'Vitamina +2',   color:'#c3d658', desc:'Cura o resfriado e o bom humor.'},
+  {k:['erva','osso'],        name:'Raiz Antiga',          eff:'Regeneração +4',color:'#8fa878', desc:'Uma raiz brotou do osso. Melhor não olhar.'},
+  {k:['erva','pimenta'],     name:'Pomada Ardida',        eff:'Cura +1, Fogo +1', color:'#b58a3e', desc:'Cura o machucado e inventa outro.'},
+  {k:['flor','limao'],       name:'Poção Cítrica',        eff:'Frescor +2',    color:'#eadf6b', desc:'Cheira a faxina de primavera.'},
+  {k:['flor','osso'],        name:'Poção do Luto',        eff:'Memória +3',    color:'#cdb9c4', desc:'Alguém que você esqueceu volta à lembrança.'},
+  {k:['flor','pedra'],       name:'Jardim de Pedra',      eff:'Paciência +2',  color:'#a9b48c', desc:'Uma flor teimosa cresce na rocha.'},
+  {k:['flor','pena'],        name:'Poção de Pólen',       eff:'Leveza +2',     color:'#f0d7e2', desc:'Você espirra purpurina por uma hora.'},
+  {k:['flor','pimenta'],     name:'Beijo Ardente',        eff:'Paixão +3',     color:'#e05a6a', desc:'Doce, quente e provavelmente má ideia.'},
+  {k:['gelo','mel'],         name:'Mel Congelado',        eff:'Doçura +2',     color:'#dcc27a', desc:'Duro como pedra, doce como desculpa.'},
+  {k:['gelo','pedra'],       name:'Poção da Geleira',     eff:'Resistência +4',color:'#a6c2cf', desc:'Pesa o dobro e range quando você anda.'},
+  {k:['gelo','pena'],        name:'Poção da Nevasca',     eff:'Vento +3',      color:'#d3e7f2', desc:'Tem uma nevasca minúscula girando no frasco.'},
+  {k:['limao','osso'],       name:'Poção do Coveiro',     eff:'Corrosão +3',   color:'#cbd08a', desc:'Dissolve o que não deveria estar aqui.'},
+  {k:['limao','pimenta'],    name:'Molho do Diabo',       eff:'Fogo +4',       color:'#e2802a', desc:'Duas gotas resolvem o jantar e uma inimizade.'},
+  {k:['mel','osso'],         name:'Poção do Cão Fiel',    eff:'Companhia +2',  color:'#d5bd82', desc:'Algo late no escuro. Amigável, espero.'},
+  {k:['mel','pedra'],        name:'Poção de Âmbar',       eff:'Preservação +3',color:'#c9973f', desc:'Um mosquito de mil anos apareceu lá dentro.'},
+  {k:['osso','pena'],        name:'Poção do Corvo',       eff:'Presságio +3',  color:'#a9a496', desc:'Três corvos pousaram na janela. Educados.'},
+  {k:['pedra','pena'],       name:'Poção do Equilíbrio',  eff:'Estabilidade +2',color:'#b4b2a0', desc:'Nem cai, nem voa. Fica.'},
+  {k:['pena','pimenta'],     name:'Poção da Fênix',       eff:'Renascer +5',   color:'#f08a3a', desc:'Suas sobrancelhas voltam a crescer. Talvez.'},
+  // ingrediente sozinho — dá para destilar a essência
+  {k:['erva'],     name:'Extrato de Erva',    eff:'Cura +1',    color:'#7cb95e', desc:'Simples, amargo e confiável.'},
+  {k:['flor'],     name:'Essência Floral',    eff:'Charme +1',  color:'#efa2c2', desc:'Perfuma o porão inteiro por uma semana.'},
+  {k:['cogumelo'], name:'Caldo de Cogumelo',  eff:'Veneno +1',  color:'#a86a4d', desc:'Terroso. Alguém realmente bebe isso.'},
+  {k:['pimenta'],  name:'Óleo de Pimenta',    eff:'Fogo +1',    color:'#dd5533', desc:'Não esfregue os olhos. Sério.'},
+  {k:['agua'],     name:'Água Fervida',       eff:'Pureza +1',  color:'#6fb3da', desc:'Você ferveu água. Um mago e tanto.'},
+  {k:['gelo'],     name:'Água Gelada',        eff:'Frio +1',    color:'#a8dcf0', desc:'O fogo embaixo discorda dessa escolha.'},
+  {k:['pedra'],    name:'Chá de Pedra',       eff:'Terra +1',   color:'#8f887a', desc:'Sabe a pedra. Quem diria.'},
+  {k:['cristal'],  name:'Pó de Cristal',      eff:'Magia +1',   color:'#a98ce6', desc:'Brilha no escuro e some no bolso.'},
+  {k:['mel'],      name:'Xarope Simples',     eff:'Doçura +1',  color:'#dda43a', desc:'Grude garantido em toda a bancada.'},
+  {k:['limao'],    name:'Suco Azedo',         eff:'Ácido +1',   color:'#e6d84f', desc:'Sua boca fechou sozinha.'},
+  {k:['osso'],     name:'Pó de Osso',         eff:'Morte +1',   color:'#ded3b4', desc:'Ingrediente de gente séria.'},
+  {k:['pena'],     name:'Infusão de Pena',    eff:'Ar +1',      color:'#d7dde5', desc:'Leve demais para ficar no caldeirão.'},
+  // mais elixires de três
+  {k:['erva','mel','agua'],        name:'Chá Calmante',        eff:'Sono +4',      color:'#cbd88a', desc:'Dormir é o feitiço mais subestimado.'},
+  {k:['pimenta','limao','mel'],    name:'Molho Secreto',       eff:'Sabor +5',     color:'#e0a02c', desc:'Ninguém sabe a receita. Nem você.'},
+  {k:['gelo','pena','cristal'],    name:'Vento Norte',         eff:'Tempestade +5',color:'#bcdcf0', desc:'A janela abriu sozinha. Feche antes de beber.'},
+  {k:['osso','cogumelo','agua'],   name:'Caldo Sinistro',      eff:'Morte +5',     color:'#8d9b7c', desc:'Serve dois. Nenhum deles vivo.'},
+  {k:['flor','mel','pena'],        name:'Poção da Primavera',  eff:'Alegria +4',   color:'#f3c9a0', desc:'Borboletas apareceram. De onde, ninguém sabe.'},
+  {k:['pedra','cristal','agua'],   name:'Elixir da Montanha',  eff:'Defesa +5',    color:'#93a5b8', desc:'Você fica difícil de derrubar e de convencer.'},
+  {k:['erva','flor','mel'],        name:'Bálsamo Doce',        eff:'Cura +4',      color:'#a9cf7b', desc:'Cheira tão bem que dói menos.'},
+  {k:['limao','gelo','agua'],      name:'Limonada Gelada',     eff:'Refresco +4',  color:'#e5ee8f', desc:'A poção mais normal deste porão.'},
+  {k:['cristal','mel','flor'],     name:'Poção da Fada',       eff:'Desejo +5',    color:'#e9b8e8', desc:'Peça algo pequeno. Ela é literal.'},
+  // poções com os ingredientes novos
+  {k:['sal','agua'],         name:'Salmoura de Bruxa',  eff:'Conserva +2',   color:'#cfd8d2', desc:'Guarda qualquer coisa. Inclusive o que não devia.'},
+  {k:['sal','erva'],         name:'Conserva Verde',     eff:'Cura +2',       color:'#a9c68d', desc:'Dura anos. O sabor também.'},
+  {k:['sal','osso'],         name:'Poção do Múmia',     eff:'Preservação +4',color:'#ddd3ac', desc:'Você para de envelhecer. E de dobrar os joelhos.'},
+  {k:['esporo','agua'],      name:'Névoa Engarrafada',  eff:'Ocultar +3',    color:'#c3c8bd', desc:'Some do frasco quando você abre.'},
+  {k:['esporo','pimenta'],   name:'Poção do Espirro',   eff:'Espirro +4',    color:'#c99a72', desc:'A vela apagou de novo. Culpa sua.'},
+  {k:['semente','erva'],     name:'Seiva de Broto',     eff:'Vida +2',       color:'#93b96a', desc:'Cresce um brotinho no fundo do frasco.'},
+  {k:['semente','cristal'],  name:'Poção do Jardim',    eff:'Vida +5',       color:'#7bc98e', desc:'Plante em qualquer lugar. Qualquer lugar mesmo.'},
+  {k:['sombra','pedra'],     name:'Tinta de Sombra',    eff:'Sombra +3',     color:'#5b5566', desc:'Escreve sozinha se você virar de costas.'},
+  {k:['sombra','flor'],      name:'Flor Noturna',       eff:'Sonhos +4',     color:'#7d6a8c', desc:'Só abre quando ninguém está olhando.'},
+  {k:['sombra','sol'],       name:'Poção do Eclipse',   eff:'Equilíbrio +6', color:'#8a7f6a', desc:'Dia e noite discutindo dentro do vidro.'},
+  {k:['sol','agua'],         name:'Poção do Amanhecer', eff:'Luz +3',        color:'#f2d47a', desc:'Ilumina o porão sem gastar vela.'},
+  {k:['sol','erva'],         name:'Poção do Verão',     eff:'Vigor +3',      color:'#cfd35a', desc:'Cheira a grama quente de dezembro.'},
+  {k:['cera','agua'],        name:'Poção Selada',       eff:'Selo +3',       color:'#e3d9b4', desc:'Fecha feridas, cartas e bocas.'},
+  {k:['cera','pimenta'],     name:'Vela Eterna',        eff:'Luz +4',        color:'#e8b264', desc:'Queima sem acabar. O porão agradece.'},
+  {k:['cera','osso'],        name:'Poção do Lacre',     eff:'Proteção +4',   color:'#d9cfa8', desc:'Nada entra. Nada sai. Nem você.'},
+  {k:['sal','sombra','agua'],name:'Elixir da Meia-Noite',eff:'Sombra +6',    color:'#4f4a5c', desc:'A vela apaga sozinha quando você abre.'},
+  {k:['sol','mel','flor'],   name:'Elixir do Girassol',  eff:'Alegria +6',   color:'#f0c04a', desc:'Você sorri sem motivo por três dias.'},
+  {k:['pimenta','osso','cristal'], name:'Elixir do Demônio',   eff:'Fogo +7',      color:'#c0442a', desc:'O contrato estava nas letras miúdas.'}
+];
+
+const WEIRD = [
+  'Você definitivamente não deveria beber isso.',
+  'A poção piscou de volta para você.',
+  'Cheira a meia velha e a destino.',
+  'Isso aqui provavelmente é ilegal em três reinos.',
+  'A colher pediu demissão.',
+  'Tem alguma coisa nadando lá dentro.'
+];
+
+const BLEND_DESC = [
+  'Funciona. Ninguém sabe exatamente como.',
+  'O caldeirão soltou um arroto de aprovação.',
+  'Tem gosto de terça-feira à tarde.',
+  'Duas gotas bastam. Você fez dois litros.',
+  'A cor muda quando você não está olhando.',
+  'Anote a receita. Você vai esquecer.',
+  'Faz um barulhinho quando o frasco fecha.',
+  'A colher saiu mais leve do que entrou.',
+  'Serve para alguma coisa. Provavelmente.',
+  'Cheira a porão de avó. No bom sentido.',
+  'Fica morna na mão e fria no bolso.',
+  'Um vizinho bateu na porta perguntando o que era esse cheiro.',
+  'A vela inclinou-se para olhar de perto.',
+  'Melhor beber de olhos fechados.',
+  'O gato do beco recusou. Isso diz algo.',
+  'Guarde longe do sol, do fogo e das visitas.'
+];
+
+/* Vocabulário para batizar as misturas sem receita escrita.
+   Nada de citar propriedades: cada combinação vira um nome próprio. */
+const P_NOUN = [
+  {w:'Lágrima',g:'f'},   {w:'Sussurro',g:'m'}, {w:'Suspiro',g:'m'},  {w:'Orvalho',g:'m'},
+  {w:'Xarope',g:'m'},    {w:'Bálsamo',g:'m'},  {w:'Tônico',g:'m'},   {w:'Néctar',g:'m'},
+  {w:'Borra',g:'f'},     {w:'Seiva',g:'f'},    {w:'Melado',g:'m'},   {w:'Espuma',g:'f'},
+  {w:'Vinho',g:'m'},     {w:'Caldo',g:'m'},    {w:'Licor',g:'m'},    {w:'Beberagem',g:'f'},
+  {w:'Unguento',g:'m'},  {w:'Geleia',g:'f'},   {w:'Sereno',g:'m'},   {w:'Resina',g:'f'},
+  {w:'Verniz',g:'m'},    {w:'Aguardente',g:'f'},{w:'Groselha',g:'f'},{w:'Mingau',g:'m'},
+  {w:'Elixir',g:'m'},    {w:'Chorume',g:'m'},  {w:'Calda',g:'f'},    {w:'Infusão',g:'f'},
+  {w:'Garapa',g:'f'},    {w:'Óleo',g:'m'}
+];
+const P_OWNER = [
+  'do Corvo Cego','da Coruja Sonolenta','do Tio Esquecido','da Vizinha Curiosa','do Mestre Errado',
+  'da Torre Tombada','do Poço Fundo','do Sapo Filósofo','da Lua Míope','do Guarda-Chuva',
+  'do Terceiro Andar','do Domingo Chuvoso','do Gato de Três Patas','da Bruxa Aposentada','do Fim da Rua',
+  'do Pântano Educado','da Meia Perdida','do Relógio Quebrado','do Último Inquilino','da Estrada Torta',
+  'do Sino Rachado','da Janela Aberta','do Barbeiro Cansado','da Ponte Velha','do Escriba Bêbado',
+  'da Galinha Sábia','do Porão Alagado','da Segunda-feira','do Espantalho','da Chuva de Ontem',
+  'do Menino Sumido','da Feira Vazia','do Rei Distraído','da Carroça Atolada','do Moinho Parado',
+  'da Cabra Teimosa','do Sótão Trancado','da Vela Curta','do Barco Furado','da Colher Entortada'
+];
+const P_ADJ = [
+  {m:'Rachado',f:'Rachada'},       {m:'Torto',f:'Torta'},           {m:'Sonolento',f:'Sonolenta'},
+  {m:'Falante',f:'Falante'},       {m:'Teimoso',f:'Teimosa'},       {m:'Ranzinza',f:'Ranzinza'},
+  {m:'Apressado',f:'Apressada'},   {m:'Encardido',f:'Encardida'},   {m:'Melancólico',f:'Melancólica'},
+  {m:'Barulhento',f:'Barulhenta'}, {m:'Educado',f:'Educada'},       {m:'Desconfiado',f:'Desconfiada'},
+  {m:'Vagabundo',f:'Vagabunda'},   {m:'Cabisbaixo',f:'Cabisbaixa'}, {m:'Impaciente',f:'Impaciente'},
+  {m:'Mal-humorado',f:'Mal-humorada'},{m:'Distraído',f:'Distraída'},{m:'Insistente',f:'Insistente'},
+  {m:'Arrependido',f:'Arrependida'},{m:'Descalço',f:'Descalça'},    {m:'Enferrujado',f:'Enferrujada'},
+  {m:'Choroso',f:'Chorosa'},       {m:'Risonho',f:'Risonha'},       {m:'Vaidoso',f:'Vaidosa'},
+  {m:'Manco',f:'Manca'},           {m:'Grosseiro',f:'Grosseira'},   {m:'Tímido',f:'Tímida'},
+  {m:'Faminto',f:'Faminta'}
+];
+const P_EFF = ['Tontura','Soluço','Arrepio','Coragem líquida','Sorte torta','Zumbido','Coceira',
+  'Saudade','Insônia','Fôlego','Teimosia','Assobio','Vertigem','Apetite','Silêncio','Calafrio',
+  'Formigamento','Bocejo','Gargalhada','Enjoo','Nostalgia','Esquecimento','Elegância','Sotaque',
+  'Pontaria','Paciência curta','Rouquidão','Boa memória'];
+
+// misturar poções: algumas combinações têm nome escrito, o resto é destilado
+const FUSIONS = [
+  {k:['Poção de Cura','Poção de Veneno'],   name:'Antídoto Perfeito',   eff:'Cura +7',      color:'#7fd0a0', desc:'Um anula o outro e sobra algo bom no meio.'},
+  {k:['Poção de Fogo','Poção de Gelo'],     name:'Vapor Engarrafado',   eff:'Névoa +6',     color:'#c3d5db', desc:'O frasco apitou como uma chaleira.'},
+  {k:['Poção Mágica','Poção do Sonho'],     name:'Sonho Lúcido',        eff:'Sonhos +8',    color:'#c39be8', desc:'Você acorda dentro do próprio sonho. Duas vezes.'},
+  {k:['Poção de Fogo','Poção de Raio'],     name:'Tempestade de Bolso', eff:'Estrondo +8',  color:'#e8a04a', desc:'Troveja baixinho toda vez que você anda.'},
+  {k:['Poção de Cura','Poção de Fogo'],     name:'Cauterizante',        eff:'Cura +5',      color:'#c9a05a', desc:'Dói agora para não doer depois.'},
+  {k:['Poção de Veneno','Poção do Riso'],   name:'Piada de Mau Gosto',  eff:'Riso +6',      color:'#b9c04a', desc:'Todo mundo ri. Alguém passa mal.'},
+  {k:['Perfume de Fada','Poção de Lama'],   name:'Charme Rústico',      eff:'Charme +5',    color:'#c69a86', desc:'Sujo, mas com uma dignidade estranha.'},
+  {k:['Poção de Cura','Poção Mágica'],      name:'Milagre Pequeno',     eff:'Cura +9',      color:'#8ad9b0', desc:'Resolve quase tudo. Quase.'},
+  {k:['Poção de Veneno','Poção de Fogo'],   name:'Fim de Tarde Ruim',   eff:'Ruína +8',     color:'#c1622f', desc:'Guarde no fundo do armário e esqueça.'},
+  {k:['Chá de Bruxo','Poção do Sonho'],     name:'Soneca Profunda',     eff:'Descanso +7',  color:'#b6c6a6', desc:'Você dorme. O caldeirão vigia.'}
+];
+const FUSE_NOUN = [
+  {w:'Destilado',g:'m'},   {w:'Quintessência',g:'f'}, {w:'Reserva',g:'f'},
+  {w:'Concentrado',g:'m'}, {w:'Extrato',g:'m'},       {w:'Refino',g:'m'},
+  {w:'Apogeu',g:'m'},      {w:'Suprassumo',g:'m'},    {w:'Segredo',g:'m'},
+  {w:'Legado',g:'m'},      {w:'Safra',g:'f'},         {w:'Obra-Prima',g:'f'}
+];
+function powerOf(eff){ const m=/\+(\d+)/.exec(eff||''); return m? +m[1] : 2; }
+function strengthen(eff, mult){
+  return (eff||'Efeito +2').replace(/\+(\d+)/, (_,n)=>'+'+Math.min(20, n*mult));
+}
+function fuseName(key){
+  const h1=hashStr(key,0x2545f491), h2=hashStr(key,0x1b873593), h3=hashStr(key,0xcc9e2d51);
+  const n=FUSE_NOUN[h1 % FUSE_NOUN.length];
+  const adj=P_ADJ[h2 % P_ADJ.length];
+  const own=P_OWNER[h3 % P_OWNER.length];
+  return n.w+' '+(n.g==='f'?adj.f:adj.m)+' '+own;
+}
+function fusePotion(ingIds, pots){
+  const names = pots.map(p=>p.name);
+  const uniq  = [...new Set(names)].sort();
+  const total = ingIds.length + pots.length;
+
+  let r=0,g=0,b=0, cnt=0;
+  for(const p of pots){ const c=hex(p.color); r+=c.r; g+=c.g; b+=c.b; cnt++; }
+  for(const id of ingIds){ const c=hex(ING[id].color); r+=c.r; g+=c.g; b+=c.b; cnt++; }
+  const color='#'+[r/cnt,g/cnt,b/cnt].map(v=>Math.round(Math.min(255,v*0.9+22)).toString(16).padStart(2,'0')).join('');
+
+  if(total>=5) return {name:'Poção Estranha', eff:'Efeito ???', color, desc:pick(WEIRD), weird:true};
+
+  // duas doses da mesma poção: fica o dobro de forte
+  if(!ingIds.length && uniq.length===1 && names.length>1){
+    const base=pots[0];
+    const grau = {2:' em Dobro', 3:' em Triplo', 4:' em Quádruplo'}[names.length] || ' em Excesso';
+    return {name: base.name+grau, eff: strengthen(base.eff, names.length),
+            color: base.color, desc:'Duas doses no mesmo frasco. O dobro de tudo, inclusive do problema.', fused:true};
+  }
+  if(!ingIds.length){
+    for(const f of FUSIONS) if(sameSet([...f.k].sort(), uniq)) return f;
+  }
+  const key = uniq.join('|') + '#' + ingIds.join('+');
+  const h = hashStr(key, 0x6b43a9b5);
+  const força = Math.min(14, pots.reduce((a,p)=>a+powerOf(p.eff),0) + ingIds.length + 1);
+  return {name: fuseName(key), eff: P_EFF[h % P_EFF.length]+' +'+força, color,
+          desc: BLEND_DESC[(h>>>11) % BLEND_DESC.length], fused:true};
+}
+
+function hashStr(str, seed){
+  let h=(seed===undefined?2166136261:seed)>>>0;
+  for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); }
+  h^=h>>>15; h=Math.imul(h,2246822507); h^=h>>>13;
+  return h>>>0;
+}
+function blendName(key){
+  const h1=hashStr(key,2166136261), h2=hashStr(key,0x9e3779b9), h3=hashStr(key,0x85ebca6b);
+  const n   = P_NOUN[h1 % P_NOUN.length];
+  const adj = P_ADJ[h2 % P_ADJ.length];
+  const own = P_OWNER[h3 % P_OWNER.length];
+  const a = n.g==='f' ? adj.f : adj.m;
+  switch((h2>>>16) % 16){          // as formas curtas são raras, para não repetir
+    case 0:  return n.w+' '+own;
+    case 1:  return n.w+' '+a;
+    default: return n.w+' '+a+' '+own;
+  }
+}
+function pick(a){ return a[(Math.random()*a.length)|0]; }
+function sameSet(a,b){ return a.length===b.length && a.every((v,i)=>v===b[i]); }
+
+// Combinações sem receita escrita ganham nome próprio, sempre o mesmo para a
+// mesma mistura. A Poção Estranha fica só para as misturas realmente caóticas.
+function blendPotion(set){
+  const props=[...new Set(set.map(id=>ING[id].prop))];
+  let r=0,g=0,b=0;
+  for(const id of set){ const c=hex(ING[id].color); r+=c.r; g+=c.g; b+=c.b; }
+  const n=set.length;
+  const color='#'+[r/n,g/n,b/n].map(v=>Math.round(Math.min(255,v*0.92+14)).toString(16).padStart(2,'0')).join('');
+  if(n>=5 || props.length>=5){
+    return {name:'Poção Estranha', eff:'Efeito ???', color, desc:pick(WEIRD), weird:true};
+  }
+  const key = set.join('+');
+  const h = hashStr(key, 0xc2b2ae35);
+  return {
+    name: blendName(key),
+    eff:  P_EFF[(h>>>13) % P_EFF.length] + ' +' + (2 + (h>>>19) % 5),
+    color,
+    desc: BLEND_DESC[(h>>>23) % BLEND_DESC.length]
+  };
+}
+function recipeFor(ids){
+  const set = [...new Set(ids)].sort();
+  for(const r of RECIPES){
+    if(sameSet([...r.k].sort(), set)) return r;
+  }
+  return blendPotion(set);
+}
+
+// oito vidrarias diferentes: cada poção fica com a sua
+const VIALS = [
+  {d:'M34 12 L34 40 L14 78 Q10 90 24 90 L62 90 Q76 90 72 78 L52 40 L52 12 Z', lv:58, cork:[31,3,24,10]},
+  {d:'M36 12 L36 36 C22 42 16 52 16 62 A27 27 0 0 0 70 62 C70 52 64 42 50 36 L50 12 Z', lv:56, cork:[33,3,20,10]},
+  {d:'M28 20 L28 42 L20 56 Q18 62 18 68 L18 82 Q18 90 26 90 L60 90 Q68 90 68 82 L68 68 Q68 62 66 56 L58 42 L58 20 Z', lv:54, cork:[26,9,34,12]},
+  {d:'M18 36 L18 82 Q18 90 28 90 L58 90 Q68 90 68 82 L68 36 Z', lv:50, cork:[13,25,60,12]},
+  {d:'M33 16 L33 84 Q33 90 43 90 Q53 90 53 84 L53 16 Z', lv:40, cork:[31,6,24,11]},
+  {d:'M43 28 A31 31 0 1 0 43 90 A31 31 0 1 0 43 28 Z', lv:52, cork:[35,15,16,13]},
+  {d:'M20 18 Q20 56 37 63 L37 76 L25 84 Q19 88 26 90 L60 90 Q67 88 61 84 L49 76 L49 63 Q66 56 66 18 Z', lv:34, cork:null},
+  {d:'M28 14 L28 32 Q28 40 38 47 Q27 53 25 66 L25 82 Q25 90 34 90 L52 90 Q61 90 61 82 L61 66 Q59 53 48 47 Q58 40 58 32 L58 14 Z', lv:60, cork:[26,4,34,10]}
+];
+let _clipId=0;
+function shapeFor(name){ return hashStr(name, 0x27d4eb2f) % VIALS.length; }
+function flaskSVG(color, shape, w){
+  const v=VIALS[(shape||0) % VIALS.length];
+  const id='vc'+(_clipId++);
+  const s=w||86, k=v.cork;
+  return '<svg class="flask" width="'+s+'" height="'+Math.round(s*96/86)+'" viewBox="0 0 86 96" aria-hidden="true">'+
+    '<defs><clipPath id="'+id+'"><path d="'+v.d+'"/></clipPath></defs>'+
+    '<path d="'+v.d+'" fill="#eef6f0"/>'+
+    '<g clip-path="url(#'+id+')">'+
+      '<rect x="0" y="'+v.lv+'" width="86" height="96" fill="'+color+'"/>'+
+      '<path d="M0 '+v.lv+' q11 -7 22 0 t22 0 t22 0 t22 0 v12 H0 Z" fill="'+color+'"/>'+
+      '<circle cx="34" cy="'+(v.lv+16)+'" r="3.4" fill="#fff" opacity=".4"/>'+
+      '<circle cx="52" cy="'+(v.lv+24)+'" r="2.4" fill="#fff" opacity=".3"/>'+
+      '<path d="M28 22 L28 '+(v.lv+6)+'" stroke="#fff" stroke-width="4" opacity=".35" stroke-linecap="round"/>'+
+    '</g>'+
+    '<path d="'+v.d+'" fill="none" stroke="#33241c" stroke-width="3.4" stroke-linejoin="round"/>'+
+    (k? '<rect x="'+k[0]+'" y="'+k[1]+'" width="'+k[2]+'" height="'+k[3]+'" rx="3" fill="#8a5a35" stroke="#33241c" stroke-width="3"/>' : '')+
+    '</svg>';
+}
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+const S = {
+  phase:'idle',            // idle | mixing | ready
+  inside:[], falling:[], loose:[], drops:[], ripples:[], bubbles:[], smoke:[], sparks:[],
+  progress:0, stirAcc:0, swirl:0, swirlAng:0,
+  stirring:false, lastAng:null, spoon:{x:0,y:0,idle:true,a:0},
+  liquid:{r:74,g:104,b:86}, target:{r:74,g:104,b:86},
+  hover:false, hoverG:false, dragging:null, potion:null, discovered:{}, t:0, ready_t:0,
+  unlocked:{}, dust:[],
+  grind:{items:[], acc:0, progress:0, active:false, lastAng:0, shake:0, done:false}
+};
+const MAX_ING = 6;
+const LOOSE_LIFE = 12;   // segundos que um ingrediente fica na bancada
+const NEED = Math.PI*2*3.2;
+const NEED_G = Math.PI*2*2.0;
+for(const id of ING_ORDER) if(ING[id].base) S.unlocked[id]=true;
+
+/* ============================================================
+   CANVAS
+   ============================================================ */
+const lab = document.getElementById('lab');
+const cv = document.getElementById('scene');
+const ctx = cv.getContext('2d');
+const bg = document.createElement('canvas');
+const bgx = bg.getContext('2d');
+let W=0,H=0,DPR=1;
+const L = {};
+
+function layout(){
+  const r = lab.getBoundingClientRect();
+  W = Math.max(320, r.width|0); H = Math.max(320, r.height|0);
+  DPR = Math.min(2, window.devicePixelRatio||1);
+  cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+  bg.width = W*DPR; bg.height = H*DPR; bgx.setTransform(DPR,0,0,DPR,0,0);
+
+  L.R  = Math.max(76, Math.min(W*0.27, H*0.29));
+  L.cx = W*0.47;
+  L.rimY = H*0.585;
+  L.rx = L.R; L.ry = L.R*0.30;
+  L.irx = L.R*0.92; L.iry = L.ry*0.92;
+  L.depth = L.R*1.02;
+  L.surfY = L.rimY + L.R*0.05;
+  L.tableY = L.rimY + L.R*1.34;
+  L.spoonRest = {x:L.cx + L.R*0.98, y:L.rimY - L.R*0.30};
+  if(S.spoon.idle){ S.spoon.x=L.spoonRest.x; S.spoon.y=L.spoonRest.y; }
+
+  // moedor na bancada, ao lado do caldeirão
+  L.gr = Math.max(44, Math.min(L.R*0.52, 88));
+  const roomRight = W - (L.cx + L.R);
+  L.gx = roomRight > L.gr*2.6 ? Math.min(W - L.gr*1.35, L.cx + L.R + L.gr*1.35)
+                              : Math.max(L.gr*1.35, L.cx - L.R - L.gr*1.35);
+  L.gy = Math.min(H - L.gr*0.9, L.tableY + L.gr*0.18);
+
+  const gb = document.getElementById('grindbar');
+  gb.style.left = L.gx+'px';
+  gb.style.top  = Math.max(40, L.gy - L.gr*2.1)+'px';
+
+  const mb = document.getElementById('mixbar');
+  mb.style.top = Math.max(50, L.rimY - L.R*1.55) + 'px';
+  drawBackground();
+}
+
+/* --- pseudo-aleatório determinístico (traço "à mão" estável) --- */
+function rnd(i){ const x = Math.sin(i*127.1+311.7)*43758.5453; return x - Math.floor(x); }
+function wob(seed,i,amp){ return (rnd(seed*13.3+i*2.17)-0.5)*amp; }
+
+function wobblyEllipse(c,cx,cy,rx,ry,seed,amp,a0,a1){
+  a0 = a0===undefined? 0 : a0; a1 = a1===undefined? Math.PI*2 : a1;
+  const steps = 40;
+  for(let i=0;i<=steps;i++){
+    const a = a0 + (a1-a0)*i/steps;
+    const w = 1 + wob(seed,i,amp);
+    const x = cx + Math.cos(a)*rx*w, y = cy + Math.sin(a)*ry*w;
+    i===0 ? c.moveTo(x,y) : c.lineTo(x,y);
+  }
+}
+function wobblyLine(c,x1,y1,x2,y2,seed,amp){
+  const n=6; c.moveTo(x1,y1);
+  for(let i=1;i<=n;i++){
+    const t=i/n;
+    c.lineTo(x1+(x2-x1)*t + wob(seed,i,amp), y1+(y2-y1)*t + wob(seed,i+40,amp));
+  }
+}
+function wobblyRect(c,x,y,w,h,seed,amp){
+  wobblyLine(c,x,y,x+w,y,seed,amp); wobblyLine(c,x+w,y,x+w,y+h,seed+1,amp);
+  wobblyLine(c,x+w,y+h,x,y+h,seed+2,amp); wobblyLine(c,x,y+h,x,y,seed+3,amp); c.closePath();
+}
+
+/* ============================================================
+   FUNDO ESTÁTICO (parede, bancada, tralhas)
+   ============================================================ */
+function drawBackground(){
+  const c = bgx;
+  c.clearRect(0,0,W,H);
+
+  // parede de pergaminho
+  const g = c.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#e6d3ac'); g.addColorStop(.62,'#dcc69c'); g.addColorStop(1,'#cdb488');
+  c.fillStyle=g; c.fillRect(0,0,W,H);
+  c.save();
+  for(let i=0;i<420;i++){
+    const x=rnd(i)*W, y=rnd(i+7.7)*H*0.9, s=0.6+rnd(i+3.3)*1.6;
+    c.fillStyle='rgba(120,95,62,'+(0.04+rnd(i+9)*0.07)+')';
+    c.beginPath(); c.arc(x,y,s,0,6.283); c.fill();
+  }
+  c.restore();
+  // vinheta
+  const v = c.createRadialGradient(W*0.47,H*0.5,Math.min(W,H)*0.28,W*0.47,H*0.5,Math.max(W,H)*0.78);
+  v.addColorStop(0,'rgba(0,0,0,0)'); v.addColorStop(1,'rgba(50,32,18,.34)');
+  c.fillStyle=v; c.fillRect(0,0,W,H);
+
+  c.lineJoin='round'; c.lineCap='round';
+  const ink = '#4a3527';
+
+  // rabiscos de parede
+  c.save(); c.globalAlpha=.30; c.strokeStyle=ink; c.lineWidth=1.6;
+  scribbleStar(c, W*0.14, H*0.17, 15);
+  scribbleStar(c, W*0.24, H*0.09, 9);
+  scribbleMoon(c, W*0.63, H*0.13, 15);
+  c.beginPath(); wobblyLine(c, W*0.66,H*0.22, W*0.78,H*0.22, 21, 2.2); c.stroke();
+  c.beginPath(); wobblyLine(c, W*0.66,H*0.255, W*0.735,H*0.255, 22, 2.2); c.stroke();
+  c.font = "17px 'Patrick Hand', cursive"; c.fillStyle=ink;
+  c.save(); c.translate(W*0.655,H*0.185); c.rotate(-.05); c.fillText('mexer sempre p/ o mesmo lado!', 0,0); c.restore();
+  c.restore();
+
+  // prateleira
+  const shY = H*0.30, shX = W*0.06, shW = Math.min(W*0.30, 250);
+  c.save();
+  c.fillStyle='#7c4e2c'; c.strokeStyle=ink; c.lineWidth=2.4;
+  c.beginPath(); wobblyRect(c, shX, shY, shW, 11, 5, 1.6); c.fill(); c.stroke();
+  c.fillStyle='rgba(60,38,22,.45)';
+  c.beginPath(); wobblyRect(c, shX+14, shY+11, 9, 16, 6, 1.2); c.fill();
+  c.beginPath(); wobblyRect(c, shX+shW-24, shY+11, 9, 16, 7, 1.2); c.fill();
+  c.restore();
+  bottle(c, shX+30, shY, 15, 34, '#8fbf3f', 11);
+  bottle(c, shX+62, shY, 12, 26, '#63c9dd', 12);
+  bottle(c, shX+90, shY, 17, 38, '#d3a3e8', 13);
+  bottle(c, shX+124, shY, 11, 22, '#ef7a34', 14);
+  if(shW>200) bottle(c, shX+152, shY, 14, 30, '#e0b64a', 15);
+
+  // ervas penduradas
+  hangingHerb(c, W*0.82, 0, H*0.20, 31);
+  hangingHerb(c, W*0.88, 0, H*0.14, 32);
+
+  // bancada
+  const tY = L.tableY;
+  c.save();
+  c.fillStyle='#7c4e2c'; c.strokeStyle=ink; c.lineWidth=3;
+  c.beginPath(); wobblyRect(c, -8, tY, W+16, H-tY+10, 41, 2.2); c.fill(); c.stroke();
+  c.fillStyle='#6a4124';
+  c.beginPath(); wobblyRect(c, -8, tY+15, W+16, H-tY, 42, 2); c.fill();
+  c.strokeStyle='rgba(45,26,13,.35)'; c.lineWidth=1.6;
+  for(let i=0;i<7;i++){
+    const y = tY + 22 + i*Math.max(13,(H-tY)/8);
+    if(y>H) break;
+    c.beginPath(); wobblyLine(c, -5, y, W+5, y, 50+i, 3.2); c.stroke();
+  }
+  // manchas de poção na mesa
+  c.fillStyle='rgba(80,120,70,.20)';
+  c.beginPath(); wobblyEllipse(c, W*0.20, tY+26, 26, 8, 61, .28); c.fill();
+  c.fillStyle='rgba(150,80,120,.16)';
+  c.beginPath(); wobblyEllipse(c, W*0.74, tY+34, 20, 7, 62, .3); c.fill();
+  c.restore();
+
+  // livro aberto
+  drawOpenBook(c, W*0.155, tY+6, Math.min(120, W*0.16));
+  // papéis
+  paper(c, W*0.30, tY+30, 54, 38, -7, 71);
+  paper(c, W*0.335, tY+40, 46, 32, 5, 72);
+  // frasco vazio + ingredientes soltos
+  bottle(c, W*0.86, tY-2, 13, 28, 'rgba(190,220,205,.5)', 81, true);
+  c.font = Math.max(15, L.R*0.13)+"px serif";
+  c.save(); c.translate(W*0.68, tY+22); c.rotate(-.2); c.fillText('🌿',0,0); c.restore();
+  c.save(); c.translate(W*0.895, tY+30); c.rotate(.3); c.fillText('🍄',0,0); c.restore();
+  c.save(); c.translate(W*0.245, tY+52); c.rotate(.1); c.fillText('🪨',0,0); c.restore();
+
+  // vela (base — a chama é animada)
+  candleBase(c, W*0.905, tY-4);
+
+  // lenha sob o caldeirão
+  logs(c, L.cx, L.rimY + L.depth + L.R*0.20, L.R);
+}
+
+function scribbleStar(c,x,y,r){
+  c.beginPath();
+  for(let i=0;i<10;i++){
+    const a=-Math.PI/2 + i*Math.PI/5, rr = i%2? r*0.42:r;
+    const px=x+Math.cos(a)*rr, py=y+Math.sin(a)*rr;
+    i?c.lineTo(px,py):c.moveTo(px,py);
+  }
+  c.closePath(); c.stroke();
+}
+function scribbleMoon(c,x,y,r){
+  c.beginPath(); c.arc(x,y,r,Math.PI*0.35,Math.PI*1.65); c.stroke();
+  c.beginPath(); c.arc(x-r*0.35,y,r*0.95,Math.PI*1.62,Math.PI*0.38,true); c.stroke();
+}
+function bottle(c,x,baseY,w,h,color,seed,empty){
+  c.save(); c.translate(x,baseY); c.rotate(wob(seed,1,.06));
+  c.strokeStyle='#4a3527'; c.lineWidth=2; c.lineJoin='round';
+  c.beginPath();
+  c.moveTo(-w/2,0); c.lineTo(-w/2,-h*0.68);
+  c.lineTo(-w*0.20,-h*0.86); c.lineTo(-w*0.20,-h);
+  c.lineTo(w*0.20,-h); c.lineTo(w*0.20,-h*0.86);
+  c.lineTo(w/2,-h*0.68); c.lineTo(w/2,0); c.closePath();
+  c.fillStyle='rgba(226,240,232,.55)'; c.fill();
+  if(!empty){ c.save(); c.clip(); c.fillStyle=color; c.globalAlpha=.72;
+    c.fillRect(-w,-h*0.52,w*2,h); c.restore(); }
+  c.stroke();
+  c.fillStyle='#8a5a35'; c.fillRect(-w*0.22,-h-4,w*0.44,5);
+  c.strokeRect(-w*0.22,-h-4,w*0.44,5);
+  c.globalAlpha=.4; c.strokeStyle='#fff'; c.lineWidth=1.6;
+  c.beginPath(); c.moveTo(-w*0.22,-h*0.55); c.lineTo(-w*0.22,-h*0.18); c.stroke();
+  c.restore();
+}
+function hangingHerb(c,x,y0,len,seed){
+  c.save(); c.strokeStyle='#4a3527'; c.lineWidth=2; c.lineCap='round';
+  c.beginPath(); wobblyLine(c,x,y0,x,y0+len*0.35,seed,1.5); c.stroke();
+  c.strokeStyle='#5c7c46'; c.lineWidth=2.4;
+  c.beginPath(); wobblyLine(c,x,y0+len*0.35,x,y0+len,seed+1,2.4); c.stroke();
+  c.lineWidth=1.8;
+  for(let i=0;i<7;i++){
+    const yy=y0+len*0.42+i*(len*0.085), s=(i%2?1:-1)*(9+rnd(seed+i)*7);
+    c.beginPath(); c.moveTo(x,yy); c.quadraticCurveTo(x+s*0.6,yy+3,x+s,yy+11); c.stroke();
+  }
+  c.restore();
+}
+function drawOpenBook(c,x,y,w){
+  const h=w*0.42;
+  c.save(); c.translate(x,y); c.rotate(-.05);
+  c.strokeStyle='#4a3527'; c.lineWidth=2.2; c.lineJoin='round';
+  c.fillStyle='#f3e6c4';
+  c.beginPath();
+  c.moveTo(-w/2,0); c.quadraticCurveTo(-w*0.25,-h*0.35,0,-h*0.12);
+  c.quadraticCurveTo(w*0.25,-h*0.35,w/2,0);
+  c.quadraticCurveTo(w*0.25,h*0.12,0,h*0.30);
+  c.quadraticCurveTo(-w*0.25,h*0.12,-w/2,0); c.closePath();
+  c.fill(); c.stroke();
+  c.beginPath(); c.moveTo(0,-h*0.12); c.lineTo(0,h*0.30); c.stroke();
+  c.strokeStyle='rgba(90,68,50,.45)'; c.lineWidth=1.2;
+  for(let i=0;i<4;i++){
+    const yy=-h*0.02+i*h*0.09;
+    c.beginPath(); wobblyLine(c,-w*0.40,yy,-w*0.08,yy+h*0.03,90+i,1.4); c.stroke();
+    c.beginPath(); wobblyLine(c, w*0.08,yy+h*0.03,w*0.40,yy,95+i,1.4); c.stroke();
+  }
+  c.restore();
+}
+function paper(c,x,y,w,h,rot,seed){
+  c.save(); c.translate(x,y); c.rotate(rot*Math.PI/180);
+  c.fillStyle='#f6ebcf'; c.strokeStyle='#4a3527'; c.lineWidth=1.8;
+  c.beginPath(); wobblyRect(c,-w/2,-h/2,w,h,seed,1.6); c.fill(); c.stroke();
+  c.strokeStyle='rgba(90,68,50,.42)'; c.lineWidth=1.1;
+  for(let i=0;i<4;i++){
+    const yy=-h/2+9+i*7;
+    c.beginPath(); wobblyLine(c,-w/2+6,yy,w/2-8-rnd(seed+i)*14,yy,seed+i,1.2); c.stroke();
+  }
+  c.restore();
+}
+function mortar(c,x,y,w){
+  c.save(); c.translate(x,y);
+  c.strokeStyle='#4a3527'; c.lineWidth=2.2; c.fillStyle='#c8b394';
+  c.beginPath(); c.moveTo(-w/2,-w*0.30);
+  c.quadraticCurveTo(-w*0.42,w*0.28,0,w*0.32);
+  c.quadraticCurveTo(w*0.42,w*0.28,w/2,-w*0.30);
+  c.closePath(); c.fill(); c.stroke();
+  c.fillStyle='#b8a284';
+  c.beginPath(); c.ellipse(0,-w*0.30,w/2,w*0.13,0,0,6.283); c.fill(); c.stroke();
+  c.strokeStyle='#8a5a35'; c.lineWidth=4; c.lineCap='round';
+  c.beginPath(); c.moveTo(-w*0.10,-w*0.34); c.lineTo(w*0.30,-w*0.78); c.stroke();
+  c.restore();
+}
+function candleBase(c,x,tY){
+  c.save(); c.translate(x,tY);
+  c.strokeStyle='#4a3527'; c.lineWidth=2; c.fillStyle='#f0e2c0';
+  c.beginPath(); wobblyRect(c,-8,-46,16,46,101,1.2); c.fill(); c.stroke();
+  c.fillStyle='rgba(215,197,160,.9)';
+  c.beginPath(); c.moveTo(-8,-40); c.quadraticCurveTo(-11,-26,-7,-14); c.lineTo(-8,-40); c.fill();
+  c.fillStyle='#8a5a35';
+  c.beginPath(); c.ellipse(0,2,17,5,0,0,6.283); c.fill(); c.stroke();
+  c.strokeStyle='#33241c'; c.lineWidth=2;
+  c.beginPath(); c.moveTo(0,-46); c.lineTo(0,-52); c.stroke();
+  c.restore();
+}
+function logs(c,cx,y,R){
+  c.save(); c.strokeStyle='#4a3527'; c.lineWidth=2.4;
+  const w=R*0.95;
+  c.fillStyle='#6a4526';
+  c.beginPath(); wobblyRect(c,cx-w*0.5,y-6,w,13,111,1.6); c.fill(); c.stroke();
+  c.save(); c.translate(cx,y-2); c.rotate(-.22);
+  c.beginPath(); wobblyRect(c,-w*0.42,-6,w*0.84,12,112,1.6); c.fill(); c.stroke();
+  c.restore();
+  c.fillStyle='#8a6440';
+  c.beginPath(); c.ellipse(cx-w*0.5,y+0.5,4,6,0,0,6.283); c.fill(); c.stroke();
+  c.beginPath(); c.ellipse(cx+w*0.5,y+0.5,4,6,0,0,6.283); c.fill(); c.stroke();
+  c.restore();
+}
+
+/* ============================================================
+   CALDEIRÃO + LÍQUIDO
+   ============================================================ */
+function bodyPath(c, inner){
+  const rx = inner? L.irx : L.rx, ry = inner? L.iry : L.ry;
+  const d = inner? L.depth*0.97 : L.depth;
+  c.beginPath();
+  c.ellipse(L.cx, L.rimY, rx, ry, 0, Math.PI, Math.PI*2);
+  c.bezierCurveTo(L.cx+rx*1.10, L.rimY+d*0.52, L.cx+rx*0.66, L.rimY+d, L.cx, L.rimY+d);
+  c.bezierCurveTo(L.cx-rx*0.66, L.rimY+d, L.cx-rx*1.10, L.rimY+d*0.52, L.cx-rx, L.rimY);
+  c.closePath();
+}
+function surfaceY(x, t){
+  const k = 2.4/Math.max(1,L.rx);
+  const dip = S.swirl*0.9;
+  return L.surfY + Math.sin((x-L.cx)*k + t*1.5)*(2.2+Math.abs(S.swirl)*1.6)
+                 + Math.sin((x-L.cx)*k*2.1 - t*2.1)*1.2
+                 - Math.cos((x-L.cx)/Math.max(1,L.rx)*1.6)*dip*2.2;
+}
+function liquidColor(a){
+  const l=S.liquid; return 'rgba('+(l.r|0)+','+(l.g|0)+','+(l.b|0)+','+a+')';
+}
+function shade(f){
+  const l=S.liquid;
+  return 'rgb('+Math.min(255,l.r*f|0)+','+Math.min(255,l.g*f|0)+','+Math.min(255,l.b*f|0)+')';
+}
+
+function drawCauldron(t){
+  const c = ctx;
+
+  // fogo atrás
+  drawFire(t);
+
+  // corpo externo
+  c.save();
+  bodyPath(c,false);
+  const bg2 = c.createLinearGradient(L.cx-L.rx,0,L.cx+L.rx,0);
+  bg2.addColorStop(0,'#2f2d33'); bg2.addColorStop(.35,'#4a474f'); bg2.addColorStop(.7,'#38363d'); bg2.addColorStop(1,'#26242a');
+  c.fillStyle=bg2; c.fill();
+  c.strokeStyle='#211f24'; c.lineWidth=3.4; c.stroke();
+  // brilho lateral
+  c.save(); c.clip();
+  c.globalAlpha=.16; c.fillStyle='#fff';
+  c.beginPath(); c.ellipse(L.cx-L.rx*0.45, L.rimY+L.depth*0.42, L.rx*0.16, L.depth*0.28, -0.25,0,6.283); c.fill();
+  c.globalAlpha=.13; c.fillStyle='#000';
+  c.beginPath(); c.ellipse(L.cx+L.rx*0.55, L.rimY+L.depth*0.5, L.rx*0.34, L.depth*0.42, 0.1,0,6.283); c.fill();
+  c.restore();
+  c.restore();
+
+  // interior
+  c.save();
+  bodyPath(c,true); c.clip();
+  c.fillStyle='#1b1a1f'; c.fill();
+
+  // líquido
+  const top = L.surfY;
+  c.beginPath();
+  const x0=L.cx-L.irx, x1=L.cx+L.irx;
+  c.moveTo(x0, surfaceY(x0,t));
+  for(let x=x0;x<=x1;x+=6) c.lineTo(x, surfaceY(x,t));
+  c.lineTo(x1, L.rimY+L.depth+6); c.lineTo(x0, L.rimY+L.depth+6); c.closePath();
+  const lg = c.createLinearGradient(0, top-L.ry, 0, L.rimY+L.depth);
+  lg.addColorStop(0, shade(1.28)); lg.addColorStop(.35, shade(1.0)); lg.addColorStop(1, shade(0.52));
+  c.fillStyle=lg; c.fill();
+
+  // elipse de superfície
+  c.save();
+  c.globalAlpha=.55;
+  c.beginPath(); c.ellipse(L.cx, top, L.irx*0.99, L.iry*(1-Math.min(.3,Math.abs(S.swirl)*.28)), 0,0,6.283);
+  c.fillStyle=shade(1.22); c.fill();
+  c.restore();
+
+  // redemoinho
+  if(Math.abs(S.swirl)>0.05){
+    c.save(); c.globalAlpha=Math.min(.4,Math.abs(S.swirl)*0.45); c.strokeStyle=shade(1.5); c.lineWidth=2;
+    for(let i=0;i<3;i++){
+      const rr = L.irx*(0.30+i*0.22);
+      c.beginPath();
+      c.ellipse(L.cx, top+2, rr, rr*(L.iry/L.irx), 0, S.swirlAng+i*1.7, S.swirlAng+i*1.7+2.1);
+      c.stroke();
+    }
+    c.restore();
+  }
+
+  drawInside(t);
+  drawBubbles();
+
+  // sombra interna
+  c.save();
+  const sg=c.createLinearGradient(0,top-L.ry*2,0,top+L.ry);
+  sg.addColorStop(0,'rgba(10,8,12,.75)'); sg.addColorStop(1,'rgba(10,8,12,0)');
+  c.fillStyle=sg; c.fillRect(L.cx-L.rx, top-L.ry*3, L.rx*2, L.ry*4);
+  c.restore();
+
+  // ondas do splash
+  for(const r of S.ripples){
+    c.save(); c.globalAlpha=r.a*0.7; c.strokeStyle=shade(1.6); c.lineWidth=2;
+    c.beginPath(); c.ellipse(r.x, surfaceY(r.x,t), r.r, r.r*(L.iry/L.irx), 0,0,6.283); c.stroke();
+    c.restore();
+  }
+  c.restore();
+
+  // aro frontal
+  c.save();
+  c.beginPath(); c.ellipse(L.cx, L.rimY, L.rx, L.ry, 0, 0, Math.PI*2);
+  c.lineWidth = Math.max(7, L.R*0.075);
+  const rg = c.createLinearGradient(L.cx-L.rx,0,L.cx+L.rx,0);
+  rg.addColorStop(0,'#3a383f'); rg.addColorStop(.3,'#605c66'); rg.addColorStop(.6,'#403e45'); rg.addColorStop(1,'#2b292f');
+  c.strokeStyle=rg; c.stroke();
+  c.lineWidth=1.8; c.strokeStyle='rgba(20,18,22,.9)';
+  c.beginPath(); c.ellipse(L.cx, L.rimY, L.rx+L.R*0.036, L.ry+L.R*0.030,0,0,6.283); c.stroke();
+  c.beginPath(); c.ellipse(L.cx, L.rimY, L.rx-L.R*0.036, L.ry-L.R*0.030,0,0,6.283); c.stroke();
+  // reflexo no aro
+  c.globalAlpha=.35; c.strokeStyle='#cfc9d6'; c.lineWidth=Math.max(2,L.R*0.02);
+  c.beginPath(); c.ellipse(L.cx,L.rimY,L.rx-L.R*0.005,L.ry-L.R*0.004,0,Math.PI*0.62,Math.PI*0.95); c.stroke();
+  c.restore();
+
+  // indicador de soltar
+  if(S.hover && S.dragging){
+    c.save();
+    c.globalAlpha = 0.55 + Math.sin(t*6)*0.18;
+    c.strokeStyle = '#f4e2b0'; c.lineWidth=3; c.setLineDash([9,8]); c.lineDashOffset = -t*22;
+    c.beginPath(); c.ellipse(L.cx, L.rimY, L.rx+12, L.ry+9, 0,0,6.283); c.stroke();
+    c.setLineDash([]);
+    c.globalAlpha=.9; c.fillStyle='#f6ecd2';
+    c.font = "18px 'Patrick Hand', cursive"; c.textAlign='center';
+    c.fillText('solte aqui', L.cx, L.rimY - L.ry - 20);
+    c.textAlign='start';
+    c.restore();
+  }
+}
+
+function drawFire(t){
+  const c=ctx;
+  const baseY = L.rimY + L.depth + L.R*0.16;
+  const heat = S.phase==='ready' ? 1.35 : 1;
+  c.save();
+  c.globalCompositeOperation='lighter';
+  for(let i=0;i<7;i++){
+    const ph = t*3 + i*1.9;
+    const fx = L.cx + (i-3)*L.R*0.16 + Math.sin(ph*0.9)*3;
+    const hgt = (L.R*0.30 + Math.sin(ph)*L.R*0.09 + rnd(i)*L.R*0.06)*heat;
+    const wdt = L.R*0.10 + Math.cos(ph*1.3)*2;
+    const g=c.createLinearGradient(0,baseY,0,baseY-hgt);
+    g.addColorStop(0,'rgba(240,120,30,.55)'); g.addColorStop(.55,'rgba(245,175,55,.42)'); g.addColorStop(1,'rgba(255,225,140,0)');
+    c.fillStyle=g;
+    c.beginPath();
+    c.moveTo(fx-wdt, baseY);
+    c.quadraticCurveTo(fx-wdt*0.8, baseY-hgt*0.6, fx+Math.sin(ph)*4, baseY-hgt);
+    c.quadraticCurveTo(fx+wdt*0.8, baseY-hgt*0.6, fx+wdt, baseY);
+    c.closePath(); c.fill();
+  }
+  c.restore();
+  // brilho no chão
+  c.save(); c.globalAlpha=.30;
+  const gg=c.createRadialGradient(L.cx,baseY,2,L.cx,baseY,L.R*1.1);
+  gg.addColorStop(0,'rgba(255,170,70,.55)'); gg.addColorStop(1,'rgba(255,150,60,0)');
+  c.fillStyle=gg; c.beginPath(); c.ellipse(L.cx,baseY,L.R*1.1,L.R*0.30,0,0,6.283); c.fill();
+  c.restore();
+}
+
+function drawInside(t){
+  const c=ctx;
+  for(const it of S.inside){
+    const x = L.cx + Math.cos(it.ang)*it.rad;
+    const sy = surfaceY(x,t);
+    const y = sy + Math.sin(it.ang)*it.rad*(L.iry/L.irx) + it.depth + Math.sin(t*2+it.ph)*2;
+    const fade = it.alpha;
+    if(fade<=0.02) continue;
+    c.save();
+    c.globalAlpha = fade*0.95;
+    c.translate(x,y); c.rotate(it.rot);
+    const sz = it.size*(0.72+fade*0.28);
+    itemGlyph(c, it, sz);
+    c.restore();
+    // véu do líquido sobre o que afundou
+    const sub = Math.max(0, Math.min(1, it.depth/(L.depth*0.35)));
+    if(sub>0.02){
+      c.save(); c.globalAlpha = fade*sub*0.55; c.fillStyle = shade(0.85);
+      c.beginPath(); c.ellipse(x,y,it.size*0.62,it.size*0.62,0,0,6.283); c.fill();
+      c.restore();
+    }
+  }
+}
+
+function drawBubbles(){
+  const c=ctx;
+  for(const b of S.bubbles){
+    c.save(); c.globalAlpha=b.a*0.55;
+    c.strokeStyle=shade(1.7); c.lineWidth=1.4; c.fillStyle=shade(1.35);
+    c.beginPath(); c.arc(b.x,b.y,b.r,0,6.283); c.fill(); c.stroke();
+    c.restore();
+  }
+}
+
+function drawFalling(t){
+  const c=ctx;
+  for(const f of S.falling){
+    c.save(); c.translate(f.x,f.y); c.rotate(f.rot);
+    c.globalAlpha=.22; c.fillStyle='#000';
+    c.beginPath(); c.ellipse(2,4,f.size*0.42,f.size*0.42,0,0,6.283); c.fill();
+    c.globalAlpha=1;
+    itemGlyph(c, f, f.size);
+    c.restore();
+  }
+  for(const d of S.drops){
+    c.save(); c.globalAlpha=d.a; c.fillStyle=shade(1.35);
+    c.beginPath(); c.arc(d.x,d.y,d.r,0,6.283); c.fill(); c.restore();
+  }
+}
+
+function drawLoose(t){
+  const c=ctx;
+  for(const o of S.loose){
+    const a = o.life>2.4 ? 1 : Math.max(0, o.life/2.4);
+    const blink = o.life<2.4 ? 0.55+0.45*Math.sin(t*11) : 1;
+    c.save();
+    c.globalAlpha = a*0.26*blink;
+    c.fillStyle='#241a12';
+    c.beginPath(); c.ellipse(o.x, o.gy+o.size*0.30, o.size*0.42, o.size*0.15, 0,0,6.283); c.fill();
+    c.globalAlpha = a*blink;
+    c.translate(o.x,o.y); c.rotate(o.rot);
+    c.font=o.size+"px serif"; c.textAlign='center'; c.textBaseline='middle';
+    c.fillText(ING[o.id].emoji,0,0);
+    c.restore();
+  }
+}
+
+function drawGrinder(t){
+  const c=ctx, gr=L.gr;
+  const sh = S.grind.shake;
+  const gx = L.gx + (sh? Math.sin(t*40)*sh*2.2 : 0);
+  const gy = L.gy + (sh? Math.cos(t*33)*sh*1.4 : 0);
+
+  // sombra na bancada
+  c.save(); c.globalAlpha=.22; c.fillStyle='#241a12';
+  c.beginPath(); c.ellipse(gx, gy+gr*0.62, gr*0.86, gr*0.20, 0,0,6.283); c.fill(); c.restore();
+
+  // tigela
+  c.save();
+  c.strokeStyle='#4a3527'; c.lineWidth=2.6; c.lineJoin='round';
+  const bowl = c.createLinearGradient(gx-gr,0,gx+gr,0);
+  bowl.addColorStop(0,'#b09b7c'); bowl.addColorStop(.35,'#d3c0a0'); bowl.addColorStop(1,'#9d8a6e');
+  c.fillStyle=bowl;
+  c.beginPath();
+  c.moveTo(gx-gr, gy);
+  c.quadraticCurveTo(gx-gr*0.86, gy+gr*0.72, gx, gy+gr*0.66);
+  c.quadraticCurveTo(gx+gr*0.86, gy+gr*0.72, gx+gr, gy);
+  c.closePath(); c.fill(); c.stroke();
+
+  // interior
+  c.save();
+  c.beginPath(); c.ellipse(gx, gy, gr*0.86, gr*0.30, 0,0,6.283);
+  c.fillStyle='#6d5c46'; c.fill();
+  c.clip();
+  c.fillStyle='#5b4c39';
+  c.beginPath(); c.ellipse(gx, gy+gr*0.16, gr*0.72, gr*0.26, 0,0,6.283); c.fill();
+  // conteúdo
+  const its=S.grind.items;
+  for(let i=0;i<its.length;i++){
+    const o=its[i];
+    const px = gx + (its.length===1? 0 : (i===0?-1:1)*gr*0.28) + (sh?Math.sin(t*37+i)*3:0);
+    const py = gy + gr*0.12 + (sh?Math.cos(t*29+i)*2:0);
+    c.save(); c.globalAlpha = 1 - S.grind.progress*0.9;
+    c.translate(px,py); c.rotate(o.rot + S.grind.progress*4*(i?1:-1));
+    c.font=Math.max(17,gr*0.42)+"px serif"; c.textAlign='center'; c.textBaseline='middle';
+    c.fillText(ING[o.id].emoji,0,0);
+    c.restore();
+  }
+  // pó acumulado
+  if(S.grind.progress>0.15){
+    c.globalAlpha=Math.min(.85,S.grind.progress);
+    c.fillStyle= S.grind.out ? ING[S.grind.out].color : '#cbbda2';
+    c.beginPath(); c.ellipse(gx, gy+gr*0.22, gr*0.55*S.grind.progress, gr*0.16*S.grind.progress, 0,0,6.283); c.fill();
+  }
+  c.restore();
+
+  // aro
+  c.beginPath(); c.ellipse(gx, gy, gr*0.88, gr*0.31, 0,0,6.283);
+  c.lineWidth=Math.max(5,gr*0.13); c.strokeStyle='#c2ad8c'; c.stroke();
+  c.lineWidth=1.8; c.strokeStyle='#4a3527';
+  c.beginPath(); c.ellipse(gx, gy, gr*0.88+gr*0.06, gr*0.31+gr*0.05,0,0,6.283); c.stroke();
+  c.beginPath(); c.ellipse(gx, gy, gr*0.88-gr*0.06, gr*0.31-gr*0.05,0,0,6.283); c.stroke();
+  c.restore();
+
+  // pilão
+  const ang = S.grind.active
+    ? Math.atan2(S.grind.py-gy, S.grind.px-gx)
+    : -0.9;
+  const rr = S.grind.active ? gr*0.34 : gr*0.30;
+  const px = gx + Math.cos(ang)*rr, py = gy + Math.sin(ang)*rr*0.4;
+  c.save(); c.translate(px, py); c.rotate(S.grind.active ? ang*0.25+0.35 : 0.45);
+  c.strokeStyle='#8a5a35'; c.lineWidth=Math.max(6,gr*0.16); c.lineCap='round';
+  c.beginPath(); c.moveTo(0,0); c.lineTo(gr*0.30,-gr*0.88); c.stroke();
+  c.fillStyle='#a87a4c'; c.strokeStyle='#4a3527'; c.lineWidth=2;
+  c.beginPath(); c.ellipse(0,0,gr*0.16,gr*0.13,0.3,0,6.283); c.fill(); c.stroke();
+  c.restore();
+
+  // poeirinha
+  for(const d of S.dust){
+    c.save(); c.globalAlpha=d.a; c.fillStyle=d.color;
+    c.beginPath(); c.arc(d.x,d.y,d.r,0,6.283); c.fill(); c.restore();
+  }
+
+  // indicação de soltar
+  if(S.hoverG && S.dragging){
+    c.save();
+    c.globalAlpha=0.55+Math.sin(t*6)*0.18;
+    c.strokeStyle='#f4e2b0'; c.lineWidth=3; c.setLineDash([8,7]); c.lineDashOffset=-t*20;
+    c.beginPath(); c.ellipse(gx, gy, gr*1.05, gr*0.44, 0,0,6.283); c.stroke();
+    c.setLineDash([]);
+    c.fillStyle='#f6ecd2'; c.font="17px 'Patrick Hand', cursive"; c.textAlign='center';
+    c.fillText(S.grind.items.length>=2 ? 'moedor cheio' : 'moer', gx, gy-gr*0.62);
+    c.textAlign='start';
+    c.restore();
+  }
+}
+
+function drawSpoon(t){
+  const c=ctx;
+  const sp=S.spoon;
+  let x=sp.x, y=sp.y, ang;
+  if(S.stirring){
+    ang = Math.atan2(y-L.rimY, x-L.cx) + Math.PI*0.5;
+  } else {
+    ang = -0.62 + Math.sin(t*1.2)*0.015;
+  }
+  const len = L.R*0.95;
+  c.save(); c.translate(x,y); c.rotate(ang);
+  // cabo
+  c.strokeStyle='#8a5a35'; c.lineWidth=Math.max(5,L.R*0.055); c.lineCap='round';
+  c.beginPath(); c.moveTo(0,0); c.lineTo(0,-len); c.stroke();
+  c.strokeStyle='rgba(60,36,18,.55)'; c.lineWidth=1.4;
+  c.beginPath(); c.moveTo(-1,-len*0.25); c.lineTo(-1,-len*0.72); c.stroke();
+  // pá
+  c.fillStyle='#96663d'; c.strokeStyle='#4a3527'; c.lineWidth=2.2;
+  c.beginPath(); c.ellipse(0, L.R*0.10, L.R*0.115, L.R*0.16, 0,0,6.283);
+  c.fill(); c.stroke();
+  c.globalAlpha=.3; c.fillStyle='#fff';
+  c.beginPath(); c.ellipse(-L.R*0.03, L.R*0.06, L.R*0.04, L.R*0.06,0,0,6.283); c.fill();
+  c.restore();
+}
+
+function drawSmoke(){
+  const c=ctx;
+  for(const s of S.smoke){
+    c.save(); c.globalAlpha=s.a;
+    c.fillStyle = s.tint || 'rgba(232,222,205,.85)';
+    c.beginPath(); c.arc(s.x,s.y,s.r,0,6.283); c.fill();
+    c.restore();
+  }
+}
+function drawSparks(){
+  const c=ctx;
+  for(const s of S.sparks){
+    c.save(); c.globalAlpha=s.a; c.translate(s.x,s.y); c.rotate(s.rot);
+    c.fillStyle=s.color;
+    c.beginPath();
+    for(let i=0;i<8;i++){
+      const a=i*Math.PI/4, r=i%2? s.r*0.35:s.r;
+      const px=Math.cos(a)*r, py=Math.sin(a)*r;
+      i?c.lineTo(px,py):c.moveTo(px,py);
+    }
+    c.closePath(); c.fill(); c.restore();
+  }
+}
+function drawCandleFlame(t){
+  const c=ctx;
+  const x=W*0.905, y=L.tableY-56;
+  const f=1+Math.sin(t*7.3)*0.14+Math.sin(t*3.1)*0.08;
+  c.save(); c.globalCompositeOperation='lighter';
+  const g=c.createRadialGradient(x,y,1,x,y,16*f);
+  g.addColorStop(0,'rgba(255,240,190,.85)'); g.addColorStop(.4,'rgba(250,180,70,.45)'); g.addColorStop(1,'rgba(250,160,60,0)');
+  c.fillStyle=g; c.beginPath(); c.arc(x,y,16*f,0,6.283); c.fill();
+  c.fillStyle='rgba(255,225,150,.95)';
+  c.beginPath(); c.moveTo(x-3.2,y+4); c.quadraticCurveTo(x-3.6,y-3, x+Math.sin(t*6)*1.2, y-9*f);
+  c.quadraticCurveTo(x+3.6,y-3, x+3.2,y+4); c.closePath(); c.fill();
+  c.restore();
+}
+function drawGlow(t){
+  if(S.phase!=='ready' && S.progress<0.55) return;
+  const c=ctx;
+  const k = S.phase==='ready' ? 1 : (S.progress-0.55)/0.45;
+  const pulse = 0.72+Math.sin(t*3)*0.14;
+  c.save(); c.globalCompositeOperation='lighter'; c.globalAlpha=0.30*k*pulse;
+  const g=c.createRadialGradient(L.cx,L.surfY,L.R*0.1,L.cx,L.surfY,L.R*1.5);
+  g.addColorStop(0, shade(1.7)); g.addColorStop(1,'rgba(0,0,0,0)');
+  c.fillStyle=g; c.beginPath(); c.arc(L.cx,L.surfY,L.R*1.5,0,6.283); c.fill();
+  c.restore();
+}
+
+/* ============================================================
+   LOOP
+   ============================================================ */
+let last=performance.now();
+function frame(now){
+  const dt = Math.min(0.05,(now-last)/1000); last=now;
+  S.t += dt;
+  update(dt);
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(bg,0,0,W,H);
+  drawCandleFlame(S.t);
+  drawCauldron(S.t);
+  drawSmoke();
+  drawFalling(S.t);
+  drawLoose(S.t);
+  drawGrinder(S.t);
+  drawSpoon(S.t);
+  drawGlow(S.t);
+  drawSparks();
+  requestAnimationFrame(frame);
+}
+
+function update(dt){
+  // cor do líquido
+  S.liquid.r += (S.target.r-S.liquid.r)*Math.min(1,dt*2.2);
+  S.liquid.g += (S.target.g-S.liquid.g)*Math.min(1,dt*2.2);
+  S.liquid.b += (S.target.b-S.liquid.b)*Math.min(1,dt*2.2);
+
+  // queda
+  for(let i=S.falling.length-1;i>=0;i--){
+    const f=S.falling[i];
+    f.vy += 1500*dt; f.y += f.vy*dt; f.x += f.vx*dt; f.rot += f.vr*dt;
+    if(f.to==='g'){
+      if(f.y >= L.gy + L.gr*0.08){
+        S.falling.splice(i,1);
+        puffDust(f.x, L.gy, 7, '#cbbda2');
+        S.grind.shake = 0.9;
+        addToGrinder(f.id);
+      }
+      continue;
+    }
+    const sy = surfaceY(f.x, S.t);
+    if(f.y >= sy){
+      S.falling.splice(i,1);
+      splash(f.x, sy, f.vy);
+      addInside(f, f.x, sy);
+    }
+  }
+  // poeira do moedor
+  for(let i=S.dust.length-1;i>=0;i--){
+    const d=S.dust[i];
+    d.x+=d.vx*dt; d.y+=d.vy*dt; d.vy+=110*dt; d.a-=dt*1.1; d.r+=dt*3;
+    if(d.a<=0) S.dust.splice(i,1);
+  }
+  S.grind.shake = Math.max(0, S.grind.shake - dt*2.2);
+  // ingredientes largados na bancada
+  for(let i=S.loose.length-1;i>=0;i--){
+    const o=S.loose[i];
+    if(!o.rest){
+      o.vy += 1500*dt; o.x += o.vx*dt; o.y += o.vy*dt; o.rot += o.vr*dt;
+      if(o.x<22 || o.x>W-22){ o.vx*=-0.45; o.x=Math.max(22,Math.min(W-22,o.x)); }
+      if(o.y>=o.gy){
+        o.y=o.gy;
+        if(o.vy>150 && o.bounces<2){ o.vy*=-0.30; o.vx*=0.5; o.vr*=0.45; o.bounces++; }
+        else { o.rest=true; o.vy=0; o.vx=0; }
+      }
+    } else {
+      o.rot += (o.restRot-o.rot)*Math.min(1,dt*5);
+    }
+    o.life -= dt;
+    if(o.life<=0) S.loose.splice(i,1);
+  }
+
+  // gotas
+  for(let i=S.drops.length-1;i>=0;i--){
+    const d=S.drops[i];
+    d.vy += 1200*dt; d.x+=d.vx*dt; d.y+=d.vy*dt; d.a-=dt*1.5;
+    if(d.a<=0) S.drops.splice(i,1);
+  }
+  // ondas
+  for(let i=S.ripples.length-1;i>=0;i--){
+    const r=S.ripples[i]; r.r += L.R*1.3*dt; r.a -= dt*1.2;
+    if(r.a<=0) S.ripples.splice(i,1);
+  }
+  // rodopio
+  S.swirl *= Math.pow(0.16, dt);
+  if(Math.abs(S.swirl)<0.001) S.swirl=0;
+  S.swirlAng += S.swirl*dt*2.2;
+
+  // ingredientes na mistura
+  for(let i=S.inside.length-1;i>=0;i--){
+    const it=S.inside[i];
+    it.ang += (S.swirl*1.5 + it.drift)*dt;
+    it.rot += (S.swirl*1.1 + it.spin)*dt;
+    it.rad += ((it.baseRad + Math.abs(S.swirl)*L.irx*0.11) - it.rad)*Math.min(1,dt*2.4);
+    const tgt = it.targetDepth*(1 - Math.min(0.55,Math.abs(S.swirl)*0.30));
+    it.depth += (tgt-it.depth)*Math.min(1,dt*1.6);
+    // só a opacidade some conforme dissolve — o ingrediente continua na receita
+    if(S.phase!=='idle') it.alpha = Math.max(0, 1 - S.progress*1.04);
+    if(S.phase==='ready') it.alpha = Math.max(0, it.alpha - dt*1.6);
+  }
+
+  // bolhas
+  if(S.inside.length || S.phase==='ready'){
+    const rate = S.phase==='ready'? 22 : (6 + S.progress*16);
+    if(Math.random() < rate*dt){
+      const a=Math.random()*6.283, rr=Math.random()*L.irx*0.8;
+      S.bubbles.push({x:L.cx+Math.cos(a)*rr, y:L.surfY+Math.abs(Math.sin(a))*L.iry*0.7+L.R*0.16,
+                      r:1.5+Math.random()*3.2, a:1, vy:-(12+Math.random()*26)});
+    }
+  }
+  for(let i=S.bubbles.length-1;i>=0;i--){
+    const b=S.bubbles[i]; b.y+=b.vy*dt; b.x+=Math.sin(S.t*3+b.r)*8*dt;
+    if(b.y < surfaceY(b.x,S.t)+1){ b.a-=dt*4; b.r+=dt*6; } 
+    if(b.a<=0) S.bubbles.splice(i,1);
+  }
+
+  // fumaça
+  const smokeRate = S.phase==='ready' ? 12 : (S.inside.length? 1.6 : 0.7);
+  if(Math.random() < smokeRate*dt){
+    S.smoke.push({x:L.cx+(Math.random()-0.5)*L.irx*0.8, y:L.surfY-4,
+                  r:3+Math.random()*5, a:0.34+Math.random()*0.18,
+                  vx:(Math.random()-0.5)*12, vy:-(16+Math.random()*18),
+                  tint: S.phase==='ready' ? liquidColor(0.5) : 'rgba(236,226,208,.8)'});
+  }
+  for(let i=S.smoke.length-1;i>=0;i--){
+    const s=S.smoke[i];
+    s.x+=s.vx*dt + Math.sin(S.t*1.4+s.r)*7*dt; s.y+=s.vy*dt;
+    s.r+=9*dt; s.a-=dt*0.20; s.vy*=0.995;
+    if(s.a<=0) S.smoke.splice(i,1);
+  }
+  // faíscas
+  for(let i=S.sparks.length-1;i>=0;i--){
+    const s=S.sparks[i];
+    s.x+=s.vx*dt; s.y+=s.vy*dt; s.vy+=260*dt; s.rot+=s.vr*dt; s.a-=dt*0.8;
+    if(s.a<=0) S.sparks.splice(i,1);
+  }
+
+  // ficar pronta
+  if(S.phase==='ready'){
+    S.ready_t += dt;
+    if(S.ready_t>1.05 && !S.cardShown){ S.cardShown=true; showPending(); }
+  }
+
+  // colher volta ao descanso
+  if(!S.stirring && !S.spoon.idle){
+    S.spoon.x += (L.spoonRest.x-S.spoon.x)*Math.min(1,dt*5);
+    S.spoon.y += (L.spoonRest.y-S.spoon.y)*Math.min(1,dt*5);
+    if(Math.abs(S.spoon.x-L.spoonRest.x)<1.2){ S.spoon.idle=true; S.spoon.x=L.spoonRest.x; S.spoon.y=L.spoonRest.y; }
+  }
+}
+
+/* ============================================================
+   AÇÕES DO CALDEIRÃO
+   ============================================================ */
+function splash(x,y,vy){
+  S.ripples.push({x:x, r:L.R*0.08, a:1});
+  const n = 5 + Math.min(6, vy/260|0);
+  for(let i=0;i<n;i++){
+    const a = -Math.PI/2 + (Math.random()-0.5)*2.0;
+    const sp = 60+Math.random()*150;
+    S.drops.push({x:x, y:y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp*0.9, r:1.6+Math.random()*2.6, a:1});
+  }
+}
+function drawVialGlyph(c, size, color){
+  const w=size*0.60, h=size*0.92;
+  c.save();
+  c.lineJoin='round';
+  c.strokeStyle='#33241c'; c.lineWidth=Math.max(1.3,size*0.075);
+  c.beginPath();
+  c.moveTo(-w*0.26,-h*0.44); c.lineTo(-w*0.26,-h*0.10);
+  c.quadraticCurveTo(-w*0.56,0,-w*0.56,h*0.16);
+  c.quadraticCurveTo(-w*0.56,h*0.5,0,h*0.5);
+  c.quadraticCurveTo(w*0.56,h*0.5,w*0.56,h*0.16);
+  c.quadraticCurveTo(w*0.56,0,w*0.26,-h*0.10);
+  c.lineTo(w*0.26,-h*0.44); c.closePath();
+  c.fillStyle='#eef6f0'; c.fill();
+  c.save(); c.clip();
+  c.fillStyle=color; c.fillRect(-w, h*0.02, w*2, h);
+  c.restore();
+  c.stroke();
+  c.fillStyle='#8a5a35';
+  c.beginPath(); c.rect(-w*0.30,-h*0.60,w*0.60,h*0.17); c.fill(); c.stroke();
+  c.restore();
+}
+function itemGlyph(c, o, size){
+  if(o.pot){ drawVialGlyph(c, size, o.pot.color); return; }
+  c.font=size+"px serif"; c.textAlign='center'; c.textBaseline='middle';
+  c.fillText(ING[o.id].emoji,0,0);
+}
+function itemColor(o){ return o.pot ? o.pot.color : ING[o.id].color; }
+
+function addInside(item, x, sy){
+  const sink = item.pot ? 0.22 : ING[item.id].sink;
+  const dx = Math.max(-L.irx*0.72, Math.min(L.irx*0.72, x-L.cx));
+  const rad = Math.abs(dx) + L.irx*0.08;
+  const ang = dx>=0 ? (Math.random()-0.5)*0.7 : Math.PI + (Math.random()-0.5)*0.7;
+  S.inside.push({
+    id:item.id, pot:item.pot||null, ang, rad, baseRad:rad,
+    depth: 0, targetDepth: sink*L.depth*0.34,
+    size: Math.max(20, L.R*0.20), rot:(Math.random()-0.5)*0.6,
+    spin:(Math.random()-0.5)*0.8, drift:(Math.random()-0.5)*0.25,
+    ph: Math.random()*6.283, alpha:1
+  });
+  blendTarget();
+  if(S.phase==='idle') S.phase='mixing';
+  setMix(S.progress, S.progress>0 ? undefined : 'gire a colher');
+  updateHint();
+  document.getElementById('dump').hidden = false;
+}
+function puffDust(x,y,n,color){
+  for(let i=0;i<n;i++){
+    S.dust.push({x:x+(Math.random()-0.5)*L.gr*0.7, y:y-Math.random()*6,
+      vx:(Math.random()-0.5)*70, vy:-(20+Math.random()*60),
+      r:1.4+Math.random()*2.8, a:0.75, color:color});
+  }
+}
+function grindFor(ids){
+  const set=[...new Set(ids)].sort();
+  for(const g of GRIND) if(sameSet([...g.k].sort(), set)) return g;
+  return null;
+}
+function addToGrinder(id){
+  const g=S.grind;
+  if(g.done || g.items.length>=2) return;
+  g.items.push({id, rot:(Math.random()-0.5)*0.8});
+  g.acc=0; g.progress=0;
+  const m=grindFor(g.items.map(o=>o.id));
+  g.out = m? m.out : null;
+  setGrind(0, g.items.length>=1 ? 'gire o pilão' : '');
+  updateHint();
+  document.getElementById('dump').hidden=false;
+}
+function clearGrinder(){
+  S.grind.items.length=0; S.grind.acc=0; S.grind.progress=0;
+  S.grind.done=false; S.grind.out=null; S.grind.active=false;
+  setGrind(0,'');
+  document.getElementById('grindbar').classList.remove('on');
+}
+function finishGrind(){
+  const g=S.grind;
+  const ids=g.items.map(o=>o.id);
+  const m=grindFor(ids);
+  g.done=true;
+  puffDust(L.gx, L.gy, 16, m? ING[m.out].color : '#cbbda2');
+  g.shake=1.2;
+  if(m){
+    S.pending={kind:'ing', id:m.out, desc:m.desc, from:'moedor', ids:[...new Set(ids)].sort()};
+  } else {
+    S.pending={kind:'dust', desc:pick(GRIND_FAIL), ids:[...new Set(ids)].sort()};
+  }
+  setTimeout(showPending, 420);
+}
+
+function blendTarget(){
+  if(!S.inside.length){ S.target={r:74,g:104,b:86}; return; }
+  let r=0,g=0,b=0;
+  for(const it of S.inside){
+    const c=hex(itemColor(it)); r+=c.r; g+=c.g; b+=c.b;
+  }
+  const n=S.inside.length;
+  // um pouco mais escuro que a média — ainda é caldo, não tinta
+  S.target={ r:(r/n)*0.72+20, g:(g/n)*0.72+22, b:(b/n)*0.72+20 };
+}
+function hex(h){
+  return {r:parseInt(h.slice(1,3),16), g:parseInt(h.slice(3,5),16), b:parseInt(h.slice(5,7),16)};
+}
+
+function mixLine(items){
+  const seen=[];
+  for(const o of items){
+    const k = o.pot ? 'p:'+o.pot.name : 'i:'+o.id;
+    if(!seen.some(x=>x.k===k)) seen.push({k, o});
+  }
+  return seen.map(x=> x.o.pot
+      ? '<span class="potref">🧪 '+x.o.pot.name+'</span>'
+      : ING[x.o.id].emoji
+  ).join(' <span class="plus">+</span> ');
+}
+function finish(){
+  if(!S.inside.length) return;
+  const ingIds = S.inside.filter(i=>!i.pot).map(i=>i.id);
+  const pots   = S.inside.filter(i=>i.pot).map(i=>i.pot);
+  const line   = mixLine(S.inside);
+  const rec = pots.length ? fusePotion(ingIds, pots) : recipeFor(ingIds);
+  S.potion = Object.assign({}, rec, {ids:[...new Set(ingIds)].sort(), line:line});
+  S.pending = rec.out
+    ? {kind:'ing', id:rec.out, desc:rec.desc, from:'caldeirao', ids:S.potion.ids, line:line}
+    : {kind:'potion', potion:S.potion, from:'caldeirao', line:line};
+  S.phase='ready'; S.ready_t=0; S.cardShown=false;
+  const c=hex(rec.color);
+  S.target={r:c.r,g:c.g,b:c.b};
+  for(let i=0;i<26;i++){
+    const a=-Math.PI/2+(Math.random()-0.5)*2.4, sp=90+Math.random()*220;
+    S.sparks.push({x:L.cx+(Math.random()-0.5)*L.irx, y:L.surfY, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp,
+                   r:2.5+Math.random()*4, a:1, rot:Math.random()*6.28, vr:(Math.random()-0.5)*7,
+                   color: i%3? rec.color : '#f7e6b8'});
+  }
+  setMix(1,'poção pronta ✨');
+  updateHint();
+}
+
+function resetCauldron(refund){
+  if(refund) for(const it of S.inside) if(it.pot) givePotion(it.pot);
+  S.inside.length=0; S.bubbles.length=0; S.sparks.length=0;
+  S.progress=0; S.stirAcc=0; S.phase='idle'; S.potion=null; S.cardShown=false;
+  S.target={r:74,g:104,b:86};
+  setMix(0,'mexendo…'); document.getElementById('mixbar').classList.remove('on');
+  document.getElementById('dump').hidden = S.grind.items.length===0;
+  updateHint();
+}
+
+/* ============================================================
+   BARRA / DICAS
+   ============================================================ */
+const mixEl = document.getElementById('mixbar');
+const fillEl = mixEl.querySelector('.fill');
+const lblEl = mixEl.querySelector('.lbl');
+function setMix(p, label){
+  fillEl.style.width = Math.round(p*100)+'%';
+  lblEl.textContent = label!==undefined ? label : ('mexendo… ' + Math.round(p*100) + '%');
+  mixEl.classList.toggle('on', p>0 || S.phase==='mixing');
+}
+const gEl = document.getElementById('grindbar');
+const gFill = gEl.querySelector('.fill');
+const gLbl = gEl.querySelector('.lbl');
+function setGrind(pr, label){
+  gFill.style.width = Math.round(pr*100)+'%';
+  gLbl.textContent = label!==undefined ? label : ('moendo… '+Math.round(pr*100)+'%');
+  gEl.classList.toggle('on', S.grind.items.length>0);
+}
+const hintEl = document.getElementById('hint');
+function updateHint(){
+  let txt;
+  if(S.phase==='ready') txt = 'A poção está pronta — guarde no frasco';
+  else if(S.grind.items.length && !S.inside.length) txt = 'Gire o pilão no moedor para triturar';
+  else if(S.inside.length) txt = 'Agora gire a colher dentro do caldeirão';
+  else if(S.loose.length) txt = 'O que caiu na bancada pode ser arrastado de novo';
+  else if(Object.keys(S.discovered).length) txt = 'Poções guardadas também podem voltar ao caldeirão';
+  else txt = 'Arraste um ingrediente para o caldeirão ou para o moedor';
+  hintEl.textContent = txt;
+}
+
+/* ============================================================
+   PAINEL LATERAL
+   ============================================================ */
+const listIng = document.getElementById('listIng');
+const listPot = document.getElementById('listPot');
+function buildIngredients(){
+  listIng.innerHTML='';
+  for(const id of ING_ORDER){
+    if(!S.unlocked[id]) continue;
+    const g=ING[id];
+    const el=document.createElement('div');
+    el.className='chip'; el.dataset.id=id;
+    el.innerHTML = '<span class="bubble">'+g.emoji+'</span><span><span class="nm">'+g.name+'</span><br><span class="pr">'+g.prop+
+      (g.solid?'':' · líquido')+'</span></span>';
+    listIng.appendChild(el);
+  }
+  const left = ING_ORDER.filter(id=>!S.unlocked[id]).length;
+  if(left){
+    const p=document.createElement('p'); p.className='empty';
+    p.innerHTML = left+' ingrediente'+(left>1?'s':'')+' por descobrir.<br>Triture no moedor ou ferva no caldeirão.';
+    listIng.appendChild(p);
+  }
+}
+function recipeLine(ids){
+  return ids.map(id=>ING[id].emoji).join(' <span class="plus">+</span> ');
+}
+function takePotion(name){
+  const d=S.discovered[name]; if(!d) return null;
+  const snap={name:d.name, eff:d.eff, color:d.color, ids:d.ids, line:d.line};
+  d.n--; if(d.n<=0) delete S.discovered[name];
+  buildPotions();
+  return snap;
+}
+function givePotion(p){
+  const d=S.discovered[p.name];
+  if(d) d.n++;
+  else S.discovered[p.name]={name:p.name, eff:p.eff, color:p.color, ids:p.ids, line:p.line, n:1};
+  buildPotions();
+}
+function buildPotions(){
+  listPot.innerHTML='';
+  const keys=Object.keys(S.discovered);
+  if(!keys.length){
+    listPot.innerHTML='<p class="empty"><span class="big">🧪</span>Nenhuma poção guardada ainda.<br>Misture dois ingredientes e veja no que dá.</p>';
+  } else {
+    for(const k of keys){
+      const p=S.discovered[k];
+      const el=document.createElement('div');
+      el.className='chip potion';
+      el.dataset.name=p.name;
+      el.innerHTML='<span class="bubble vial" style="background:'+p.color+'2e">'+
+          flaskSVG(p.color, shapeFor(p.name), 22)+'</span>'+
+        '<span><span class="nm">'+p.name+'</span>'+
+        '<br><span class="rec">'+(p.line || recipeLine(p.ids))+'</span>'+
+        '<br><span class="pr">'+p.eff+'</span></span>'+
+        (p.n>1?'<span class="tally">×'+p.n+'</span>':'');
+      listPot.appendChild(el);
+    }
+  }
+  if(keys.length){
+    const tip=document.createElement('p'); tip.className='empty';
+    tip.innerHTML='Arraste uma poção de volta ao caldeirão<br>para fundir com outra.';
+    listPot.appendChild(tip);
+  }
+  const known = RECIPES.filter(r=>S.discovered[r.name]).length;
+  const left = RECIPES.length - known;
+  if(left>0){
+    const p=document.createElement('p'); p.className='empty';
+    p.innerHTML = left+' receita'+(left>1?'s':'')+' ainda escondida'+(left>1?'s':'')+'.<br>Abra o livro na bancada para conferir.';
+    listPot.appendChild(p);
+  }
+}
+buildIngredients(); buildPotions();
+
+const tabIng=document.getElementById('tabIng'), tabPot=document.getElementById('tabPot');
+function selectTab(which){
+  const ing = which==='ing';
+  tabIng.classList.toggle('active',ing); tabPot.classList.toggle('active',!ing);
+  listIng.hidden=!ing; listPot.hidden=ing;
+  if(!ing) buildPotions();
+}
+tabIng.addEventListener('click',()=>selectTab('ing'));
+tabPot.addEventListener('click',()=>selectTab('pot'));
+
+/* ============================================================
+   ARRASTAR & SOLTAR
+   ============================================================ */
+const ghost=document.getElementById('ghost');
+function labPos(e){
+  const r=lab.getBoundingClientRect();
+  return {x:e.clientX-r.left, y:e.clientY-r.top};
+}
+function overGrinder(p){
+  const dx=(p.x-L.gx)/(L.gr*1.12), dy=(p.y-L.gy)/(L.gr*0.60);
+  return dx*dx+dy*dy < 1;
+}
+function canGrind(){ return !S.grind.done && S.grind.items.length<2; }
+function overCauldron(p){
+  const dx=(p.x-L.cx)/(L.rx*1.12), dy=(p.y-L.rimY)/(L.R*0.86);
+  return dx*dx+dy*dy < 1;
+}
+
+function startDrag(item, e, chip){
+  S.dragging = Object.assign({chip: chip||null}, item);
+  if(chip) chip.classList.add('grabbing');
+  ghost.innerHTML = item.pot
+    ? flaskSVG(item.pot.color, shapeFor(item.pot.name), 30)
+    : ING[item.id].emoji;
+  ghost.classList.toggle('vialghost', !!item.pot);
+  ghost.classList.add('on');
+  moveGhost(e);
+  window.addEventListener('pointermove', onDragMove);
+  window.addEventListener('pointerup', onDragEnd);
+  window.addEventListener('pointercancel', onDragEnd);
+}
+listIng.addEventListener('pointerdown', e=>{
+  const chip=e.target.closest('.chip');
+  if(!chip || chip.classList.contains('locked')) return;
+  e.preventDefault();
+  startDrag({id:chip.dataset.id}, e, chip);
+});
+listPot.addEventListener('pointerdown', e=>{
+  const chip=e.target.closest('.chip.potion'); if(!chip) return;
+  e.preventDefault();
+  const pot=takePotion(chip.dataset.name);      // sai do estoque enquanto está na mão
+  if(!pot) return;
+  startDrag({pot}, e, null);
+});
+function moveGhost(e){
+  ghost.style.transform='translate('+e.clientX+'px,'+e.clientY+'px) translate(-50%,-50%) scale(1.12) rotate(-7deg)';
+}
+function onDragMove(e){
+  if(!S.dragging) return;
+  e.preventDefault();
+  moveGhost(e);
+  const r=lab.getBoundingClientRect();
+  const inLab = e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom;
+  const pp = labPos(e);
+  S.hover  = inLab && overCauldron(pp) && canAdd();
+  S.hoverG = inLab && overGrinder(pp);
+}
+function canAdd(){
+  return S.phase!=='ready' &&
+         S.inside.length + S.falling.filter(f=>f.to!=='g').length < MAX_ING;
+}
+function onDragEnd(e){
+  const d=S.dragging; if(!d) return;
+  window.removeEventListener('pointermove', onDragMove);
+  window.removeEventListener('pointerup', onDragEnd);
+  window.removeEventListener('pointercancel', onDragEnd);
+  if(d.chip) d.chip.classList.remove('grabbing');
+  ghost.classList.remove('on');
+  S.dragging=null; S.hover=false;
+
+  const r=lab.getBoundingClientRect();
+  const inLab = e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom;
+  if(!inLab){ if(d.pot) givePotion(d.pot); updateHint(); return; }   // volta pra prateleira
+
+  const p=labPos(e);
+  if(d.pot){                                   // poções só entram no caldeirão
+    if(overCauldron(p) && canAdd()){ dropItem(d, p.x); return; }
+    givePotion(d.pot);
+    hintEl.textContent = overCauldron(p) ? 'O caldeirão está ocupado — a poção voltou para a prateleira'
+                                         : 'A poção voltou para a prateleira';
+    return;
+  }
+  if(overGrinder(p)){
+    if(!ING[d.id].solid){
+      hintEl.textContent = 'Líquido não vai no moedor — use o caldeirão';
+      dropLoose(d.id, p.x, p.y);
+      return;
+    }
+    if(!canGrind()){
+      hintEl.textContent = S.grind.done ? 'Recolha o pó antes de moer outra coisa'
+                                        : 'O moedor só aguenta dois ingredientes';
+      dropLoose(d.id, p.x, p.y);
+      return;
+    }
+    dropItem(d, p.x, 'g');
+    return;
+  }
+  if(overCauldron(p)){
+    if(canAdd()){ dropItem(d, p.x); return; }
+    hintEl.textContent = S.phase==='ready' ? 'Guarde a poção antes de misturar outra'
+                                           : 'O caldeirão está cheio — mexa a mistura';
+    dropLoose(d.id, L.cx + (p.x>L.cx?1:-1)*L.rx*1.25, p.y);
+    return;
+  }
+  dropLoose(d.id, p.x, p.y);
+}
+function dropLoose(id, x, y){
+  const gy = Math.min(H-16, L.tableY + 16 + Math.random()*Math.min(30, Math.max(8,(H-L.tableY)*0.28)));
+  S.loose.push({
+    id, x:Math.max(24,Math.min(W-24,x)), y:Math.min(y,gy-1),
+    gy, vx:(Math.random()-0.5)*50, vy:30,
+    rot:(Math.random()-0.5)*0.9, vr:(Math.random()-0.5)*5,
+    restRot:(Math.random()-0.5)*1.3, rest:false, bounces:0,
+    size: Math.max(20, L.R*0.20), life: LOOSE_LIFE
+  });
+  hintEl.textContent = 'Caiu na bancada — pegue de novo antes que suma';
+}
+function looseAt(p){
+  for(let i=S.loose.length-1;i>=0;i--){
+    const o=S.loose[i];
+    if(Math.hypot(p.x-o.x, p.y-o.y) < o.size*0.8) return i;
+  }
+  return -1;
+}
+function dropItem(item, x, to){
+  const g = to==='g';
+  const cxx = g ? L.gx + (Math.random()-0.5)*L.gr*0.3
+                : Math.max(L.cx-L.irx*0.68, Math.min(L.cx+L.irx*0.68, x));
+  S.falling.push({
+    to: g?'g':'c',
+    id:item.id, pot:item.pot||null, x:cxx, y: g ? L.gy - L.gr*2.0 : L.rimY - L.R*1.12,
+    vx:(Math.random()-0.5)*30, vy:0,
+    rot:(Math.random()-0.5)*0.8, vr:(Math.random()-0.5)*4.5,
+    size: g ? Math.max(18, L.gr*0.42) : Math.max(22, L.R*0.22)
+  });
+}
+
+/* ============================================================
+   MEXER
+   ============================================================ */
+cv.addEventListener('pointerdown', e=>{
+  const p=labPos(e);
+  const li = looseAt(p);
+  if(li>=0){                       // pegar de volta um ingrediente da bancada
+    e.preventDefault();
+    const o=S.loose.splice(li,1)[0];
+    startDrag({id:o.id}, e, null);
+    return;
+  }
+  if(overDeskBook(p)){ e.preventDefault(); openBook(); return; }
+  if(overGrinder(p) && S.grind.items.length && !S.grind.done){
+    e.preventDefault();
+    S.grind.active=true; S.grind.px=p.x; S.grind.py=p.y;
+    S.grind.lastAng=Math.atan2(p.y-L.gy, p.x-L.gx);
+    cv.setPointerCapture(e.pointerId);
+    return;
+  }
+  if(!overCauldron(p) || S.phase==='ready') return;
+  e.preventDefault();
+  S.stirring=true; S.spoon.idle=false;
+  S.spoon.x=p.x; S.spoon.y=p.y;
+  S.lastAng=Math.atan2(p.y-L.rimY, p.x-L.cx);
+  cv.setPointerCapture(e.pointerId);
+});
+cv.addEventListener('pointermove', e=>{
+  const p=labPos(e);
+  if(S.grind.active){
+    cv.style.cursor='grabbing';
+    S.grind.px=p.x; S.grind.py=p.y;
+    const a=Math.atan2(p.y-L.gy, p.x-L.gx);
+    let d=a-S.grind.lastAng;
+    while(d>Math.PI) d-=Math.PI*2;
+    while(d<-Math.PI) d+=Math.PI*2;
+    S.grind.lastAng=a;
+    S.grind.acc += Math.abs(d);
+    S.grind.shake = Math.min(1, S.grind.shake + Math.abs(d)*0.6);
+    S.grind.progress = Math.min(1, S.grind.acc/NEED_G);
+    setGrind(S.grind.progress);
+    if(Math.random() < Math.abs(d)*2.2){
+      puffDust(L.gx, L.gy, 1, S.grind.out ? ING[S.grind.out].color : '#cbbda2');
+    }
+    if(S.grind.progress>=1 && !S.grind.done){ S.grind.active=false; finishGrind(); }
+    return;
+  }
+  if(!S.stirring){
+    if(overDeskBook(p)){ cv.style.cursor='pointer'; return; }
+    const grabbable = looseAt(p)>=0 || (overCauldron(p) && S.phase!=='ready')
+                   || (overGrinder(p) && S.grind.items.length && !S.grind.done);
+    cv.style.cursor = grabbable ? 'grab' : 'default';
+    return;
+  }
+  cv.style.cursor='grabbing';
+  // colher presa ao caldeirão
+  const dx=p.x-L.cx, dy=(p.y-L.rimY);
+  const a=Math.atan2(dy,dx);
+  const maxR=L.rx*0.78;
+  const dist=Math.min(maxR, Math.hypot(dx, dy/(L.ry/L.rx)));
+  S.spoon.x=L.cx+Math.cos(a)*dist;
+  S.spoon.y=L.rimY+Math.sin(a)*dist*(L.ry/L.rx);
+
+  let d=a-S.lastAng;
+  while(d>Math.PI) d-=Math.PI*2;
+  while(d<-Math.PI) d+=Math.PI*2;
+  S.lastAng=a;
+  S.swirl = Math.max(-6, Math.min(6, S.swirl + d*7));
+  if(S.inside.length && S.phase==='mixing'){
+    S.stirAcc += Math.abs(d);
+    S.progress = Math.min(1, S.stirAcc/NEED);
+    setMix(S.progress);
+    if(S.progress>=1) finish();
+  } else if(!S.inside.length){
+    hintEl.textContent='O caldeirão está vazio — solte um ingrediente primeiro';
+  }
+});
+function stopStir(e){
+  S.grind.active=false;
+  if(!S.stirring) return;
+  S.stirring=false; cv.style.cursor='default';
+  updateHint();
+}
+cv.addEventListener('pointerup', stopStir);
+cv.addEventListener('pointercancel', stopStir);
+cv.addEventListener('pointerleave', stopStir);
+
+document.getElementById('dump').addEventListener('click', ()=>{
+  if(S.phase==='ready') return;
+  if(S.grind.items.length){ puffDust(L.gx, L.gy, 10, '#cbbda2'); clearGrinder(); }
+  if(S.inside.length){ S.ripples.push({x:L.cx, r:L.R*0.1, a:1}); }
+  resetCauldron(true);
+  updateHint();
+});
+
+/* ============================================================
+   CARTÃO DE RESULTADO
+   ============================================================ */
+const resultEl=document.getElementById('result');
+function showPending(){
+  const d=S.pending; if(!d) return;
+  let head, title, tag='', body, label='GUARDAR';
+
+  if(d.kind==='potion'){
+    const p=d.potion;
+    head = flaskSVG(p.color, shapeFor(p.name));
+    title = p.name;
+    tag = (!S.discovered[p.name] && !p.weird) ? '<span class="newtag">nova!</span>' : '';
+    body = '<p class="eff">'+p.eff+'</p>'+
+           '<p class="rec-card">'+(p.line || recipeLine(p.ids))+'</p>'+
+           '<p class="desc">'+p.desc+'</p>';
+  } else if(d.kind==='ing'){
+    const g=ING[d.id];
+    const isNew = !S.unlocked[d.id];
+    head = '<div class="bigicon" style="background:'+g.color+'33">'+g.emoji+'</div>';
+    title = g.name;
+    tag = isNew ? '<span class="newtag">ingrediente novo!</span>' : '';
+    body = '<p class="eff">'+g.prop+(isNew?'':' — você já tinha este')+'</p>'+
+           '<p class="rec-card">'+(d.line || recipeLine(d.ids))+'</p>'+
+           '<p class="desc">'+d.desc+'</p>';
+    label = isNew ? 'ADICIONAR' : 'FECHAR';
+  } else {
+    head = '<div class="bigicon" style="background:#cbbda233">🌫️</div>';
+    title = 'Só pó';
+    body = '<p class="rec-card">'+recipeLine(d.ids)+'</p>'+
+           '<p class="desc">'+d.desc+'</p>';
+    label = 'LIMPAR';
+  }
+
+  resultEl.innerHTML =
+    '<div class="card">'+tag+head+'<h2>'+title+'</h2>'+body+
+    '<button id="keep">'+label+'</button></div>';
+  resultEl.classList.add('on');
+  const btn=document.getElementById('keep');
+  btn.focus();
+  btn.addEventListener('click', ()=>{
+    resultEl.classList.remove('on'); resultEl.innerHTML='';
+    if(d.kind==='potion'){
+      const p=d.potion, old=S.discovered[p.name];
+      S.discovered[p.name]={name:p.name, eff:p.eff, color:p.color,
+                            ids: old? old.ids : p.ids,
+                            line: old? old.line : p.line,
+                            n:(old? old.n:0)+1};
+      resetCauldron(); buildPotions(); selectTab('pot');
+      setTimeout(()=>selectTab('ing'), 1400);
+    } else {
+      if(d.kind==='ing'){ S.unlocked[d.id]=true; buildIngredients(); selectTab('ing'); }
+      if(d.from==='caldeirao') resetCauldron(); else clearGrinder();
+    }
+    S.pending=null;
+    updateHint();
+  });
+}
+
+/* ============================================================
+   LIVRO DE RECEITAS
+   ============================================================ */
+const bookEl=document.getElementById('book');
+const bookBtn=document.getElementById('bookBtn');
+S.revealAll=false;
+function bookRow(name, k, found, color, extra){
+  const ing = found ? recipeLine(k) : k.map(()=>'❔').join(' <span class="plus">+</span> ');
+  return '<div class="rrow'+(found?'':' hidden')+'">'+
+           '<span class="dot" style="background:'+(found?color:'transparent')+'"></span>'+
+           '<span class="rn">'+(found?name:'???')+(extra&&found?' <em>'+extra+'</em>':'')+'</span>'+
+           '<span class="ri">'+ing+'</span>'+
+         '</div>';
+}
+function buildBook(){
+  const R = S.revealAll;
+  const potions = RECIPES.filter(r=>!r.out);
+  const brews   = RECIPES.filter(r=>r.out);
+  const knownP  = potions.filter(r=>S.discovered[r.name]).length;
+  // só conta ingredientes obtidos (não os que já vinham desbloqueados na base)
+  const knownI  = brews.filter(r=>S.unlocked[r.out] && !ING[r.out].base).length
+                + GRIND.filter(g=>S.unlocked[g.out] && !ING[g.out].base).length;
+  const totalI  = brews.filter(r=>!ING[r.out].base).length + GRIND.filter(g=>!ING[g.out].base).length;
+
+  const rowsI =
+    GRIND.filter(g=>!ING[g.out].base).map(g=>bookRow(ING[g.out].name+' '+ING[g.out].emoji, g.k,
+                         !!(S.unlocked[g.out]||R), ING[g.out].color, 'moedor')).join('') +
+    brews.filter(r=>!ING[r.out].base).map(r=>bookRow(ING[r.out].name+' '+ING[r.out].emoji, r.k,
+                         !!(S.unlocked[r.out]||R), r.color, 'caldeirão')).join('');
+  const rowsP = potions.map(r=>bookRow(r.name, r.k, !!(S.discovered[r.name]||R), r.color)).join('');
+  const rowsF = FUSIONS.map(f=>{
+    const found = !!(S.discovered[f.name] || R);
+    const ing = found ? f.k.map(n=>'<span class="potref">🧪 '+n+'</span>').join(' <span class="plus">+</span> ')
+                      : '❔ <span class="plus">+</span> ❔';
+    return '<div class="rrow'+(found?'':' hidden')+'">'+
+             '<span class="dot" style="background:'+(found?f.color:'transparent')+'"></span>'+
+             '<span class="rn">'+(found?f.name:'???')+'</span>'+
+             '<span class="ri">'+ing+'</span></div>';
+  }).join('');
+
+  bookEl.innerHTML =
+    '<div class="tome" role="dialog" aria-label="Livro de receitas">'+
+      '<h2>Livro de receitas</h2>'+
+      '<p class="sub">'+knownI+' de '+totalI+' ingredientes e '+knownP+' de '+potions.length+' poções anotadas. '+
+        'Poções prontas voltam ao caldeirão para virar fusões.</p>'+
+      '<div class="scroll">'+
+        '<h3>Ingredientes</h3>'+
+        '<div class="recipes">'+rowsI+'</div>'+
+        '<h3>Poções</h3>'+
+        '<div class="recipes">'+rowsP+'</div>'+
+        '<h3>Fusões</h3>'+
+        '<div class="recipes">'+rowsF+'</div>'+
+      '</div>'+
+      '<footer>'+
+        '<label><input type="checkbox" id="revealChk"'+(R?' checked':'')+'> espiar as páginas rasgadas</label>'+
+        '<button class="tool-btn close" id="bookClose" style="position:static;transform:none">Fechar</button>'+
+      '</footer>'+
+    '</div>';
+  document.getElementById('revealChk').addEventListener('change', e=>{
+    S.revealAll=e.target.checked; buildBook();
+  });
+  document.getElementById('bookClose').addEventListener('click', closeBook);
+}
+function openBook(){ buildBook(); bookEl.classList.add('on'); }
+function overDeskBook(p){
+  const w=Math.min(120, W*0.16);
+  return Math.abs(p.x-W*0.155) < w*0.55 && Math.abs(p.y-(L.tableY+6)) < w*0.26;
+}
+function closeBook(){ bookEl.classList.remove('on'); bookEl.innerHTML=''; }
+bookBtn.addEventListener('click', openBook);
+bookEl.addEventListener('pointerdown', e=>{ if(e.target===bookEl) closeBook(); });
+
+/* ============================================================
+   INÍCIO
+   ============================================================ */
+let rid;
+window.addEventListener('resize', ()=>{ clearTimeout(rid); rid=setTimeout(layout,120); });
+document.addEventListener('keydown', e=>{
+  if(e.key!=='Escape') return;
+  if(bookEl.classList.contains('on')){ closeBook(); return; }
+  if(S.phase!=='ready') resetCauldron(true);
+});
+layout();
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(drawBackground);
+updateHint();
+requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
