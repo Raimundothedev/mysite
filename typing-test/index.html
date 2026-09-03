@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste de Velocidade de Digitação</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0f0f23, #1a1a3e);
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      margin: 20px 0 10px;
+      font-size: 1.8rem;
+      background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle { opacity: 0.7; margin-bottom: 30px; font-size: 0.95rem; text-align: center; }
+    .container {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+    .text-to-type {
+      background: rgba(0,0,0,0.3);
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 1.25rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      min-height: 100px;
+      letter-spacing: 0.3px;
+      word-wrap: break-word;
+    }
+    .text-to-type span.correct { color: #00ff9d; }
+    .text-to-type span.incorrect { color: #ff4d6d; background: rgba(255,77,109,0.15); }
+    .text-to-type span.current { background: rgba(0,212,255,0.3); border-radius: 3px; }
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 15px;
+      font-size: 1.15rem;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.4);
+      color: #fff;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+    textarea:focus { border-color: #00d4ff; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 15px;
+      margin: 25px 0;
+    }
+    .stat {
+      background: rgba(255,255,255,0.07);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .stat-value { font-size: 1.8rem; font-weight: 700; color: #00d4ff; }
+    .stat-label { font-size: 0.85rem; opacity: 0.7; margin-top: 4px; }
+    .result-box {
+      display: none;
+      background: rgba(0,212,255,0.1);
+      border: 1px solid rgba(0,212,255,0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .result-box h2 { margin-bottom: 12px; color: #00d4ff; }
+    .percentile {
+      font-size: 1.3rem;
+      margin: 15px 0;
+      padding: 12px;
+      background: rgba(123,44,191,0.2);
+      border-radius: 8px;
+    }
+    .buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    button {
+      flex: 1;
+      min-width: 140px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+    button:hover { transform: translateY(-2px); }
+    button:active { transform: translateY(0); }
+    .btn-primary { background: linear-gradient(90deg, #00d4ff, #0099cc); color: #000; }
+    .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+    .timer { font-size: 1.1rem; opacity: 0.8; margin-bottom: 10px; }
+    .info {
+      margin-top: 25px;
+      font-size: 0.85rem;
+      opacity: 0.6;
+      line-height: 1.5;
+      text-align: center;
+      max-width: 600px;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚡ Teste de Velocidade de Digitação</h1>
+  <p class="subtitle">Digite o texto o mais rápido e preciso possível</p>
+
+  <div class="container">
+    <div class="timer" id="timer">Tempo: 0.0s</div>
+    
+    <div class="text-to-type" id="textDisplay"></div>
+    
+    <textarea id="input" placeholder="Comece a digitar aqui..." disabled></textarea>
+    
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value" id="wpm">0</div>
+        <div class="stat-label">WPM</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="wps">0</div>
+        <div class="stat-label">Palavras/seg</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="accuracy">100%</div>
+        <div class="stat-label">Precisão</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="chars">0</div>
+        <div class="stat-label">Caracteres</div>
+      </div>
+    </div>
+
+    <div class="result-box" id="resultBox">
+      <h2>Resultado Final</h2>
+      <p id="finalStats"></p>
+      <div class="percentile" id="percentile"></div>
+      <p id="comparison"></p>
+    </div>
+
+    <div class="buttons">
+      <button class="btn-primary" id="startBtn">Começar</button>
+      <button class="btn-secondary" id="restartBtn" style="display:none;">Novo Texto</button>
+    </div>
+  </div>
+
+  <p class="info">
+    Média mundial aproximada: <strong>40–45 WPM</strong><br>
+    Dados baseados em testes de milhões de pessoas (Ratatype, Human Benchmark, etc.)
+  </p>
+
+  <script>
+    const texts = [
+      "A vida é feita de escolhas e cada decisão molda o nosso futuro de maneiras inesperadas.",
+      "O conhecimento é a única riqueza que ninguém pode tirar de você, por isso invista nele todos os dias.",
+      "Tecnologia avança rapidamente e quem não se adapta corre o risco de ficar para trás na sociedade digital.",
+      "Escrever bem é uma habilidade valiosa que abre portas tanto no mundo profissional quanto no pessoal.",
+      "A prática constante é o caminho mais curto para a excelência em qualquer área da vida humana.",
+      "Computadores e internet transformaram completamente a forma como nos comunicamos e trabalhamos hoje.",
+      "A curiosidade é o motor da descoberta científica e do progresso da humanidade ao longo dos séculos.",
+      "Paciência e persistência vencem o talento quando o talento não se esforça o suficiente para evoluir.",
+      "O silêncio às vezes fala mais alto do que mil palavras ditas em um momento de impulsividade.",
+      "Aprender a digitar rápido e com precisão é uma vantagem competitiva no mercado de trabalho atual."
+    ];
+
+    let currentText = "";
+    let startTime = null;
+    let timerInterval = null;
+    let finished = false;
+
+    const textDisplay = document.getElementById("textDisplay");
+    const input = document.getElementById("input");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const timerEl = document.getElementById("timer");
+    const resultBox = document.getElementById("resultBox");
+
+    function getRandomText() {
+      return texts[Math.floor(Math.random() * texts.length)];
+    }
+
+    function renderText(typed = "") {
+      let html = "";
+      for (let i = 0; i < currentText.length; i++) {
+        if (i < typed.length) {
+          if (typed[i] === currentText[i]) {
+            html += `<span class="correct">${currentText[i]}</span>`;
+          } else {
+            html += `<span class="incorrect">${currentText[i]}</span>`;
+          }
+        } else if (i === typed.length) {
+          html += `<span class="current">${currentText[i]}</span>`;
+        } else {
+          html += currentText[i];
+        }
+      }
+      textDisplay.innerHTML = html;
+    }
+
+    function startTest() {
+      currentText = getRandomText();
+      input.value = "";
+      input.disabled = false;
+      input.focus();
+      finished = false;
+      startTime = null;
+      resultBox.style.display = "none";
+      startBtn.style.display = "none";
+      restartBtn.style.display = "inline-block";
+      renderText();
+      updateStats(0, 0, 100, 0);
+      timerEl.textContent = "Tempo: 0.0s";
+      clearInterval(timerInterval);
+    }
+
+    function updateStats(wpm, wps, accuracy, chars) {
+      document.getElementById("wpm").textContent = Math.round(wpm);
+      document.getElementById("wps").textContent = wps.toFixed(2);
+      document.getElementById("accuracy").textContent = Math.round(accuracy) + "%";
+      document.getElementById("chars").textContent = chars;
+    }
+
+    function getPercentile(wpm) {
+      // Aproximação baseada em dados reais de testes online (mediana ~40-45 WPM)
+      if (wpm < 20) return { pct: 5, text: "você está entre os 5% mais lentos" };
+      if (wpm < 30) return { pct: 15, text: "você está abaixo da média (bottom 25%)" };
+      if (wpm < 40) return { pct: 35, text: "você está um pouco abaixo da média" };
+      if (wpm < 50) return { pct: 55, text: "você está na média mundial" };
+      if (wpm < 60) return { pct: 70, text: "você está acima da média" };
+      if (wpm < 70) return { pct: 82, text: "você digita mais rápido que ~80% das pessoas" };
+      if (wpm < 80) return { pct: 90, text: "você está no top 10%!" };
+      if (wpm < 90) return { pct: 95, text: "você está no top 5%!" };
+      if (wpm < 100) return { pct: 98, text: "você está no top 2%!" };
+      return { pct: 99, text: "você está no top 1% — nível elite!" };
+    }
+
+    function finishTest() {
+      if (finished) return;
+      finished = true;
+      clearInterval(timerInterval);
+      input.disabled = true;
+
+      const elapsed = (Date.now() - startTime) / 1000; // segundos
+      const typed = input.value;
+      const words = typed.trim().split(/\s+/).filter(w => w.length > 0).length;
+      const chars = typed.length;
+
+      // Método padrão: 5 caracteres = 1 palavra
+      const wpm = (chars / 5) / (elapsed / 60);
+      const wps = words / elapsed;
+
+      // Precisão
+      let correct = 0;
+      for (let i = 0; i < Math.min(typed.length, currentText.length); i++) {
+        if (typed[i] === currentText[i]) correct++;
+      }
+      const accuracy = typed.length === 0 ? 100 : (correct / typed.length) * 100;
+
+      updateStats(wpm, wps, accuracy, chars);
+
+      const perc = getPercentile(wpm);
+
+      document.getElementById("finalStats").innerHTML = `
+        Você digitou a <strong>${Math.round(wpm)} WPM</strong> 
+        (${wps.toFixed(2)} palavras por segundo)<br>
+        com <strong>${Math.round(accuracy)}% de precisão</strong> em ${elapsed.toFixed(1)} segundos.
+      `;
+
+      document.getElementById("percentile").textContent = 
+        `Você está aproximadamente no percentil ${perc.pct} — ${perc.text}`;
+
+      let comparison = "";
+      if (wpm < 40) comparison = "A média mundial fica em torno de 40–45 WPM. Continue praticando!";
+      else if (wpm < 60) comparison = "Bom resultado! A maioria das pessoas digita nessa faixa.";
+      else if (wpm < 80) comparison = "Excelente! Velocidade profissional.";
+      else comparison = "Impressionante! Poucas pessoas digita nessa velocidade.";
+
+      document.getElementById("comparison").textContent = comparison;
+      resultBox.style.display = "block";
+    }
+
+    input.addEventListener("input", () => {
+      if (finished) return;
+
+      if (!startTime) {
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+          const elapsed = (Date.now() - startTime) / 1000;
+          timerEl.textContent = `Tempo: ${elapsed.toFixed(1)}s`;
+          
+          // Atualiza stats em tempo real
+          const typed = input.value;
+          const chars = typed.length;
+          const words = typed.trim().split(/\s+/).filter(w => w.length > 0).length;
+          const wpm = (chars / 5) / (elapsed / 60);
+          const wps = words / elapsed;
+          
+          let correct = 0;
+          for (let i = 0; i < Math.min(typed.length, currentText.length); i++) {
+            if (typed[i] === currentText[i]) correct++;
+          }
+          const accuracy = typed.length === 0 ? 100 : (correct / typed.length) * 100;
+          
+          updateStats(wpm, wps, accuracy, chars);
+        }, 100);
+      }
+
+      renderText(input.value);
+
+      // Termina automaticamente quando chega no final
+      if (input.value.length >= currentText.length) {
+        finishTest();
+      }
+    });
+
+    startBtn.addEventListener("click", startTest);
+    restartBtn.addEventListener("click", startTest);
+
+    // Inicia com um texto já carregado (mas desabilitado)
+    currentText = getRandomText();
+    renderText();
+  </script>
+</body>
+</html>
