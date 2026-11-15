@@ -18,8 +18,23 @@ body {
 	touch-action: none;
 }
 
+/* [pngg] O jogo renderiza sempre em 1920x1080 e é redimensionado para caber na janela,
+   com faixas pretas quando a proporção não for 16:9. */
+html, body {
+	width: 100%;
+	height: 100%;
+}
+
+body {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
 #canvas {
 	display: block;
+	width: min(100vw, calc(100vh * 16 / 9));
+	height: min(100vh, calc(100vw * 9 / 16));
 }
 
 #canvas:focus {
@@ -95,7 +110,7 @@ body {
 
 	</head>
 	<body>
-		<canvas id="canvas">
+		<canvas id="canvas" width="1920" height="1080">
 			Your browser does not support the canvas tag.
 		</canvas>
 
@@ -111,7 +126,7 @@ body {
 
 		<script src="pataforma.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"pataforma","experimentalVK":false,"fileSizes":{"pataforma.pck":507928,"pataforma.wasm":37902138},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":0,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"pataforma","experimentalVK":false,"fileSizes":{"pataforma.pck":563916,"pataforma.wasm":37902138},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
