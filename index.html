@@ -3,788 +3,623 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PNGG LABZ ★ home</title>
+<title>[pngg labz] :: jogos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo+Narrow:wght@700&family=Permanent+Marker&family=Rubik+Dirt&family=Special+Elite&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --ruido: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    --ruido-escuro: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    /* manchas e rabiscos brancos do cabeçalho */
+    --rabiscos: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='220'%3E%3Cg fill='none' stroke='%23fff' stroke-linecap='round'%3E%3Cpath d='M10 40 Q60 10 120 46 T240 30' stroke-width='1.2' opacity='.25'/%3E%3Cpath d='M300 190 q30 -40 60 -10 t50 -20' stroke-width='1.5' opacity='.2'/%3E%3Cpath d='M30 180 l40 -12 l-30 -6 l50 -10' stroke-width='1' opacity='.3'/%3E%3Cpath d='M200 120 c20 -30 50 -30 70 0 s50 30 70 0' stroke-width='.8' opacity='.18'/%3E%3Ccircle cx='380' cy='40' r='22' stroke-width='1' opacity='.15'/%3E%3Ccircle cx='380' cy='40' r='14' stroke-width='.8' opacity='.15'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Ccircle cx='90' cy='120' r='3' opacity='.35'/%3E%3Ccircle cx='96' cy='126' r='1.5' opacity='.3'/%3E%3Ccircle cx='260' cy='70' r='5' opacity='.18'/%3E%3Ccircle cx='330' cy='150' r='2' opacity='.35'/%3E%3Ccircle cx='160' cy='200' r='4' opacity='.2'/%3E%3C/g%3E%3C/svg%3E");
+    /* nuvem desenhada à mão, com borda tremida */
+    --nuvem: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 84' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='t'%3E%3CfeTurbulence baseFrequency='.06' numOctaves='2' seed='4'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='3.5'/%3E%3C/filter%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='.55' stop-color='%23fff'/%3E%3Cstop offset='1' stop-color='%23b9b9b9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg filter='url(%23t)'%3E%3Cpath d='M24 66 C6 66 4 44 20 40 C14 22 36 12 50 22 C58 8 84 6 94 18 C106 6 134 8 140 22 C154 12 178 18 178 36 C196 38 198 62 182 66 C178 80 152 82 142 74 C130 84 102 84 92 74 C78 84 54 82 48 72 C40 80 22 78 24 66 Z' fill='url(%23g)' stroke='%23111' stroke-width='2.6'/%3E%3Cpath d='M30 60 C22 58 22 50 28 48 M150 70 C160 72 170 68 172 62' fill='none' stroke='%23111' stroke-width='1.2'/%3E%3C/g%3E%3C/svg%3E");
+    --vermelho: #d5121b;
+  }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; min-height: 100%; }
-
-  body.mode-games {
-    background: #000080 url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='3' cy='3' r='1.2' fill='%23ffffff' opacity='0.35'/%3E%3Ccircle cx='22' cy='18' r='0.9' fill='%23ffffff' opacity='0.25'/%3E%3Ccircle cx='35' cy='8' r='1' fill='%23ffff99' opacity='0.4'/%3E%3Ccircle cx='12' cy='30' r='0.8' fill='%23ffffff' opacity='0.3'/%3E%3C/svg%3E");
-    color: #fff;
-    font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", "Marker Felt", cursive;
-    font-size: 16px;
-  }
-
-  body.mode-sims {
-    background: linear-gradient(180deg, #a8d8f5 0%, #7ec8f5 30%, #5bb8e8 70%, #3aa0d0 100%);
-    color: #0a3a55;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  }
-
-  .topbar { text-align: center; padding: 8px 10px; }
-  .mode-games .topbar {
-    background: #000;
-    border-bottom: 3px ridge #c0c0c0;
-  }
-  .mode-sims .topbar {
-    background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(180,230,255,0.5));
-    border-bottom: 1px solid rgba(255,255,255,0.7);
-    backdrop-filter: blur(12px);
-  }
-
-  .logo-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 6px;
-  }
-  .logo-icon { width: 42px; height: 42px; }
-  .logo-text {
-    font-size: 28px;
-    font-weight: bold;
-    letter-spacing: 1px;
-  }
-  .mode-games .logo-text {
-    color: #ffff00;
-    text-shadow: 2px 2px 0 #ff00ff, -1px -1px 0 #00ffff;
-  }
-  .mode-sims .logo-text {
-    font-family: "Segoe UI", Tahoma, sans-serif;
-    font-size: 20px;
-    letter-spacing: 2px;
-    color: #08608a;
-    text-shadow: 0 1px 0 #fff;
-  }
-
-  .tabs { display: inline-block; margin-top: 4px; }
-  .tab-btn {
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    margin: 0 3px;
-    padding: 4px 14px;
-  }
-  .mode-games .tab-btn {
-    background: #c0c0c0;
-    border: 2px outset #fff;
-    color: #000;
-  }
-  .mode-games .tab-btn:active,
-  .mode-games .tab-btn.on {
-    border-style: inset;
-    background: #808080;
-    color: #fff;
-  }
-  .mode-sims .tab-btn {
-    background: linear-gradient(180deg, #fff, #c8e8ff);
-    border: 1px solid #fff;
-    border-radius: 20px;
-    color: #08608a;
-    padding: 6px 16px;
-    box-shadow: 0 2px 8px rgba(0,80,120,0.15);
-  }
-  .mode-sims .tab-btn.on {
-    background: linear-gradient(180deg, #5ec4f0, #2a9fd4);
-    color: #fff;
-  }
-
-  .view { display: none; }
-  .view.on { display: block; }
-
-  .games-wrap {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 16px 12px 40px;
-    text-align: center;
-  }
-
-  .welcome {
-    background: #000;
-    border: 3px solid #ffff00;
-    padding: 12px;
-    margin-bottom: 16px;
-  }
-  .welcome h1 {
-    margin: 0 0 8px;
-    font-size: 32px;
-    color: #00ff00;
-    text-shadow: 0 0 6px #00ff00;
-  }
-  .welcome .slogan {
-    color: #ff66cc;
-    font-size: 18px;
-    margin: 0;
-  }
-
-  .blink { animation: blink 1s step-start infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
-
-  marquee {
-    background: #ffff00;
-    color: #000;
-    font-weight: bold;
-    font-size: 14px;
-    padding: 4px 0;
-    border-top: 2px solid #ff0000;
-    border-bottom: 2px solid #ff0000;
-    margin: 12px 0;
-    display: block;
-  }
-
-  .hit-counter {
-    display: inline-block;
-    background: #000;
-    border: 2px inset #808080;
-    padding: 3px 8px;
-    font-family: "Courier New", monospace;
-    font-size: 14px;
-    color: #0f0;
-    letter-spacing: 3px;
-    margin: 10px 0;
-  }
-
-  .section-title {
-    color: #ffff00;
-    font-size: 22px;
-    margin: 20px 0 12px;
-    text-decoration: underline;
-  }
-
-  .game-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 0 auto 20px;
+  html, body { margin: 0; padding: 0; }
+  body {
     background: #fff;
-    color: #000;
-    border: 4px ridge #c0c0c0;
-  }
-  .game-table td {
-    border: 2px solid #808080;
-    padding: 10px;
-    vertical-align: middle;
-    text-align: left;
-  }
-  .game-table .thumb {
-    width: 120px;
-    height: 80px;
-    background: #000080;
-    border: 2px inset #c0c0c0;
-    display: block;
-  }
-  .game-table .thumb svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-  .game-table .name {
-    font-size: 20px;
-    font-weight: bold;
-    color: #0000ee;
-  }
-  .game-table a { color: #0000ee; text-decoration: underline; }
-  .game-table a:visited { color: #551a8b; }
-  .game-table .go {
-    display: inline-block;
-    margin-top: 6px;
-    background: #00ff00;
-    border: 2px outset #fff;
-    color: #000;
-    font-weight: bold;
-    font-size: 14px;
-    padding: 3px 12px;
-    text-decoration: none;
-    font-family: inherit;
-  }
-  .game-table .go:active { border-style: inset; }
-
-  .construction {
-    margin: 24px auto;
-    padding: 10px;
-    border: 3px dashed #ff0000;
-    background: #330000;
-    color: #ff6666;
-    max-width: 400px;
-  }
-
-  .footer-games {
-    margin-top: 30px;
-    padding-top: 12px;
-    border-top: 2px dotted #ffff00;
-    font-size: 15px;
-    color: #ccc;
-  }
-  .footer-games .by {
     color: #fff;
-    font-size: 17px;
-    font-weight: bold;
-  }
-  .footer-games .claude {
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 11px;
-    color: #888;
-    margin-top: 4px;
+  }
+  a { color: inherit; }
+  img { display: block; }
+
+  .site { width: 940px; margin: 0 auto; position: relative; }
+
+  /* ==== recursos reutilizados ==== */
+  .rasgado { position: relative; isolation: isolate; }
+  .rasgado::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; background: inherit; filter: url(#rasgar);
   }
 
-  hr.stars {
-    border: none;
-    text-align: center;
-    height: auto;
-    margin: 16px 0;
-    font-size: 14px;
-    color: #ffff00;
+  .botao-bisel {
+    display: inline-flex; align-items: center; gap: 4px; cursor: pointer; text-decoration: none;
+    font: bold 10px Verdana, Arial; color: #fff; text-transform: uppercase; letter-spacing: 0.3px;
+    padding: 3px 8px 3px 7px; border: 1px solid #000; border-radius: 2px;
+    background: linear-gradient(#6d6d6d, #3c3c3c 50%, #2a2a2a 51%, #353535);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 1px 0 rgba(255,255,255,0.12);
+    text-shadow: 0 -1px 0 #000;
   }
-  hr.stars::before { content: "★ ☆ ★ ☆ ★ ☆ ★ ☆ ★"; }
+  .botao-bisel:hover { background: linear-gradient(#8a8a8a, #555 50%, #3d3d3d 51%, #4a4a4a); }
+  .botao-bisel:active { background: linear-gradient(#2a2a2a, #3c3c3c); box-shadow: inset 0 1px 2px #000; }
+  .botao-bisel .seta { font-size: 8px; }
 
-  .sims-wrap {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 30px 16px 50px;
-    position: relative;
-  }
-  .sims-hero { text-align: center; margin-bottom: 28px; }
-  .sims-hero .kicker {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: #08608a;
-    background: rgba(255,255,255,0.65);
-    border: 1px solid rgba(255,255,255,0.9);
-    padding: 5px 12px;
-    border-radius: 20px;
-    margin-bottom: 12px;
-  }
-  .sims-hero h1 {
-    margin: 0 0 10px;
-    font-size: 28px;
-    color: #08608a;
-    text-shadow: 0 1px 0 #fff;
-  }
-  .sims-hero p {
-    margin: 0 auto;
-    max-width: 480px;
-    color: #2a6a88;
-    font-size: 15px;
-    line-height: 1.5;
+  .botao-gloss {
+    display: inline-block; font: 11px "Archivo Black", Arial; color: #111; letter-spacing: 0.2px; text-transform: uppercase;
+    padding: 4px 13px 5px; border-radius: 12px; border: 1px solid #5a4a00; text-decoration: none; white-space: nowrap;
+    background: linear-gradient(#fffbb0, #fde74c 45%, #f2c300 55%, #ffd927);
+    box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(0,0,0,0.6);
   }
 
-  .sims-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 22px;
-    justify-content: center;
+  .arabesco { display: block; }
+
+  /* ==== CABEÇALHO ==== */
+  .cabeca {
+    position: relative; height: 262px; isolation: isolate;
   }
-  .sim-card {
-    width: 320px;
-    background: linear-gradient(165deg, rgba(255,255,255,0.7), rgba(180,220,245,0.45));
-    border: 1px solid rgba(255,255,255,0.85);
-    border-radius: 18px;
-    overflow: hidden;
-    text-decoration: none;
-    color: inherit;
-    box-shadow: 0 10px 30px rgba(20,90,140,0.2), inset 0 1px 0 #fff;
-    transition: transform 0.2s;
+  .cabeca .fundo {
+    position: absolute; inset: 0 10px 0 10px; z-index: -1;
+    background: var(--rabiscos), var(--ruido), repeating-linear-gradient(-14deg, transparent 0 9px, rgba(255,255,255,0.04) 9px 10px), linear-gradient(#2a2a2a, #1a1a1a 60%, #262626);
+    filter: url(#rasgar-forte);
   }
-  .sim-card:hover { transform: translateY(-5px); }
-  .sim-card .art { height: 140px; overflow: hidden; }
-  .sim-card .art svg { width: 100%; height: 100%; display: block; }
-  .sim-card .body { padding: 14px 16px 18px; }
-  .sim-card h2 { margin: 0 0 6px; font-size: 17px; color: #08608a; }
-  .sim-card p { margin: 0 0 12px; font-size: 13px; color: #2a6a88; line-height: 1.45; }
-  .sim-card .cta {
-    display: inline-block;
-    font-size: 13px;
-    font-weight: 700;
-    color: #fff;
-    background: linear-gradient(180deg, #6ecff5, #2a9fd4);
-    padding: 7px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.5);
-    box-shadow: 0 3px 10px rgba(30,130,180,0.3);
+  /* faixa de papel branco rasgado embaixo do cabeçalho */
+  .cabeca .papel-base {
+    position: absolute; left: 20px; right: 140px; bottom: 6px; height: 46px; z-index: -1;
+    background: linear-gradient(#f2f2f2, #cfcfcf); filter: url(#rasgar-forte); opacity: 0.95;
+    transform: rotate(-1.2deg);
   }
-  .sims-foot {
-    text-align: center;
-    margin-top: 36px;
-    font-size: 12px;
-    color: #08608a;
-    opacity: 0.8;
+  .cabeca .papel-base::after {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, transparent 0 34px, rgba(0,0,0,0.08) 34px 35px), var(--ruido-escuro);
   }
-  .orb {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 0;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.7), rgba(100,180,220,0.1));
-    border: 1px solid rgba(255,255,255,0.4);
+  .arabesco.esq { position: absolute; left: -2px; top: 6px; width: 70px; }
+  .arabesco.dir { position: absolute; right: -2px; top: 6px; width: 70px; transform: scaleX(-1); }
+
+  /* anúncio do topo 728x90 */
+  .faixa-ad { position: absolute; left: 50%; top: 8px; margin-left: -364px; width: 728px; height: 90px; }
+  .ad-gta {
+    position: relative; display: block; width: 728px; height: 90px; overflow: hidden; text-decoration: none; color: #fff;
+    background: linear-gradient(110deg, #e1141c 0%, #c80e15 48%, #111 48.2%, #000 100%);
+    border: 1px solid #000;
+  }
+  .ad-gta .t-grande { position: absolute; left: 12px; top: 6px; font: 31px/0.92 "Archivo Narrow", Arial Narrow, Arial; letter-spacing: -0.5px; text-transform: uppercase; }
+  .ad-gta .t-grande small { display: block; font: 14px Arial; letter-spacing: 0; text-transform: none; margin-top: 2px; }
+  .ad-gta .data { position: absolute; left: 172px; top: 7px; text-align: center; }
+  .ad-gta .data span { display: block; font: bold 12px Arial; }
+  .ad-gta .data b { display: block; font: 38px/1 "Archivo Black", Arial; letter-spacing: -2px; }
+  .ad-gta .data b sup { font-size: 20px; vertical-align: 15px; letter-spacing: 0; }
+  .ad-gta .data em { display: block; font: normal 7px Arial; letter-spacing: 0.5px; margin-top: 3px; text-transform: uppercase; }
+  .ad-gta .tela {
+    position: absolute; left: 296px; top: 6px; width: 230px; height: 76px; border-radius: 6px;
+    background: url("assets/ads/gta6.webp") 30% 38% / 260px auto no-repeat;
+    border: 3px solid #d8d8d8; box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgba(0,0,0,0.5), 3px 3px 6px rgba(0,0,0,0.6);
+  }
+  .ad-gta .tela::after { content: ""; position: absolute; inset: 0; background: linear-gradient(160deg, rgba(255,255,255,0.35), transparent 40%); border-radius: 3px; }
+  .ad-gta .legenda-tela { position: absolute; left: 380px; bottom: 1px; font: 7px Arial; color: #bbb; }
+  .ad-gta .botao-gloss { position: absolute; left: 548px; top: 50px; }
+  .ad-gta .marca { position: absolute; right: 12px; top: 10px; text-align: right; }
+  .ad-gta .marca b { display: block; font: italic 19px "Archivo Black", Arial; letter-spacing: -1px; }
+  .ad-gta .marca b i { color: var(--vermelho); font-style: italic; }
+  .ad-gta .marca span { font: 9px Arial; color: #ccc; }
+  .ad-gta .contagem { position: absolute; right: 12px; bottom: 5px; font: bold 9px "Courier New", monospace; color: #ffd84a; }
+  .ad-gta .tique { position: absolute; left: 556px; top: 14px; width: 26px; height: 16px; border-left: 4px solid var(--vermelho); border-bottom: 4px solid var(--vermelho); transform: rotate(-50deg); }
+
+  .logo { position: absolute; left: 30px; top: 112px; text-decoration: none; color: #fff; }
+  .logo b { display: block; font: 47px/1 "Archivo Black", Arial; letter-spacing: -2.5px; text-shadow: 2px 2px 0 #000; }
+  .logo b sup { font: 9px Arial; letter-spacing: 0; vertical-align: 30px; margin-left: 2px; }
+  .logo small { display: block; margin: 4px 0 0 30px; font: 10px/1.25 "Archivo Black", Arial; letter-spacing: 0.2px; color: #e8e8e8; text-transform: uppercase; transform: rotate(-3deg); }
+
+  .nuvem {
+    position: absolute; background: var(--nuvem) center / 100% 100% no-repeat; border: 0; cursor: pointer;
+    color: #111; text-decoration: none; text-align: center; font: 15px "Archivo Black", Arial; letter-spacing: -0.3px;
+    display: flex; align-items: center; justify-content: center; padding: 0 0 4px; text-transform: uppercase;
+    filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.55)); transition: transform 0.12s;
+  }
+  .nuvem:hover { transform: translateY(-2px) scale(1.06); }
+  .nuvem.on { color: var(--vermelho); }
+  .nuvem.on::after { content: ""; position: absolute; bottom: 9px; left: 30%; right: 30%; height: 2px; background: var(--vermelho); }
+
+  .mudo { position: absolute; right: 120px; top: 148px; font: bold 9px Verdana; color: #fff; background: none; border: 0; cursor: pointer; letter-spacing: 0.5px; }
+  .mascote { position: absolute; right: 44px; top: 162px; width: 82px; }
+
+  .faixa-busca { position: absolute; left: 66px; top: 204px; width: 160px; height: 36px; transform: rotate(-4deg); }
+  .faixa-busca svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .faixa-busca label { position: absolute; left: 52px; top: 10px; font: bold 12px "Special Elite", monospace; letter-spacing: 3px; color: #111; pointer-events: none; }
+  .faixa-busca input {
+    position: absolute; left: 160px; top: 9px; width: 104px; border: 1px solid #000; background: #fff; color: #111; padding: 2px 4px; font: 10px Verdana;
   }
 
+  .faixa-login {
+    position: absolute; right: 10px; top: 214px; height: 30px; padding: 0 12px 0 22px; isolation: isolate;
+    display: flex; gap: 6px; align-items: center;
+  }
+  .faixa-login::before { content: ""; position: absolute; inset: 0; z-index: -1; background: #000; filter: url(#rasgar); }
+  .faixa-login input, .faixa-login select {
+    width: 64px; background: #4a4a4a; border: 1px solid #6a6a6a; color: #ccc; font: 10px Verdana; padding: 2px 4px; border-radius: 0;
+  }
+  .faixa-login select { width: 70px; }
+  .faixa-login button { background: none; border: 0; color: #fff; font: 9px Verdana; text-transform: uppercase; cursor: pointer; padding: 0 2px; }
+  .faixa-login button:hover { text-decoration: underline; color: #fde74c; }
+  .lembrar { position: absolute; right: 22px; top: 247px; font: 10px "Special Elite"; color: #111; display: flex; align-items: center; gap: 3px; }
+  .lembrar input { margin: 0; width: 10px; height: 10px; }
 
-  .featured-game {
-    max-width: 620px;
-    margin: 0 auto 22px;
-    background: #000;
-    border: 3px solid #ffff00;
-    box-shadow: 5px 5px 0 #ff00ff;
-    text-align: left;
-    overflow: hidden;
+  /* ==== CORPO ==== */
+  .corpo { display: flex; align-items: flex-start; position: relative; isolation: isolate; padding: 0 10px; }
+  .corpo::before {
+    content: ""; position: absolute; inset: -4px 10px 0 10px; z-index: -1; filter: url(#rasgar-forte);
+    background: var(--ruido), #0d0d0d;
   }
-  .featured-art {
-    height: 250px;
-    position: relative;
-    overflow: hidden;
-    background: #151020;
-    border-bottom: 2px solid #ffff00;
-  }
-  .featured-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .featured-ribbon {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 5px 9px;
-    color: #000;
-    background: #ffff00;
-    border: 2px outset #fff;
-    font-size: 12px;
-    font-weight: bold;
-  }
-  .featured-info { padding: 13px 16px 16px; }
-  .featured-kicker {
-    color: #00ff00;
-    font-size: 11px;
-    letter-spacing: 2px;
-    margin-bottom: 5px;
-  }
-  .featured-info h2 {
-    margin: 0 0 7px;
-    color: #fff;
-    font-size: 27px;
-    text-transform: uppercase;
-  }
-  .featured-info h2 span {
-    display: inline-block;
-    vertical-align: middle;
-    padding: 3px 7px;
-    margin-left: 5px;
-    color: #000;
-    background: #ffff00;
-    border: 2px outset #fff;
-    font-size: 12px;
-  }
-  .featured-info p { margin: 0; color: #ccc; font-size: 13px; }
+  .principal { flex: 0 0 608px; padding: 10px 0 18px 14px; }
+  .lateral { flex: 1; padding: 10px 10px 18px 14px; display: flex; flex-direction: column; align-items: center; }
 
-  /* botão do jogo em destaque */
-  .featured-info .go {
-    display: inline-block;
-    margin-top: 10px;
-    background: #00ff00;
-    border: 2px outset #fff;
-    color: #000;
-    font-weight: bold;
-    font-size: 14px;
-    padding: 3px 12px;
-    text-decoration: none;
-    font-family: inherit;
+  .barra-titulo { position: relative; height: 82px; margin-bottom: 10px; }
+  .rotulo-jogos {
+    position: absolute; left: 0; top: 2px; width: 196px; height: 74px; display: flex; align-items: center; justify-content: center;
+    background: #dcdcdc; filter: url(#rasgar-forte);
   }
-  .featured-info .go:active { border-style: inset; }
+  .rotulo-jogos::after { content: ""; position: absolute; inset: 0; background: var(--ruido-escuro), repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,0,0,0.05) 3px 4px); }
+  .rotulo-jogos h1 { margin: 0; font: 58px/1 "Rubik Dirt", Impact; color: #111; letter-spacing: -1px; transform: scaleY(1.12); position: relative; z-index: 1; }
+  .controles { position: absolute; left: 210px; top: 8px; }
+  .linha-filtro { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; }
+  .linha-filtro span { font: 13px "Archivo Black", Arial; color: #9a9a9a; letter-spacing: 0.3px; }
+  .seletor { position: relative; width: 160px; height: 17px; background: #2e2e2e; border: 1px solid #000; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); }
+  .seletor select { appearance: none; -webkit-appearance: none; width: 100%; height: 100%; background: transparent; color: #fff; border: 0; font: bold 10px Verdana; padding: 0 22px 0 6px; text-transform: uppercase; cursor: pointer; }
+  .seletor select option { background: #222; }
+  .seletor::after { content: "▼"; position: absolute; right: 0; top: 0; bottom: 0; width: 17px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #fff; background: linear-gradient(#5a5a5a, #2a2a2a); border-left: 1px solid #000; pointer-events: none; }
+  .linha-pag { display: flex; align-items: center; gap: 5px; }
+  .pagina-etiqueta { display: inline-flex; align-items: center; gap: 6px; margin-left: 4px; font: 10px Verdana; color: #ccc; }
+  .pagina-etiqueta b { font: bold 11px "Special Elite", monospace; color: #111; background: #bdbdbd; padding: 1px 5px; letter-spacing: 2px; transform: rotate(-2deg); display: inline-block; }
+  .legenda { position: absolute; right: 2px; top: 6px; font: bold 9px Verdana; line-height: 1.65; color: #fff; }
+  .legenda span { color: #bbb; font-weight: normal; }
 
-  @media (max-width: 500px) {
-    .featured-art { height: 180px; }
-    .featured-info h2 { font-size: 22px; }
-    .game-table .thumb { width: 90px; height: 60px; }
-    .game-table .name { font-size: 16px; }
-    .welcome h1 { font-size: 24px; }
-    .sim-card { width: 100%; }
+  /* mural de cards em papel cinza amassado */
+  .mural { position: relative; padding: 10px 6px 16px; isolation: isolate; }
+  .mural::before {
+    content: ""; position: absolute; inset: 0 0 0 0; z-index: -1; filter: url(#rasgar-forte);
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.08), transparent 60%),
+      var(--ruido),
+      repeating-linear-gradient(35deg, transparent 0 40px, rgba(0,0,0,0.12) 40px 42px, transparent 42px 70px),
+      repeating-linear-gradient(-55deg, transparent 0 55px, rgba(255,255,255,0.05) 55px 57px, transparent 57px 90px),
+      #333;
+  }
+  .grade-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 14px; }
+  .card { position: relative; display: block; text-decoration: none; color: #fff; padding: 12px 10px 24px; isolation: isolate; }
+  .card::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; filter: url(#rasgar-forte);
+    background: var(--ruido-escuro), radial-gradient(ellipse at 40% 30%, #b5b5b5, #8f8f8f 70%);
+  }
+  .card:nth-child(3n+1)::before { transform: rotate(-1.5deg); }
+  .card:nth-child(3n+2)::before { transform: rotate(1.2deg); }
+  .card:nth-child(3n)::before { transform: rotate(-0.6deg); }
+  .card .thumb {
+    display: block; position: relative; margin: 0 6px; aspect-ratio: 4 / 3; overflow: hidden; background: #000;
+    border: 4px solid #f4f4f4; box-shadow: 2px 3px 3px rgba(0,0,0,0.55);
+    transition: transform 0.12s;
+  }
+  .card:nth-child(3n+1) .thumb { transform: rotate(-2deg); }
+  .card:nth-child(3n+2) .thumb { transform: rotate(1.5deg); }
+  .card:nth-child(3n) .thumb { transform: rotate(-1deg); }
+  .card:hover .thumb { transform: rotate(0) scale(1.05); }
+  .card .thumb svg { width: 100%; height: 100%; display: block; }
+  .card .legenda-card {
+    position: relative; margin: -14px 0 0 -2px; width: 92%; padding: 6px 8px 7px; isolation: isolate;
+  }
+  .card .legenda-card::before { content: ""; position: absolute; inset: 0; z-index: -1; background: #000; filter: url(#rasgar); box-shadow: 2px 2px 0 rgba(0,0,0,0.4); }
+  .card h3 { margin: 0 0 3px; font: bold 11px/1.1 Arial; color: #fff; }
+  .card p { margin: 0; font: 10px/1.25 Arial; color: #e6e6e6; }
+  .card:hover h3 { color: #fde74c; text-decoration: underline; }
+  .card .sigla { position: absolute; right: 6px; bottom: 5px; font: bold 9px Verdana; color: #fff; letter-spacing: 1px; }
+  .card.escondido { display: none; }
+  .card .novo {
+    position: absolute; z-index: 3; top: 2px; right: 0; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;
+    font: 11px/1 "Archivo Black", Arial; color: #111; background: #fde74c; transform: rotate(16deg); text-align: center;
+    clip-path: polygon(50% 0, 61% 18%, 82% 10%, 79% 32%, 100% 38%, 84% 54%, 96% 74%, 74% 76%, 70% 98%, 52% 85%, 33% 100%, 28% 77%, 6% 76%, 16% 56%, 0 38%, 21% 32%, 18% 10%, 39% 17%);
+    animation: pulsar 0.9s steps(2) infinite;
+  }
+  @keyframes pulsar { 50% { transform: rotate(16deg) scale(1.1); } }
+  .vazio { grid-column: 1 / -1; text-align: center; font: 16px "Permanent Marker"; color: #bbb; padding: 30px; display: none; }
+
+  .rodape-mural { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+  .em-obras { font: 13px "Permanent Marker"; color: #fde74c; }
+  .em-obras img { display: inline; }
+
+  /* ==== LATERAL ==== */
+  .programacao { width: 270px; position: relative; padding: 4px 10px 10px; isolation: isolate; }
+  .programacao::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--ruido), #1c1c1c; filter: url(#rasgar); }
+  .programacao h2 {
+    margin: 4px 0 4px; display: flex; align-items: center; justify-content: center; gap: 6px;
+    font: bold 20px Arial; letter-spacing: -0.5px; color: #fff;
+  }
+  .programacao h2 svg { width: 38px; height: 14px; }
+  .dias { display: flex; align-items: center; gap: 1px; margin: 0 -2px 10px; }
+  .dias button {
+    flex: 1; padding: 2px 0; border: 0; cursor: pointer; font: bold 9px Verdana; color: #111;
+    background: linear-gradient(#fff, #d8d8d8); border-right: 1px solid #888;
+  }
+  .dias button:hover { background: #fde74c; }
+  .dias button.on { background: #555; color: #888; }
+  .dias .seta-dia { flex: 0 0 auto; background: none; color: #fff; font-size: 12px; padding: 0 2px; border: 0; }
+  .data-dia { margin: 0 4px 6px; font: bold 13px Arial; color: #fff; }
+  .grade { list-style: none; margin: 0 4px; padding: 0; background: #2b2b2b; border: 1px solid #000; }
+  .grade li { border-bottom: 1px solid #000; }
+  .grade a { display: flex; justify-content: space-between; padding: 3px 6px; font: bold 11px Arial; text-decoration: none; color: #fff; }
+  .grade li:nth-child(even) a { background: #333; }
+  .grade a:hover { background: var(--vermelho); }
+  .grade .mais { text-align: center; color: #888; font-size: 9px; padding: 1px 0 2px; background: #222; }
+  .fuso { margin: 10px 4px 2px; display: flex; justify-content: flex-end; align-items: center; gap: 6px; font: bold 10px Arial; color: #9a9a9a; }
+
+  .ornamento { width: 210px; margin: 14px 0 -8px; position: relative; z-index: 1; }
+  .slot-ad { position: relative; }
+  .slot-ad .tag-ad { position: absolute; top: -9px; right: -4px; z-index: 3; background: #fff; color: #000; font: bold 8px Verdana; padding: 0 3px; border: 1px solid #000; }
+  .slot-ad + .slot-ad { margin-top: 14px; }
+
+  /* anúncio tênis 300x250 */
+  .ad-tenis { display: block; width: 300px; height: 250px; position: relative; overflow: hidden; background: #fff; color: #111; text-decoration: none; border: 1px solid #000; }
+  .ad-tenis::before { content: ""; position: absolute; inset: 0; background: var(--ruido-escuro); opacity: 0.4; }
+  .ad-tenis .titulo { position: absolute; left: 10px; top: 6px; font: 29px/0.88 "Permanent Marker", cursive; letter-spacing: 0.5px; text-transform: uppercase; z-index: 2; }
+  .ad-tenis .organico { position: absolute; right: 10px; top: 10px; font: bold 8px Arial; letter-spacing: 0.5px; z-index: 2; }
+  .ad-tenis .estouro {
+    position: absolute; left: -10px; top: 50px; width: 250px; height: 200px; background: var(--vermelho);
+    clip-path: polygon(50% 0, 57% 26%, 76% 4%, 71% 32%, 100% 22%, 80% 44%, 100% 60%, 76% 62%, 88% 94%, 62% 74%, 52% 100%, 42% 76%, 16% 96%, 26% 66%, 0 66%, 18% 48%, 0 26%, 26% 32%, 20% 6%, 42% 24%);
+  }
+  .ad-tenis .estouro::after { content: ""; position: absolute; inset: 0; background: repeating-radial-gradient(circle at 50% 50%, transparent 0 6px, rgba(255,255,255,0.12) 6px 7px); }
+  .ad-tenis img { position: absolute; left: 50px; top: 66px; width: 250px; transform: rotate(-6deg); mix-blend-mode: multiply; z-index: 1; }
+  .ad-tenis .lateral-txt { position: absolute; left: 10px; bottom: 32px; font: bold 7px/1.3 Arial; text-transform: uppercase; z-index: 2; }
+  .ad-tenis .rodape-ad { position: absolute; left: 10px; right: 10px; bottom: 6px; display: flex; justify-content: space-between; align-items: flex-end; font: 7px/1.25 Arial; text-transform: uppercase; z-index: 2; }
+  .ad-tenis .rodape-ad b { font: bold 16px "Archivo Black", Arial; background: #111; color: #fff; padding: 1px 6px; transform: rotate(-4deg); }
+
+  /* anúncio zelda 300x250 (roxo) */
+  .ad-zelda { display: block; width: 300px; height: 250px; position: relative; overflow: hidden; text-decoration: none; color: #fff; border: 1px solid #000;
+    background: radial-gradient(circle at 75% 45%, #a77bff 0, #7b3fe4 35%, #5520b8 70%, #3a128a); }
+  .ad-zelda .titulo { position: absolute; left: 14px; top: 10px; font: bold 34px/1 Arial; letter-spacing: -1.5px; }
+  .ad-zelda .sub { position: absolute; left: 14px; top: 50px; width: 112px; z-index: 2; font: 11px/1.35 Arial; color: #efe6ff; }
+  .ad-zelda img { position: absolute; right: -8px; top: 6px; width: 172px; transform: rotate(6deg); filter: drop-shadow(-5px 6px 6px rgba(0,0,0,0.5)); }
+  .ad-zelda .fala { position: absolute; left: 16px; top: 140px; font: 13px "Permanent Marker", cursive; color: #111; background: #fff; padding: 4px 10px; border-radius: 50%; border: 2px solid #111; transform: rotate(-6deg); animation: pulsar-fala 1s steps(2) infinite; }
+  .ad-zelda .fala::after { content: ""; position: absolute; right: -8px; top: 12px; border: 6px solid transparent; border-left: 10px solid #111; }
+  .ad-zelda .botao-gloss { position: absolute; left: 14px; bottom: 30px; }
+  .ad-zelda .mini { position: absolute; left: 14px; bottom: 10px; font: 8px Arial; color: #cdbbff; }
+  @keyframes pulsar-fala { 50% { transform: rotate(-3deg) scale(1.06); } }
+  .aviso-ads { font: 9px Verdana; color: #777; text-align: center; margin: 10px 0 0; }
+
+  /* ==== RODAPÉ ==== */
+  .rodape { position: relative; isolation: isolate; text-align: center; padding: 16px 30px 22px; color: #999; font: 10px Verdana; }
+  .rodape::before { content: ""; position: absolute; inset: 0 10px 0 10px; z-index: -1; background: var(--rabiscos), var(--ruido), #1d1d1d; filter: url(#rasgar-forte); }
+  .rodape .links a { color: #fff; font-weight: bold; text-decoration: none; text-transform: uppercase; margin: 0 5px; }
+  .rodape .links a:hover { text-decoration: underline; color: #fde74c; }
+  .contador { display: inline-block; background: #000; border: 2px inset #666; color: #3f3; font: bold 12px "Courier New", monospace; letter-spacing: 3px; padding: 0 5px; margin: 8px 0 4px; }
+  .rodape .feito { font: 15px "Permanent Marker", cursive; color: #fff; margin: 4px 0; }
+  .selos { display: flex; gap: 4px; justify-content: center; margin: 8px 0; flex-wrap: wrap; }
+  .selos span { display: inline-block; width: 88px; height: 31px; border: 1px solid #000; font: bold 8px/1.1 Verdana; display: flex; align-items: center; justify-content: center; text-align: center; }
+  .selos span:nth-child(1) { background: linear-gradient(#fff, #ccc); color: #000; }
+  .selos span:nth-child(2) { background: #000; color: #3f3; border-color: #3f3; }
+  .selos span:nth-child(3) { background: linear-gradient(#ff8a00, #e04c00); color: #fff; }
+  .selos span:nth-child(4) { background: #1a3a8a; color: #fff; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) rotate(-1deg); background: #fde74c; color: #111;
+    font: 15px "Permanent Marker", cursive; padding: 10px 18px; border: 2px solid #111; box-shadow: 4px 4px 0 #000;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 99; max-width: calc(100% - 32px); text-align: center;
+  }
+  .toast.on { opacity: 1; }
+
+  /* ==== TELAS MENORES ==== */
+  @media (max-width: 960px) {
+    .site { width: 100%; }
+    .corpo { flex-direction: column; }
+    .principal { flex: none; width: 100%; padding-right: 14px; }
+    .lateral { width: 100%; }
+    .cabeca { height: auto; padding: 10px 16px 66px; }
+    .faixa-ad { position: static; margin: 0 auto 12px; width: 100%; max-width: 728px; height: auto; }
+    .ad-gta { width: 100%; }
+    .logo, .faixa-busca, .mudo, .faixa-login, .lembrar { position: relative; left: auto; right: auto; top: auto; }
+    .logo { display: inline-block; margin: 6px 0 10px; }
+    .nuvens { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0 14px; }
+    .nuvem { position: static !important; width: auto !important; height: 46px !important; padding: 0 22px 4px; }
+    .mascote, .arabesco, .mudo { display: none; }
+    .faixa-busca { display: block; margin-left: 10px; }
+    .faixa-login { position: absolute; left: 16px; right: auto; bottom: 18px; top: auto; }
+    .lembrar { display: none; }
+    .papel-base { right: 20px !important; }
+  }
+  @media (max-width: 760px) {
+    .ad-gta { height: 90px; }
+    .ad-gta .data, .ad-gta .legenda-tela, .ad-gta .marca, .ad-gta .tique { display: none; }
+    .ad-gta .t-grande { font-size: 22px; }
+    .ad-gta .tela { left: auto; right: 8px; width: 46%; background-size: cover; }
+    .ad-gta .botao-gloss { left: 12px; top: auto; bottom: 6px; }
+    .ad-gta .contagem { right: auto; left: 120px; bottom: 10px; }
+    .barra-titulo { height: auto; display: flex; flex-wrap: wrap; gap: 10px; }
+    .rotulo-jogos, .controles, .legenda { position: relative; left: auto; top: auto; right: auto; }
+    .grade-cards { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 460px) {
+    .grade-cards { grid-template-columns: 1fr; }
+    .ad-gta .t-grande small { display: none; }
+    .faixa-login input { width: 54px; }
   }
 </style>
 </head>
-<body class="mode-games">
+<body>
 
-<div class="topbar">
-  <div class="logo-row">
-    <svg class="logo-icon" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="46" height="46" fill="#ff0" stroke="#000" stroke-width="3"/>
-      <circle cx="16" cy="20" r="4" fill="#000"/>
-      <circle cx="32" cy="20" r="4" fill="#000"/>
-      <path d="M14 30 Q24 38 34 30" fill="none" stroke="#000" stroke-width="3"/>
-    </svg>
-    <div class="logo-text">PNGG LABZ</div>
-  </div>
-  <div class="tabs">
-    <button class="tab-btn on" id="btn-games" onclick="go('games')">Jogos</button>
-    <button class="tab-btn" id="btn-sims" onclick="go('sims')">Simulações</button>
-  </div>
-</div>
+<!-- filtros SVG para bordas de papel rasgado -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="rasgar" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="3" seed="2" result="r"/>
+    <feDisplacementMap in="SourceGraphic" in2="r" scale="5"/>
+  </filter>
+  <filter id="rasgar-forte" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="4" seed="7" result="r"/>
+    <feDisplacementMap in="SourceGraphic" in2="r" scale="16"/>
+  </filter>
+  <symbol id="espiral" viewBox="0 0 70 90">
+    <g fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round">
+      <path d="M60 86 C20 80 6 56 14 36 C22 16 48 14 54 30 C60 46 40 54 32 44 C26 36 36 28 42 34"/>
+      <path d="M58 6 C40 8 30 18 34 26" stroke-width="1.6"/>
+      <path d="M10 60 C2 70 6 82 18 84" stroke-width="1.4"/>
+    </g>
+  </symbol>
+</svg>
 
-<div class="view on" id="view-games">
-  <div class="games-wrap">
+<div class="site">
 
-    <div class="welcome">
-      <h1>~* PNGG LABZ *~</h1>
-      <p class="slogan">jogos na maioria ruins e pra piorar feitos com IA</p>
+  <!-- ===================== CABEÇALHO ===================== -->
+  <header class="cabeca">
+    <div class="fundo"></div>
+    <div class="papel-base"></div>
+    <svg class="arabesco esq" viewBox="0 0 70 90" aria-hidden="true"><use href="#espiral"/></svg>
+    <svg class="arabesco dir" viewBox="0 0 70 90" aria-hidden="true"><use href="#espiral"/></svg>
+
+    <div class="faixa-ad">
+      <a class="ad-gta" href="#" data-msg="pré-venda? isso é um anúncio fake. o jogo é real, o banner não.">
+        <span class="t-grande">Volta<br>pra Vice<small>Edição Leonida</small></span>
+        <span class="data"><span>Lança em</span><b>19<sup>.11</sup></b><em>no seu console, se tiver um</em></span>
+        <span class="tela" role="img" aria-label="Arte promocional de Grand Theft Auto VI"></span>
+        <span class="legenda-tela">GTA VI · 2026</span>
+        <span class="botao-gloss">Pré-venda</span>
+        <span class="tique"></span>
+        <span class="marca"><b>pngg<i>games</i></b><span>a gente não vende nada</span></span>
+        <span class="contagem">faltam <span class="js-contagem">--</span></span>
+      </a>
     </div>
 
-    <marquee scrollamount="5">
-      ★ bem-vindo ao meu site ★ &nbsp; best viewed in any browser &nbsp; ★ under construction forever ★ &nbsp; sem download ★ &nbsp; jogos duvidosos ★
-    </marquee>
-
-    <div>
-      você é o visitante nº
-      <span class="hit-counter" id="hits">0001337</span>
-    </div>
-
-    <hr class="stars">
-
-    <div class="section-title">↓ meus jogos ↓</div>
-
-
-    <section class="featured-game" aria-label="Jogo em destaque">
-      <div class="featured-art">
-        <!-- Coloque sua imagem na mesma pasta deste arquivo com o nome meu-jogo.png (ou troque o src abaixo) -->
-        <img src="meu-jogo.png"
-             alt="Imagem do meu jogo em desenvolvimento"
-             style="width:100%;height:100%;object-fit:cover;display:block">
-        <span class="featured-ribbon">★ EM DESTAQUE</span>
-      </div>
-      <div class="featured-info">
-        <div class="featured-kicker">PROJETO EM DESENVOLVIMENTO</div>
-        <h2>meu jogo <span>BETA</span></h2>
-        <p>Uma prévia do que estou desenvolvendo. Ainda em construção!</p>
-        <a class="go" href="meu jogo.html">► JOGAR</a>
-      </div>
-    </section>
-
-    <table class="game-table">
-
-
-      <tr>
-        <td style="width:130px">
-          <a href="empire-builder.html">
-            <span class="thumb">
-              <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
-                <rect width="120" height="80" fill="#3a8fd0"/>
-                <rect x="8" y="6" width="104" height="68" fill="#ece9d8" stroke="#00138c" stroke-width="1.5"/>
-                <rect x="8" y="6" width="104" height="12" fill="#105ce6"/>
-                <text x="12" y="15" font-family="Tahoma" font-size="7" fill="#fff" font-weight="bold">Empire Builder</text>
-                <rect x="12" y="22" width="72" height="46" fill="#0d2b57"/>
-                <polygon points="20,35 28,30 36,35 36,43 28,48 20,43" fill="#3d8b4f"/>
-                <polygon points="36,43 44,38 52,43 52,51 44,56 36,51" fill="#2d6b3f"/>
-                <polygon points="52,35 60,30 68,35 68,43 60,48 52,43" fill="#c2b280"/>
-                <rect x="40" y="40" width="6" height="6" fill="#e8d5a8"/>
-                <circle cx="48" cy="32" r="2.5" fill="#1c62d6"/>
-                <rect x="88" y="22" width="20" height="46" fill="#dbe6f6" stroke="#7f9db9"/>
-                <rect x="90" y="26" width="16" height="5" fill="#1a6ef0"/>
-                <rect x="90" y="36" width="12" height="8" fill="#6ec06e"/>
-              </svg>
-            </span>
-          </a>
-        </td>
-        <td>
-          <div class="name"><a href="empire-builder.html">Empire Builder</a></div>
-          <a class="go" href="empire-builder.html">► JOGAR</a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a href="netops-admin.html">
-            <span class="thumb">
-              <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
-                <rect width="120" height="80" fill="#3a8cc9"/>
-                <rect x="8" y="6" width="104" height="68" fill="#c0c0c0" stroke="#000" stroke-width="1.2"/>
-                <rect x="8" y="6" width="104" height="12" fill="#000080"/>
-                <text x="12" y="15" font-family="Tahoma" font-size="6.5" fill="#fff" font-weight="bold">NetOps Admin '98</text>
-                <rect x="12" y="22" width="44" height="46" fill="#fff" stroke="#808080"/>
-                <rect x="14" y="24" width="40" height="6" fill="#000080"/>
-                <rect x="14" y="32" width="40" height="5" fill="#e0e0e0"/>
-                <rect x="14" y="39" width="40" height="5" fill="#e0e0e0"/>
-                <rect x="14" y="46" width="40" height="5" fill="#c0ffc0"/>
-                <rect x="14" y="53" width="40" height="5" fill="#e0e0e0"/>
-                <rect x="60" y="22" width="48" height="32" fill="#000"/>
-                <text x="62" y="30" font-family="Consolas,monospace" font-size="4.5" fill="#0f0">[sys] online</text>
-                <text x="62" y="38" font-family="Consolas,monospace" font-size="4.5" fill="#0f0">&lt;p1&gt; lag???</text>
-                <text x="62" y="46" font-family="Consolas,monospace" font-size="4.5" fill="#ff0">&lt;admin&gt; ok</text>
-                <rect x="60" y="56" width="48" height="12" fill="#d4d0c8" stroke="#808080"/>
-              </svg>
-            </span>
-          </a>
-        </td>
-        <td>
-          <div class="name"><a href="netops-admin.html">NetOps Admin '98</a></div>
-          <a class="go" href="netops-admin.html">► JOGAR</a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a href="art-market.html">
-            <span class="thumb">
-              <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
-                <rect width="120" height="80" fill="#d7d5cb"/>
-                <rect x="30" y="10" width="56" height="44" fill="#f4f2ec" stroke="#6d2a3a" stroke-width="1.5"/>
-                <rect x="34" y="14" width="48" height="36" fill="#fff"/>
-                <path d="M38 40 Q50 20 62 36 T80 30" fill="none" stroke="#6d2a3a" stroke-width="2.5"/>
-                <path d="M40 42 Q52 28 66 38" fill="none" stroke="#b28a2e" stroke-width="2"/>
-                <circle cx="48" cy="24" r="4" fill="#4b5d45" opacity="0.75"/>
-                <ellipse cx="96" cy="52" rx="13" ry="10" fill="#ece9e0" stroke="#c3c0b2"/>
-                <circle cx="92" cy="50" r="2.8" fill="#6d2a3a"/>
-                <circle cx="99" cy="49" r="2.8" fill="#b28a2e"/>
-                <circle cx="95" cy="56" r="2.8" fill="#4b5d45"/>
-                <rect x="30" y="60" width="56" height="9" rx="2" fill="#6d2a3a"/>
-                <text x="58" y="67" text-anchor="middle" font-family="Georgia,serif" font-size="6" fill="#f6ece9">avaliar</text>
-              </svg>
-            </span>
-          </a>
-        </td>
-        <td>
-          <div class="name"><a href="art-market.html">Art Market</a></div>
-          <a class="go" href="art-market.html">► JOGAR</a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a href="typing-test.html">
-            <span class="thumb">
-              <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
-                <rect width="120" height="80" fill="#0f0f23"/>
-                <rect x="8" y="6" width="104" height="68" fill="#1a1a3e" stroke="#00d4ff" stroke-width="1.5"/>
-                <rect x="8" y="6" width="104" height="12" fill="#7b2cbf"/>
-                <text x="12" y="15" font-family="Tahoma" font-size="7" fill="#fff" font-weight="bold">Typing Test</text>
-                <rect x="14" y="24" width="92" height="18" rx="2" fill="#0a0a1a" stroke="#00d4ff" stroke-width="0.8"/>
-                <text x="18" y="36" font-family="Consolas,monospace" font-size="5.5" fill="#00ff9d">A vida é feita de escolhas...</text>
-                <rect x="14" y="48" width="92" height="20" rx="2" fill="#000" stroke="#444"/>
-                <text x="18" y="61" font-family="Consolas,monospace" font-size="5" fill="#888">digite aqui...</text>
-                <text x="60" y="72" text-anchor="middle" font-family="Tahoma" font-size="5.5" fill="#00d4ff">WPM ★</text>
-              </svg>
-            </span>
-          </a>
-        </td>
-        <td>
-          <div class="name"><a href="typing-test.html">Typing Speed Test</a></div>
-          <a class="go" href="typing-test.html">► JOGAR</a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a href="nutcase-wizard.html">
-            <span class="thumb">
-              <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
-                <rect width="120" height="80" fill="#2a1c12"/>
-                <rect x="8" y="6" width="104" height="68" fill="#e6d3ac" stroke="#4a3527" stroke-width="1.5"/>
-                <rect x="8" y="6" width="104" height="12" fill="#7c4e2c"/>
-                <text x="12" y="15" font-family="Tahoma" font-size="6.5" fill="#f6e9cd" font-weight="bold">Nutcase Wizard</text>
-                <!-- caldeirão -->
-                <ellipse cx="48" cy="52" rx="22" ry="8" fill="#2f2d33"/>
-                <path d="M26 52 Q26 68 48 70 Q70 68 70 52" fill="#3a383f" stroke="#211f24" stroke-width="1.2"/>
-                <ellipse cx="48" cy="52" rx="22" ry="7" fill="#4a474f"/>
-                <ellipse cx="48" cy="50" rx="16" ry="5" fill="#5fbf6a"/>
-                <!-- fogo -->
-                <path d="M36 68 Q40 60 44 68 Q48 58 52 68 Q56 61 60 68" fill="#ef7a34" opacity="0.9"/>
-                <!-- frasco -->
-                <path d="M86 28 L86 42 L78 58 Q76 64 84 64 L96 64 Q104 64 102 58 L94 42 L94 28 Z" fill="#eef6f0" stroke="#33241c" stroke-width="1.2"/>
-                <path d="M78 52 L102 52 L102 58 Q102 64 96 64 L84 64 Q76 64 78 58 Z" fill="#a97bea"/>
-                <rect x="88" y="24" width="8" height="5" rx="1" fill="#8a5a35" stroke="#33241c" stroke-width="0.8"/>
-                <!-- ingredientes -->
-                <text x="22" y="38" font-size="9">🌿</text>
-                <text x="68" y="36" font-size="8">🍄</text>
-              </svg>
-            </span>
-          </a>
-        </td>
-        <td>
-          <div class="name"><a href="nutcase-wizard.html">Nutcase Wizard</a></div>
-          <div style="font-size:12px;color:#444;margin:2px 0 4px">oficina de poções duvidosas</div>
-          <a class="go" href="nutcase-wizard.html">► JOGAR</a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a href="gambit-monsters.html">
-            <span class="thumb">
-              <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
-                <rect width="120" height="80" fill="#141026"/>
-                <rect x="8" y="6" width="104" height="68" fill="#1d1733" stroke="#6a5a92" stroke-width="1.5"/>
-                <rect x="8" y="6" width="104" height="12" fill="#3a2f52"/>
-                <text x="12" y="15" font-family="Tahoma" font-size="6.5" fill="#f0d048" font-weight="bold">Gambit Monsters</text>
-                <!-- mini chess board -->
-                <rect x="14" y="24" width="40" height="40" fill="#c8c0a8" stroke="#2b2029" stroke-width="1"/>
-                <rect x="14" y="24" width="5" height="5" fill="#2b2029"/>
-                <rect x="24" y="24" width="5" height="5" fill="#2b2029"/>
-                <rect x="34" y="24" width="5" height="5" fill="#2b2029"/>
-                <rect x="44" y="24" width="5" height="5" fill="#2b2029"/>
-                <rect x="19" y="29" width="5" height="5" fill="#2b2029"/>
-                <rect x="29" y="29" width="5" height="5" fill="#2b2029"/>
-                <rect x="39" y="29" width="5" height="5" fill="#2b2029"/>
-                <rect x="49" y="29" width="5" height="5" fill="#2b2029"/>
-                <rect x="14" y="34" width="5" height="5" fill="#2b2029"/>
-                <rect x="24" y="34" width="5" height="5" fill="#2b2029"/>
-                <rect x="34" y="34" width="5" height="5" fill="#2b2029"/>
-                <rect x="44" y="34" width="5" height="5" fill="#2b2029"/>
-                <rect x="19" y="39" width="5" height="5" fill="#2b2029"/>
-                <rect x="29" y="39" width="5" height="5" fill="#2b2029"/>
-                <rect x="39" y="39" width="5" height="5" fill="#2b2029"/>
-                <rect x="49" y="39" width="5" height="5" fill="#2b2029"/>
-                <rect x="14" y="44" width="5" height="5" fill="#2b2029"/>
-                <rect x="24" y="44" width="5" height="5" fill="#2b2029"/>
-                <rect x="34" y="44" width="5" height="5" fill="#2b2029"/>
-                <rect x="44" y="44" width="5" height="5" fill="#2b2029"/>
-                <rect x="19" y="49" width="5" height="5" fill="#2b2029"/>
-                <rect x="29" y="49" width="5" height="5" fill="#2b2029"/>
-                <rect x="39" y="49" width="5" height="5" fill="#2b2029"/>
-                <rect x="49" y="49" width="5" height="5" fill="#2b2029"/>
-                <rect x="14" y="54" width="5" height="5" fill="#2b2029"/>
-                <rect x="24" y="54" width="5" height="5" fill="#2b2029"/>
-                <rect x="34" y="54" width="5" height="5" fill="#2b2029"/>
-                <rect x="44" y="54" width="5" height="5" fill="#2b2029"/>
-                <rect x="19" y="59" width="5" height="5" fill="#2b2029"/>
-                <rect x="29" y="59" width="5" height="5" fill="#2b2029"/>
-                <rect x="39" y="59" width="5" height="5" fill="#2b2029"/>
-                <rect x="49" y="59" width="5" height="5" fill="#2b2029"/>
-                <!-- pieces hint -->
-                <circle cx="26" cy="36" r="3" fill="#e8d6b6" stroke="#2b2029" stroke-width="0.8"/>
-                <circle cx="41" cy="51" r="3" fill="#514c6e" stroke="#120f19" stroke-width="0.8"/>
-                <!-- battle spark -->
-                <text x="68" y="42" font-family="Tahoma" font-size="18" fill="#f0b840">⚔</text>
-                <text x="88" y="38" font-family="Tahoma" font-size="9" fill="#f8f4e4">VS</text>
-                <text x="62" y="60" font-family="Tahoma" font-size="5.5" fill="#a89cc8">capturou? luta!</text>
-              </svg>
-            </span>
-          </a>
-        </td>
-        <td>
-          <div class="name"><a href="gambit-monsters.html">Gambit Monsters</a></div>
-          <div style="font-size:12px;color:#444;margin:2px 0 4px">xadrez. capturou? luta.</div>
-          <a class="go" href="gambit-monsters.html">► JOGAR</a>
-        </td>
-      </tr>
-    </table>
-
-    <div class="construction">
-      <div style="font-size:28px">🚧</div>
-      <b class="blink">UNDER CONSTRUCTION</b><br>
-      mais jogos ruins em breve
-    </div>
-
-    <hr class="stars">
-
-<div class="footer-games">
-  <div class="by">feito por mim</div>
-  <div class="claude">e o Claude</div>
-
-  <div style="margin-top:14px;font-size:12px;color:#888">
-    quer ver outros projetos bons e sem IA?
-    <a href="https://github.com/Raimundothedev"
-       target="_blank"
-       style="color:#aaa;">
-      github.com/Raimundothedev
+    <a class="logo" href="#">
+      <b>[pngg labz]<sup>TM</sup></b>
+      <small>sábado–quinta 23h–6h<br>(E/P) no seu navegador</small>
     </a>
-  </div>
 
-  <div style="margin-top:10px;font-size:12px;color:#888">
-    © 2026 pngg labz · não afiliado a nada
-  </div>
-</div>
+    <nav class="nuvens" aria-label="Menu principal">
+      <button class="nuvem on" data-filtro="jogo" style="left:392px;top:120px;width:118px;height:50px">Jogos</button>
+      <button class="nuvem" data-filtro="sim" style="left:520px;top:104px;width:150px;height:46px;font-size:13px">Simulações</button>
+      <button class="nuvem" data-msg="downloads? tudo roda no navegador, campeão." style="left:440px;top:164px;width:126px;height:40px;font-size:12px">Downloads</button>
+      <button class="nuvem" data-filtro="todos" style="left:584px;top:152px;width:100px;height:46px">Tudo</button>
+      <button class="nuvem" data-msg="a comunidade é você e eu. oi." style="left:680px;top:110px;width:140px;height:42px;font-size:12px">Comunidade</button>
+      <button class="nuvem" data-msg="loja fechada. volte em 2009." style="left:690px;top:160px;width:92px;height:40px;font-size:13px">Loja</button>
+      <a class="nuvem" href="https://github.com/Raimundothedev" target="_blank" rel="noopener" style="left:336px;top:180px;width:92px;height:38px;font-size:12px">GitHub</a>
+    </nav>
 
-  </div>
-</div>
+    <button class="mudo" data-msg="não tem som. é 2007, use o winamp.">MUDO &#128264;</button>
 
-<div class="view" id="view-sims">
-  <div class="orb" style="width:180px;height:180px;top:10%;left:-30px;opacity:0.55"></div>
-  <div class="orb" style="width:100px;height:100px;top:40%;right:8%;opacity:0.45"></div>
+    <svg class="mascote" viewBox="0 0 100 90" aria-hidden="true">
+      <path d="M8 88 L18 54 L10 18 L32 34 L50 30 L64 6 L70 32 L94 48 L80 56 L74 88 Z" fill="#0b0b0b" stroke="#fff" stroke-width="2"/>
+      <path d="M58 40 l8 -3" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M2 70 L16 64 M0 78 L16 74" stroke="#fff" stroke-width="1.5"/>
+    </svg>
 
-  <div class="sims-wrap">
-    <div class="sims-hero">
-      <div class="kicker">Laboratory Online</div>
-      <h1>Simulações &amp; Experimentos</h1>
-      <p>Modelos vivos de evolução e matemática. Explore sem pressa.</p>
+    <div class="faixa-busca">
+      <svg viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M2 18 L14 6 L14 12 L146 12 L146 6 L158 18 L146 30 L146 24 L14 24 L14 30 Z" fill="#eee" stroke="#111" stroke-width="1.5"/>
+        <path d="M14 12 L24 2 L136 2 L146 12 M14 24 L24 34 L136 34 L146 24" fill="#cfcfcf" stroke="#111" stroke-width="1.2"/>
+        <circle cx="30" cy="18" r="3" fill="#111"/><circle cx="130" cy="18" r="3" fill="#111"/>
+      </svg>
+      <label for="busca">BUSCA</label>
+      <input id="busca" type="search" placeholder="nome do jogo" autocomplete="off">
     </div>
 
-    <div class="sims-grid">
-      <a class="sim-card" href="evolution-lab.html">
-        <div class="art">
-          <svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="es" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#c8ecff"/>
-                <stop offset="100%" stop-color="#5aaa7a"/>
-              </linearGradient>
-            </defs>
-            <rect width="320" height="140" fill="url(#es)"/>
-            <ellipse cx="80" cy="115" rx="100" ry="28" fill="#6dcf8a" opacity="0.85"/>
-            <ellipse cx="240" cy="120" rx="90" ry="24" fill="#5bbb7a" opacity="0.8"/>
-            <ellipse cx="70" cy="85" rx="18" ry="13" fill="#7dcf9a" stroke="#fff" stroke-width="1.5"/>
-            <circle cx="78" cy="81" r="4" fill="#fff"/><circle cx="79" cy="81" r="2" fill="#0a3a55"/>
-            <ellipse cx="150" cy="95" rx="14" ry="10" fill="#5ec4f0" stroke="#fff" stroke-width="1.5"/>
-            <circle cx="157" cy="92" r="3.5" fill="#fff"/><circle cx="158" cy="92" r="1.8" fill="#0a3a55"/>
-            <ellipse cx="220" cy="80" rx="16" ry="12" fill="#a0e0c0" stroke="#fff" stroke-width="1.5"/>
-            <circle cx="228" cy="76" r="4" fill="#fff"/><circle cx="229" cy="76" r="2" fill="#0a3a55"/>
-            <circle cx="100" cy="105" r="3" fill="#ffe566"/>
-            <circle cx="180" cy="110" r="2.5" fill="#ffe566"/>
-          </svg>
-        </div>
-        <div class="body">
-          <h2>Evolution Lab</h2>
-          <p>Criaturas com rede neural evoluem e formam espécies em tempo real.</p>
-          <span class="cta">Abrir →</span>
-        </div>
-      </a>
-
-      <a class="sim-card" href="function-lab.html">
-        <div class="art">
-          <svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="fs" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#eaf7ff"/>
-                <stop offset="100%" stop-color="#8fd0f0"/>
-              </linearGradient>
-            </defs>
-            <rect width="320" height="140" fill="url(#fs)"/>
-            <rect x="20" y="14" width="280" height="112" rx="12" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.7)"/>
-            <line x1="30" y1="70" x2="290" y2="70" stroke="rgba(10,58,85,0.15)"/>
-            <line x1="160" y1="24" x2="160" y2="116" stroke="rgba(10,58,85,0.15)"/>
-            <path d="M40 100 Q90 30 140 80 T240 50 T280 85" fill="none" stroke="#f0a050" stroke-width="2" stroke-dasharray="5 4" opacity="0.7"/>
-            <path d="M40 95 Q95 40 145 75 T245 55 T280 80" fill="none" stroke="#2a9fd4" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="110" cy="50" r="5" fill="#5ec4f0" stroke="#fff" stroke-width="1.5"/>
-            <circle cx="160" cy="72" r="5" fill="#2a9fd4" stroke="#fff" stroke-width="1.5"/>
-            <circle cx="230" cy="48" r="5" fill="#5ec4f0" stroke="#fff" stroke-width="1.5"/>
-          </svg>
-        </div>
-        <div class="body">
-          <h2>Lab de Funções</h2>
-          <p>Digite, desenhe e desafie funções. Livre, Desafio, Estudos e Battle.</p>
-          <span class="cta">Abrir →</span>
-        </div>
-      </a>
+    <div class="faixa-login">
+      <input type="text" placeholder="Apelido" aria-label="Apelido" autocomplete="off">
+      <select aria-label="Signo"><option>Signo</option><option>Áries</option><option>Touro</option><option>Gêmeos</option><option>Escorpião</option><option>Outro</option></select>
+      <button data-msg="login desativado desde 2007.">Entrar</button>
+      <button data-msg="nem a gente lembra.">esqueci o signo</button>
+      <button data-msg="WTF mesmo.">WTF?</button>
     </div>
+    <label class="lembrar"><input type="checkbox"> Lembrar de mim</label>
+  </header>
 
-    <div class="sims-foot">PNGG LABZ · 2026</div>
+  <!-- ===================== CORPO ===================== -->
+  <div class="corpo">
+    <main class="principal">
+      <div class="barra-titulo">
+        <div class="rotulo-jogos"><h1 id="titulo-secao">JOGOS</h1></div>
+        <div class="controles">
+          <div class="linha-filtro">
+            <span>FILTRAR:</span>
+            <div class="seletor">
+              <select id="filtro" aria-label="Filtrar">
+                <option value="todos">Todos</option>
+                <option value="jogo" selected>Só jogos</option>
+                <option value="sim">Só simulações</option>
+                <option value="beta">Só beta</option>
+              </select>
+            </div>
+          </div>
+          <div class="linha-pag">
+            <button class="botao-bisel" data-msg="não tem página anterior. você está no começo de tudo."><span class="seta">◄</span> Voltar</button>
+            <button class="botao-bisel" data-msg="só tem 1 página. as outras 998 são mentira.">Mais <span class="seta">►</span></button>
+            <span class="pagina-etiqueta"><b>PÁGINA:</b> 1 de 999</span>
+          </div>
+        </div>
+        <div class="legenda">[ J ] <span>Jogo</span><br>[ S ] <span>Simulação</span><br>[ B ] <span>Beta</span></div>
+      </div>
+
+      <div class="mural">
+        <div class="grade-cards" id="grade-cards">
+          <div class="vazio" id="vazio">nada aqui. tenta outra palavra.</div>
+        </div>
+        <div class="rodape-mural">
+          <span class="em-obras">🚧 em construção pra sempre · mais jogos ruins em breve</span>
+          <span>
+            <button class="botao-bisel" data-msg="não tem página anterior."><span class="seta">◄</span> Voltar</button>
+            <button class="botao-bisel" data-msg="só tem 1 página.">Mais <span class="seta">►</span></button>
+          </span>
+        </div>
+      </div>
+    </main>
+
+    <aside class="lateral">
+      <section class="programacao" aria-label="Programação">
+        <h2>
+          <svg viewBox="0 0 38 14" aria-hidden="true"><path d="M36 7 C26 7 24 1 18 3 C12 5 16 11 20 9 M36 7 C26 7 22 13 14 11 C6 9 4 4 2 7" fill="none" stroke="#9a9a9a" stroke-width="1.6"/></svg>
+          Programação
+          <svg viewBox="0 0 38 14" aria-hidden="true" style="transform:scaleX(-1)"><path d="M36 7 C26 7 24 1 18 3 C12 5 16 11 20 9 M36 7 C26 7 22 13 14 11 C6 9 4 4 2 7" fill="none" stroke="#9a9a9a" stroke-width="1.6"/></svg>
+        </h2>
+        <div class="dias" id="dias"></div>
+        <p class="data-dia" id="data-dia"></p>
+        <ul class="grade" id="grade"></ul>
+        <div class="fuso">Fuso: <button class="botao-bisel" data-msg="só tem um fuso: o do sono.">Brasília <span class="seta">►</span></button></div>
+      </section>
+
+      <svg class="ornamento" viewBox="0 0 210 30" aria-hidden="true">
+        <g fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round">
+          <path d="M105 26 C90 26 86 10 74 12 C62 14 66 28 76 22 M105 26 C120 26 124 10 136 12 C148 14 144 28 134 22"/>
+          <path d="M70 18 C50 6 30 22 10 14 M140 18 C160 6 180 22 200 14" stroke-width="1.2"/>
+          <path d="M98 10 L105 2 L112 10 L105 18 Z" fill="#fff"/>
+        </g>
+      </svg>
+
+      <div class="slot-ad">
+        <span class="tag-ad">AD</span>
+        <a class="ad-tenis" href="#" data-msg="esgotado no seu tamanho. e em todos os outros.">
+          <span class="titulo">Cano Alto<br>Sneaker</span>
+          <span class="organico">100% LONA ORGÂNICA*</span>
+          <span class="estouro"></span>
+          <img src="assets/ads/tenis.png" alt="Tênis de cano alto preto com cadarço branco">
+          <span class="lateral-txt">feito à mão<br>por uma máquina</span>
+          <span class="rodape-ad"><span>1 par = 2 pés<br>*não é orgânica</span><b>R$ 19,99</b><span>design:<br>pngg labz</span></span>
+        </a>
+      </div>
+
+      <div class="slot-ad">
+        <span class="tag-ad">AD</span>
+        <a class="ad-zelda" href="#" data-msg="a fada não para de falar. desculpa.">
+          <span class="titulo">ocarina.</span>
+          <span class="sub">O clássico de 98 no console novo. Mesma floresta, mesmo templo da água, mesma raiva.</span>
+          <img src="assets/ads/zelda.webp" alt="Caixa de The Legend of Zelda: Ocarina of Time">
+          <span class="fala">Hey! Listen!</span>
+          <span class="botao-gloss">Quero ►</span>
+          <span class="mini">anúncio de mentirinha</span>
+        </a>
+      </div>
+
+      <p class="aviso-ads">anúncios falsos · paródia · ninguém pagou nada</p>
+    </aside>
   </div>
+
+  <!-- ===================== RODAPÉ ===================== -->
+  <footer class="rodape">
+    <div class="links">
+      <a href="#" data-filtro-link="jogo">Jogos</a> |
+      <a href="#" data-filtro-link="sim">Simulações</a> |
+      <a href="https://github.com/Raimundothedev" target="_blank" rel="noopener">GitHub</a> |
+      <a href="#" data-msg="termos de uso: use.">Termos</a> |
+      <a href="#" data-msg="privacidade: a gente nem sabe seu nome.">Privacidade</a>
+    </div>
+    <div>você é o visitante nº <span class="contador js-visitas">0001337</span></div>
+    <div class="feito">feito por mim (e o Claude)</div>
+    <div class="selos"><span>HTML 4.01<br>VÁLIDO?</span><span>FEITO<br>COM IA</span><span>MELHOR EM<br>1024x768</span><span>SEM FLASH<br>(RIP)</span></div>
+    <div>quer ver projetos bons e sem IA? <a href="https://github.com/Raimundothedev" target="_blank" rel="noopener" style="color:#fff">github.com/Raimundothedev</a></div>
+    <div style="margin-top:4px">© 2007–2026 pngg labz · não afiliado a nada nem a ninguém</div>
+  </footer>
 </div>
 
+<div class="toast" id="toast" role="status"></div>
+
+<script src="assets/jogos.js"></script>
 <script>
-function go(tab) {
-  var games = tab === 'games';
-  document.body.className = games ? 'mode-games' : 'mode-sims';
-  document.getElementById('view-games').className = games ? 'view on' : 'view';
-  document.getElementById('view-sims').className = games ? 'view' : 'view on';
-  document.getElementById('btn-games').className = games ? 'tab-btn on' : 'tab-btn';
-  document.getElementById('btn-sims').className = games ? 'tab-btn' : 'tab-btn on';
-  try { localStorage.setItem('pngg-tab', tab); } catch(e) {}
-}
-try {
-  if (localStorage.getItem('pngg-tab') === 'sims') go('sims');
-} catch(e) {}
+(function () {
+  var jogos = window.PNGG_JOGOS;
+  var grade = document.getElementById('grade-cards');
+  var vazio = document.getElementById('vazio');
+  var filtroSel = document.getElementById('filtro');
+  var busca = document.getElementById('busca');
+  var titulo = document.getElementById('titulo-secao');
+  var siglaCurta = { JOGO: 'J', SIM: 'S', BETA: 'B' };
 
-(function(){
-  var el = document.getElementById('hits');
-  var n = 1337;
-  try {
-    var s = localStorage.getItem('pngg-hits');
-    if (s) n = parseInt(s, 10) || 1337;
-    n += 1;
-    localStorage.setItem('pngg-hits', String(n));
-  } catch(e) {}
-  el.textContent = String(n).padStart(7, '0');
+  jogos.forEach(function (j) {
+    var a = document.createElement('a');
+    a.className = 'card';
+    a.href = j.href;
+    a.dataset.tipo = j.tipo;
+    a.dataset.beta = j.beta ? '1' : '';
+    a.dataset.nome = j.nome.toLowerCase();
+    a.innerHTML =
+      (j.destaque ? '<span class="novo">NOVO!</span>' : '') +
+      '<span class="thumb">' + j.thumb + '</span>' +
+      '<div class="legenda-card"><h3>' + j.nome + '</h3><p>' + j.desc + '</p></div>' +
+      '<span class="sigla">[ ' + siglaCurta[j.sigla] + ' ]</span>';
+    grade.insertBefore(a, vazio);
+  });
+
+  function aplicar() {
+    var f = filtroSel.value, q = busca.value.trim().toLowerCase(), n = 0;
+    grade.querySelectorAll('.card').forEach(function (c) {
+      var ok = (f === 'todos') || (f === 'beta' ? c.dataset.beta : c.dataset.tipo === f);
+      if (q) ok = c.dataset.nome.indexOf(q) !== -1;
+      c.classList.toggle('escondido', !ok);
+      if (ok) n++;
+    });
+    vazio.style.display = n ? 'none' : 'block';
+    titulo.textContent = q ? 'BUSCA' : ({ jogo: 'JOGOS', sim: 'SIMS', todos: 'TUDO', beta: 'BETA' })[f];
+    document.querySelectorAll('.nuvem[data-filtro]').forEach(function (b) { b.classList.toggle('on', b.dataset.filtro === f); });
+  }
+  function filtrar(v) { filtroSel.value = v; busca.value = ''; aplicar(); }
+  filtroSel.addEventListener('change', aplicar);
+  busca.addEventListener('input', aplicar);
+  document.querySelectorAll('[data-filtro]').forEach(function (b) { b.addEventListener('click', function () { filtrar(b.dataset.filtro); }); });
+  document.querySelectorAll('[data-filtro-link]').forEach(function (b) {
+    b.addEventListener('click', function (e) { e.preventDefault(); filtrar(b.dataset.filtroLink); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  });
+  aplicar();
+
+  // programação da semana
+  var nomesDias = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+  var nomesLongos = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+  var meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  var hoje = new Date(), diaAtual = hoje.getDay();
+  var diasEl = document.getElementById('dias');
+  function mostrarDia(d) {
+    diaAtual = d;
+    var data = new Date(hoje); data.setDate(hoje.getDate() + (d - hoje.getDay()));
+    document.getElementById('data-dia').textContent = nomesLongos[d] + ', ' + data.getDate() + ' de ' + meses[data.getMonth()];
+    document.getElementById('grade').innerHTML = window.PNGG_PROGRAMACAO(d).map(function (it) {
+      return '<li><a href="' + it.jogo.href + '"><span>' + it.jogo.nome + '</span><span>' + it.hora + '</span></a></li>';
+    }).join('') + '<li class="mais">▼</li>';
+    diasEl.querySelectorAll('button[data-d]').forEach(function (b) { b.classList.toggle('on', +b.dataset.d === d); });
+  }
+  nomesDias.forEach(function (n, i) {
+    var b = document.createElement('button'); b.textContent = n; b.dataset.d = i;
+    b.addEventListener('click', function () { mostrarDia(i); }); diasEl.appendChild(b);
+  });
+  var prox = document.createElement('button'); prox.className = 'seta-dia'; prox.textContent = '►'; prox.setAttribute('aria-label', 'Próximo dia');
+  prox.addEventListener('click', function () { mostrarDia((diaAtual + 1) % 7); }); diasEl.appendChild(prox);
+  mostrarDia(hoje.getDay());
+
+  document.querySelectorAll('.js-visitas').forEach(function (el) { el.textContent = window.PNGG_VISITAS(); });
+  function tic() { document.querySelectorAll('.js-contagem').forEach(function (el) { el.textContent = window.PNGG_CONTAGEM(); }); }
+  tic(); setInterval(tic, 1000);
+
+  var toast = document.getElementById('toast'), tt;
+  document.querySelectorAll('[data-msg]').forEach(function (el) {
+    el.addEventListener('click', function (e) {
+      e.preventDefault();
+      toast.textContent = el.dataset.msg; toast.classList.add('on');
+      clearTimeout(tt); tt = setTimeout(function () { toast.classList.remove('on'); }, 2600);
+    });
+  });
 })();
 </script>
 </body>
